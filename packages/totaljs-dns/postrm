@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    # the drop-in of resolved is gone with the package: resolved has to forget it
+    if [ -d /run/systemd/system ]; then systemctl restart systemd-resolved.service >/dev/null 2>&1 || true; fi
+    ;;
+esac
+
+exit 0

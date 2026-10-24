@@ -1,0 +1,15 @@
+Package: totaljs-dns
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: net
+Priority: optional
+Depends: dnsmasq-base, systemd-resolved
+Homepage: https://www.totaljs.com
+Description: The local domain of the Total.js Developer Distros
+ Makes totaljs.developer and every name under it (code.totaljs.developer,
+ pgadmin.totaljs.developer, the address of each project...) point to this
+ computer, so that the reverse proxy of the services can tell them apart. A small
+ dnsmasq answers only that domain, on its own loopback address (127.0.0.100),
+ and systemd-resolved sends to it the names of the domain and nothing else, so the
+ rest of the DNS of the system is not touched.

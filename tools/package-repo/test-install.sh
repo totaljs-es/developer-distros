@@ -16,7 +16,7 @@ CODENAME="$(. /etc/os-release && echo "${VERSION_CODENAME}")"
 echo "==> ${CODENAME}: $(. /etc/os-release && echo "${PRETTY_NAME}")"
 
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends ca-certificates curl gnupg xz-utils >/dev/null
+apt-get install -y -qq --no-install-recommends ca-certificates curl gnupg xz-utils bind9-dnsutils >/dev/null
 
 # the first regular person of the system, as the installer would have made it (the image of Ubuntu already has one)
 FIRST="$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')"
@@ -89,6 +89,19 @@ rm /www/flow/docker-compose.yml
 grep -q '^# edited$' /www/proxy/docker-compose.yml
 test -f /www/flow/docker-compose.yml
 
+echo "==> the local domain"
+test -f /etc/totaljs-developer/dns.conf
+test -f /etc/systemd/resolved.conf.d/totaljs-developer.conf
+test -f /usr/lib/systemd/system/totaljs-dns.service
+/usr/sbin/dnsmasq --test --conf-file=/etc/totaljs-developer/dns.conf
+# it answers: the domain, and any name under it, with this computer
+/usr/sbin/dnsmasq --keep-in-foreground --conf-file=/etc/totaljs-developer/dns.conf --pid-file=/tmp/dns-test.pid --user=root >/tmp/dns-test.log 2>&1 &
+DNS_PID=$!
+sleep 1
+test "$(dig +short +time=2 +tries=1 @127.0.0.100 code.totaljs.developer)" = 127.0.0.1
+test -z "$(dig +short +time=2 +tries=1 @127.0.0.100 example.com)"
+kill "${DNS_PID}" 2>/dev/null || true
+
 echo "==> the source that the package wrote works by itself"
 apt-get update -qq
 POLICY="$(apt-cache policy totaljs-node)"
@@ -105,13 +118,15 @@ apt-get install -y --reinstall totaljs-node >/dev/null
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"
 test ! -e /usr/local/lib/node_modules/total5
 test ! -e /usr/share/plymouth/themes/totaljs
 test ! -e /usr/lib/systemd/system/totaljs-proxy.service
+test ! -e /usr/lib/systemd/system/totaljs-dns.service
+test ! -e /etc/systemd/resolved.conf.d/totaljs-developer.conf
 test ! -e /etc/apt/sources.list.d/docker.sources
 test -f /www/proxy/docker-compose.yml   # /www is where the person works: it stays
 test ! -e /etc/default/grub.d/99-totaljs.cfg

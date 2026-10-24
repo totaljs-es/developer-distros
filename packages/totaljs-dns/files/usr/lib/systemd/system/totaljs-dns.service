@@ -1,0 +1,16 @@
+[Unit]
+Description=Total.js Developer local domain DNS
+After=network.target
+Before=systemd-resolved.service
+# if dnsmasq is not there, or the configuration is wrong, it is better to say so than to start and answer nothing
+ConditionFileIsExecutable=/usr/sbin/dnsmasq
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/dnsmasq --test --conf-file=/etc/totaljs-developer/dns.conf
+ExecStart=/usr/sbin/dnsmasq --keep-in-foreground --conf-file=/etc/totaljs-developer/dns.conf
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
