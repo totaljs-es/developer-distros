@@ -1,0 +1,18 @@
+{
+  "id": "developer-ubuntu",
+  "name": "Total.js Developer (Ubuntu LTS)",
+  "version": "1.0.0",
+  "os": "ubuntu",
+  "arch": "arm64",
+  "format": "raw",
+  "compression": "applearchive",
+  "memory": 4096,
+  "cpus": 4,
+  "disk": 15,
+  "download": "https://totalvm.totaljs.es/developer-ubuntu/developer.raw.aar",
+  "size": 0,
+  "sha256": "",
+  "icon": "icon.svg",
+  "description": "Ready-to-use Total.js development environment on Ubuntu LTS with Node.js, Total.js, Docker, PostgreSQL, Nginx, code-server and SSH preinstalled.",
+  "author": "Total.js"
+}

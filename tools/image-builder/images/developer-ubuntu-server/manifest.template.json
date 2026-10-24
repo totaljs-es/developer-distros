@@ -1,0 +1,39 @@
+{
+  "id": "developer-ubuntu-server",
+  "name": "Total.js Developer Distro (Server Edition)",
+  "version": "__VERSION__",
+  "os": "ubuntu",
+  "arch": "arm64",
+  "format": "raw",
+  "compression": "applearchive",
+  "memory": __MEMORY__,
+  "cpus": __CPUS__,
+  "disk": __DISK__,
+  "download": "__DOWNLOAD_URL__",
+  "size": __SIZE__,
+  "size_uncompressed": __SIZE_UNCOMPRESSED__,
+  "sha256": "__SHA256__",
+  "icon": "icon.svg",
+  "accent": "#5F6368",
+  "description": "Headless Total.js Developer Distro with Docker, Code, Flow, PostgreSQL, nginx-proxy, Total.js Center and Intel Linux binary support through Apple Rosetta. Minimum recommended HDD: 15 GB.",
+  "highlights": [
+    {
+      "title": "Server only",
+      "systemImage": "terminal"
+    },
+    {
+      "title": "Total.js Developer Distro",
+      "systemImage": "checkmark.shield"
+    },
+    {
+      "title": "Node.js + Total.js",
+      "systemImage": "shippingbox"
+    },
+    {
+      "title": "Intel apps via Rosetta",
+      "systemImage": "cpu"
+    }
+  ],
+  "author": "Total.js",
+  "built_at": "__BUILT_AT__"
+}

@@ -1,0 +1,1 @@
+totaljs ALL=(root) NOPASSWD: /usr/bin/python3 /usr/local/sbin/totaljs-apply-firstrun.py *

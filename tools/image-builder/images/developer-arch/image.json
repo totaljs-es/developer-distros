@@ -1,0 +1,22 @@
+{
+  "id": "developer-arch",
+  "name": "Total.js Developer Distro",
+  "version": "1.2.0",
+  "os": "arch",
+  "release": "rolling",
+  "arch": "arm64",
+  "base_installer_url": "https://release.archboot.com/aarch64/latest/iso/",
+  "base_rootfs_url": "http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz",
+  "disk_gb": 15,
+  "build": {
+    "cpus": 2,
+    "memory_mb": 4096
+  },
+  "runtime": {
+    "memory": 4096,
+    "cpus": 2,
+    "disk": 15
+  },
+  "description": "Total.js Developer Distro for users who prefer a rolling base, newer packages and Intel Linux binary support through Apple Rosetta.",
+  "author": "Total.js"
+}

@@ -1,0 +1,3 @@
+# Drop wallpaper-dark.png / wallpaper-light.png and an optional totalcenter/
+# app folder here. They are shared into the guest over virtiofs at build time.
+# If absent, the build generates safe fallbacks.

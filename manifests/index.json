@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "TotalVM Images",
+  "updated": "2026-07-09",
+  "images": [
+    {
+      "id": "developer-ubuntu",
+      "name": "Total.js Developer (Ubuntu LTS)",
+      "manifest": "developer-ubuntu/manifest.json",
+      "official": true
+    },
+    {
+      "id": "developer-ubuntu-server",
+      "name": "Total.js Developer Server (Ubuntu 24.04 LTS)",
+      "manifest": "developer-ubuntu-server/manifest.json",
+      "official": true
+    },
+    {
+      "id": "developer-arch",
+      "name": "Total.js Developer (Arch)",
+      "manifest": "developer-arch/manifest.json",
+      "official": true
+    },
+    {
+      "id": "developer-arch-server",
+      "name": "Total.js Developer Server (Arch Linux)",
+      "manifest": "developer-arch-server/manifest.json",
+      "official": true
+    }
+  ]
+}

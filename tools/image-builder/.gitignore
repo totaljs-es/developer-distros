@@ -1,0 +1,9 @@
+# Swift build products
+.build/
+
+# Build working tree: downloads, raw disks, seeds, NVRAM (large + reproducible)
+build/
+dist/
+
+# Image assets are generated/large unless explicitly committed
+images/*/assets/*.png

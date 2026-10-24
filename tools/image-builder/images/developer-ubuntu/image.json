@@ -1,0 +1,22 @@
+{
+  "id": "developer-ubuntu",
+  "name": "Total.js Developer Distro",
+  "version": "1.2.1",
+  "os": "ubuntu",
+  "release": "noble",
+  "arch": "arm64",
+  "base_image_url": "https://cloud-images.ubuntu.com/noble/20260615/noble-server-cloudimg-arm64.img",
+  "base_image_sha256": "cafa1a965b591b7c4184b484ffd8e625981a79d48f9b4ae8a4adf7b4c5ade927",
+  "disk_gb": 15,
+  "build": {
+    "cpus": 2,
+    "memory_mb": 6144
+  },
+  "runtime": {
+    "memory": 4096,
+    "cpus": 2,
+    "disk": 15
+  },
+  "description": "Ready-to-use Total.js Developer Distro with a lightweight Openbox desktop, Node.js, Total.js, Docker, PostgreSQL, Nginx and Intel Linux binary support through Apple Rosetta.",
+  "author": "Total.js"
+}

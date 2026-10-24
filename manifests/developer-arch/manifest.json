@@ -1,0 +1,18 @@
+{
+  "id": "developer-arch",
+  "name": "Total.js Developer (Arch)",
+  "version": "1.0.0",
+  "os": "arch",
+  "arch": "arm64",
+  "format": "raw",
+  "compression": "applearchive",
+  "memory": 4096,
+  "cpus": 4,
+  "disk": 15,
+  "download": "https://totalvm.totaljs.es/developer-arch/developer.raw.aar",
+  "size": 0,
+  "sha256": "",
+  "icon": "icon.svg",
+  "description": "Rolling Total.js development environment on Arch with the shared Total.js desktop layer, developer tools and workflow.",
+  "author": "Total.js"
+}

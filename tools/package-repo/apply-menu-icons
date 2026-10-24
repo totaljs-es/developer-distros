@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ICON_ROOT="${TOTALJS_ICON_ROOT:-/usr/share/totaljs-developer/icons}"
+SKEL_MENU="${TOTALJS_SKEL_MENU:-/etc/skel/.config/openbox/menu.xml}"
+HOME_ROOT="${TOTALJS_HOME_ROOT:-/home}"
+
+icons_available=1
+for icon in \
+    terminal.svg browser.svg projects.svg total-center.svg developer.svg \
+    applications.svg totaljs.svg services.svg preferences.svg launcher.svg \
+    logout.svg restart.svg shutdown.svg; do
+    [ -f "${ICON_ROOT}/${icon}" ] || icons_available=0
+done
+
+apply_icons() {
+    local menu="$1"
+    [ -f "${menu}" ] || return 0
+    [ "${icons_available}" -eq 1 ] || return 0
+
+    sed -i.bak \
+        -e 's|<item label="Terminal"[^>]*>|<item label="Terminal" icon="/usr/share/totaljs-developer/icons/terminal.svg">|' \
+        -e 's|<item label="Web Browser"[^>]*>|<item label="Web Browser" icon="/usr/share/totaljs-developer/icons/browser.svg">|' \
+        -e 's|<item label="Projects"[^>]*>|<item label="Projects" icon="/usr/share/totaljs-developer/icons/projects.svg">|' \
+        -e 's|<item label="Total Center"[^>]*>|<item label="Total Center" icon="/usr/share/totaljs-developer/icons/total-center.svg">|' \
+        -e 's|<menu id="developer-menu"[^>]*>|<menu id="developer-menu" label="Developer" icon="/usr/share/totaljs-developer/icons/developer.svg">|' \
+        -e 's|<menu id="apps-menu"[^>]*/>|<menu id="apps-menu" label="Applications" execute="python3 /usr/local/bin/totaljs-appmenu" icon="/usr/share/totaljs-developer/icons/applications.svg" />|' \
+        -e 's|<menu id="totaljs-menu"[^>]*>|<menu id="totaljs-menu" label="Total.js" icon="/usr/share/totaljs-developer/icons/totaljs.svg">|' \
+        -e 's|<menu id="services-menu"[^>]*>|<menu id="services-menu" label="Services" icon="/usr/share/totaljs-developer/icons/services.svg">|' \
+        -e 's|<menu id="preferences-menu"[^>]*>|<menu id="preferences-menu" label="Preferences" icon="/usr/share/totaljs-developer/icons/preferences.svg">|' \
+        -e 's|<item label="Open launcher"[^>]*>|<item label="Open launcher" icon="/usr/share/totaljs-developer/icons/launcher.svg">|' \
+        -e 's|<item label="Log out"[^>]*>|<item label="Log out" icon="/usr/share/totaljs-developer/icons/logout.svg">|' \
+        -e 's|<item label="Restart"[^>]*>|<item label="Restart" icon="/usr/share/totaljs-developer/icons/restart.svg">|' \
+        -e 's|<item label="Shutdown"[^>]*>|<item label="Shutdown" icon="/usr/share/totaljs-developer/icons/shutdown.svg">|' \
+        "${menu}"
+    rm -f "${menu}.bak"
+}
+
+apply_autostart() {
+    local autostart="$1"
+    [ -f "${autostart}" ] || return 0
+
+    sed -i.bak \
+        -e "s|^totaljs-launch-once '\[t\]otaljs-pasystray' /usr/local/bin/totaljs-pasystray.*$|/usr/local/bin/totaljs-pasystray \&|" \
+        -e "s|^/usr/local/bin/totaljs-pasystray.*$|/usr/local/bin/totaljs-pasystray \&|" \
+        "${autostart}"
+    rm -f "${autostart}.bak"
+}
+
+prune_pasystray() {
+    local profile="$1" uid pids keep pid
+    command -v pgrep >/dev/null 2>&1 || return 0
+    command -v pkill >/dev/null 2>&1 || return 0
+    uid="$(stat -c %u "${profile}" 2>/dev/null || true)"
+    [ -n "${uid}" ] && [ "${uid}" != 0 ] || return 0
+    pids="$(pgrep -u "${uid}" -f '(^|[ /])totaljs-pasystray([[:space:]]|$)' 2>/dev/null || true)"
+    keep=
+    for pid in ${pids}; do
+        if [ -z "${keep}" ]; then
+            keep="${pid}"
+            continue
+        fi
+        pkill -TERM -P "${pid}" 2>/dev/null || true
+        kill "${pid}" 2>/dev/null || true
+    done
+}
+
+apply_icons "${SKEL_MENU}"
+apply_autostart "$(dirname "${SKEL_MENU}")/autostart"
+
+for menu in "${HOME_ROOT}"/*/.config/openbox/menu.xml; do
+    [ -e "${menu}" ] || continue
+    apply_icons "${menu}"
+    apply_autostart "$(dirname "${menu}")/autostart"
+    prune_pasystray "${menu}"
+done
+
+exit 0

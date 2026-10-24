@@ -1,0 +1,220 @@
+#cloud-config
+# TotalVM — Total.js Developer (Ubuntu LTS) build-time provisioning.
+#
+# This seed is used ONCE, during image construction. It creates the default
+# user, mounts the host-provided provisioning scripts over virtiofs, runs them
+# in order, then powers the VM off — which signals totalvm-builder that the
+# image is ready to be packaged.
+
+hostname: totaljs-dev
+fqdn: totaljs-dev.local
+preserve_hostname: false
+
+network:
+  version: 2
+  ethernets:
+    totalvm-en:
+      match:
+        name: "en*"
+      dhcp4: true
+      dhcp6: false
+      optional: true
+    totalvm-eth:
+      match:
+        name: "eth*"
+      dhcp4: true
+      dhcp6: false
+      optional: true
+
+# Bootstrap account used only to display the graphical first-run wizard. Its
+# password hash was generated from a discarded random secret: the account can
+# auto-login through LightDM, but has no reusable credential or general sudo.
+users:
+  - name: totaljs
+    gecos: Total.js Developer
+    groups: []
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: "$6$VOwkJr3Be41vq2KC$XbrdNKVtSmVOMk9KUCNe9nXseWolBIcteU7pxXcRTwa5bnELUF.57cOmxn5j1kA/aGRI5uzxE0ka.n7RiSOJk1"
+
+ssh_pwauth: false
+
+package_update: false
+package_upgrade: false
+
+# Some cloud-init final stages can be skipped in Apple Virtualization boot paths.
+# Create our own one-shot provisioning unit early, then let systemd run it once
+# networking is up. The unit powers off the VM when the image is ready.
+bootcmd:
+  - |
+    # Ubuntu cloud images run apt-daily / unattended-upgrades on first boot,
+    # which grab the dpkg lock and stall our provisioning apt commands forever.
+    # Mask them as early as possible so they never start during the build.
+    systemctl stop --no-block \
+      apt-daily.timer apt-daily-upgrade.timer \
+      apt-daily.service apt-daily-upgrade.service \
+      unattended-upgrades.service >/dev/null 2>&1 || true
+    for unit in apt-daily.timer apt-daily-upgrade.timer apt-daily.service \
+      apt-daily-upgrade.service unattended-upgrades.service; do
+      ln -sf /dev/null "/etc/systemd/system/${unit}"
+    done
+    # Stop the login prompt (getty) on the serial console hvc0: it fights the
+    # provisioning service for the same tty and HIDES the build output after a
+    # point, leaving us blind to where a later step stalls. Masked only during
+    # the build (the final image re-enables it on the user's machine because
+    # this seed isn't present there).
+    systemctl stop --no-block serial-getty@hvc0.service getty@hvc0.service \
+      >/dev/null 2>&1 || true
+    ln -sf /dev/null /etc/systemd/system/serial-getty@hvc0.service
+    ln -sf /dev/null /etc/systemd/system/getty@hvc0.service
+    # needrestart's post-apt "Scanning processes / outdated hypervisor (qemu)"
+    # check HANGS in this VM (it misreads the virtio guest as outdated qemu and
+    # stalls — confirmed by a manual apt upgrade freezing exactly there). It's
+    # useless for an image build. Remove its apt hook so it never runs after any
+    # apt operation, and neuter its config.
+    rm -f /etc/apt/apt.conf.d/99needrestart
+    mkdir -p /etc/needrestart/conf.d
+    cat >/etc/needrestart/conf.d/00-totalvm-disable.conf <<'EOF'
+    $nrconf{restart} = 'a';
+    $nrconf{kernelhints} = -1;
+    $nrconf{ucodehints} = 0;
+    $nrconf{hook_d} = [];
+    EOF
+    # THE apt-get update hang: the debug trace showed all 54 indices download
+    # fine, then apt freezes BEFORE "Reading package lists". The culprit is a
+    # post-update apt hook — Ubuntu Pro / ESM (and apt-news / appstream) run a
+    # Post-Invoke-Success that phones Canonical's servers and stalls. Remove
+    # every apt.conf.d hook that does that, before the first apt-get update.
+    grep -rlE 'esm|ubuntu-advantage|ubuntu.pro|apt.news|apt_news|appstream|packagekit' \
+      /etc/apt/apt.conf.d/ 2>/dev/null | xargs -r rm -f
+    rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf \
+          /etc/apt/apt.conf.d/20snapd.conf \
+          /etc/apt/apt.conf.d/20packagekit 2>/dev/null || true
+    # Large downloads (apt's 15MB index files) deterministically stall on this
+    # virtio-net NIC while small ones work. Two known virtio-in-VM causes, both
+    # fixed here via systemd (NO ethtool binary needed — systemd sets these
+    # directly): (1) NIC hardware offload (TSO/GSO/GRO) corrupting big TCP
+    # transfers, disabled in a .link file; (2) a broken path-MTU causing large
+    # frames to be silently dropped, worked around with a conservative MTU.
+    cat >/etc/systemd/network/05-totalvm.link <<'EOF'
+    [Match]
+    Driver=virtio_net
+
+    [Link]
+    TCPSegmentationOffload=false
+    TCP6SegmentationOffload=false
+    GenericSegmentationOffload=false
+    GenericReceiveOffload=false
+    LargeReceiveOffload=false
+    EOF
+    cat >/etc/systemd/network/10-totalvm.network <<'EOF'
+    [Match]
+    Name=en* eth*
+
+    [Link]
+    MTUBytes=1400
+
+    [Network]
+    DHCP=yes
+    IPv6AcceptRA=no
+
+    [DHCP]
+    UseMTU=false
+    EOF
+    systemctl enable systemd-networkd systemd-resolved
+    # Do not restart networkd or replay the NIC's udev add event here. The
+    # cloud image already has a DHCP lease, and racing both operations can make
+    # networkd crash while resolved loses the DNS learned with that lease. The
+    # provisioning service applies MTU directly; these files take effect on its
+    # intentional HWE-kernel reboot.
+    cat >/usr/local/sbin/totalvm-build-provision <<'EOF'
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -f /var/lib/totalvm-provisioned ]; then
+      exit 0
+    fi
+    mkdir -p /mnt/totalvm-seed /var/log/totalvm
+    # A kernel switch can rename the virtio NIC from en* to eth*. Make the
+    # build recover without requiring a new image or an interactive console.
+    NIC="$(find /sys/class/net -mindepth 1 -maxdepth 1 ! -name lo -exec basename {} \; | head -n1)"
+    if [ -n "${NIC}" ]; then
+      ip link set dev "${NIC}" up >/dev/null 2>&1 || true
+      ip link set dev "${NIC}" mtu 1400 >/dev/null 2>&1 || true
+    fi
+    systemctl start systemd-resolved >/dev/null 2>&1 || true
+    GATEWAY="$(ip route show default | awk 'NR==1 { print $3 }')"
+    if [ -n "${NIC}" ] && [ -n "${GATEWAY}" ]; then
+      resolvectl dns "${NIC}" "${GATEWAY}" >/dev/null 2>&1 || true
+      resolvectl default-route "${NIC}" yes >/dev/null 2>&1 || true
+    fi
+    for attempt in $(seq 1 90); do
+      if getent hosts ports.ubuntu.com >/dev/null 2>&1; then
+        break
+      fi
+      # The Apple NAT always exposes a DNS forwarder at its DHCP gateway. If
+      # resolved has not received it after ten attempts, use that forwarder
+      # directly for the remainder of this build instead of losing three
+      # minutes with a perfectly routable interface and an empty DNS scope.
+      if [ "${attempt}" -eq 10 ] && [ -n "${GATEWAY}" ]; then
+        rm -f /etc/resolv.conf
+        printf 'nameserver %s\noptions timeout:2 attempts:3\n' "${GATEWAY}" > /etc/resolv.conf
+      fi
+      echo "Waiting for DNS/network (${attempt}/90)..."
+      sleep 2
+    done
+    if ! getent hosts ports.ubuntu.com >/dev/null 2>&1; then
+      echo "TotalVM provisioning: no network/DNS after 90 attempts, aborting." >&2
+      ip -br link >&2 || true
+      ip -br address >&2 || true
+      ip route >&2 || true
+      networkctl status --no-pager >&2 || true
+      resolvectl status --no-pager >&2 || true
+      exit 1
+    fi
+    mountpoint -q /mnt/totalvm-seed || mount -o ro /dev/disk/by-label/CIDATA /mnt/totalvm-seed
+    export TOTALVM_ASSETS=/mnt/totalvm-seed/assets
+    # Capture run.sh's REAL status via PIPESTATUS, not tee's: the 90-cleanup
+    # zero-fill fills the disk, which can make `tee` fail writing the log and,
+    # under pipefail, wrongly mark a successful provision as failed (then the
+    # VM never powers off and the build looks hung).
+    set +e
+    bash /mnt/totalvm-seed/provision/run.sh 2>&1 | tee /var/log/totalvm/provision.log
+    PROV_STATUS=${PIPESTATUS[0]}
+    set -e
+    if [ "${PROV_STATUS}" -eq 0 ]; then
+      touch /var/lib/totalvm-provisioned
+      umount /mnt/totalvm-seed || true
+      systemctl poweroff
+    else
+      echo "TotalVM provisioning FAILED (status ${PROV_STATUS}); leaving VM up." >&2
+    fi
+    EOF
+    chmod +x /usr/local/sbin/totalvm-build-provision
+    cat >/etc/systemd/system/totalvm-build-provision.service <<'EOF'
+    [Unit]
+    Description=Total.js Developer image provisioning
+    After=network-online.target
+    Wants=network-online.target
+    ConditionPathExists=!/var/lib/totalvm-provisioned
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/local/sbin/totalvm-build-provision
+    TimeoutSec=0
+    # journal+console alone doesn't reliably land on hvc0 (the tty the host
+    # terminal is actually attached to, confirmed by the login banner) — pin
+    # it explicitly so build progress is visible live, not just in the log.
+    StandardOutput=tty
+    StandardError=tty
+    TTYPath=/dev/hvc0
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    systemctl daemon-reload
+    systemctl enable totalvm-build-provision.service
+
+runcmd:
+  - systemctl start totalvm-build-provision.service --no-block
+
+final_message: "Total.js Developer provisioning finished after $UPTIME seconds"

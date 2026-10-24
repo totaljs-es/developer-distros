@@ -1,0 +1,39 @@
+{
+  "id": "developer-ubuntu",
+  "name": "Total.js Developer Distro",
+  "version": "__VERSION__",
+  "os": "ubuntu",
+  "arch": "arm64",
+  "format": "raw",
+  "compression": "applearchive",
+  "memory": __MEMORY__,
+  "cpus": __CPUS__,
+  "disk": __DISK__,
+  "download": "__DOWNLOAD_URL__",
+  "size": __SIZE__,
+  "size_uncompressed": __SIZE_UNCOMPRESSED__,
+  "sha256": "__SHA256__",
+  "icon": "icon.png",
+  "accent": "#E95420",
+  "description": "Recommended for most developers: a stable, familiar Total.js Developer Distro with a lightweight desktop and Intel Linux binary support through Apple Rosetta.",
+  "highlights": [
+    {
+      "title": "Stable base",
+      "systemImage": "checkmark.shield"
+    },
+    {
+      "title": "Long-term projects",
+      "systemImage": "calendar"
+    },
+    {
+      "title": "Familiar ecosystem",
+      "systemImage": "person.2"
+    },
+    {
+      "title": "Intel apps via Rosetta",
+      "systemImage": "cpu"
+    }
+  ],
+  "author": "Total.js",
+  "built_at": "__BUILT_AT__"
+}

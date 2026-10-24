@@ -1,0 +1,164 @@
+#cloud-config
+# TotalVM - Total.js Developer Server (Ubuntu 24.04 LTS) build-time provisioning.
+
+hostname: totaljs-server
+fqdn: totaljs-server.local
+preserve_hostname: false
+
+network:
+  version: 2
+  ethernets:
+    totalvm-en:
+      match:
+        name: "en*"
+      dhcp4: true
+      dhcp6: false
+      optional: true
+    totalvm-eth:
+      match:
+        name: "eth*"
+      dhcp4: true
+      dhcp6: false
+      optional: true
+
+users:
+  - name: totaljs
+    gecos: Total.js Server
+    groups: [adm, sudo]
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: "$6$TotalJSServer$dtIW6Z5GFxpwPRTTNqqJYbQ5itycW2KPHzYWv2PE187ooz7Kk4pkZd4NQh2feFz70tjHsFNqbd24ae8yi764o0"
+
+ssh_pwauth: true
+disable_root: true
+
+package_update: false
+package_upgrade: false
+
+bootcmd:
+  - |
+    systemctl stop --no-block \
+      apt-daily.timer apt-daily-upgrade.timer \
+      apt-daily.service apt-daily-upgrade.service \
+      unattended-upgrades.service >/dev/null 2>&1 || true
+    for unit in apt-daily.timer apt-daily-upgrade.timer apt-daily.service \
+      apt-daily-upgrade.service unattended-upgrades.service; do
+      ln -sf /dev/null "/etc/systemd/system/${unit}"
+    done
+    rm -f /etc/apt/apt.conf.d/99needrestart
+    mkdir -p /etc/needrestart/conf.d
+    cat >/etc/needrestart/conf.d/00-totalvm-disable.conf <<'EOF'
+    $nrconf{restart} = 'a';
+    $nrconf{kernelhints} = -1;
+    $nrconf{ucodehints} = 0;
+    $nrconf{hook_d} = [];
+    EOF
+    grep -rlE 'esm|ubuntu-advantage|ubuntu.pro|apt.news|apt_news|appstream|packagekit' \
+      /etc/apt/apt.conf.d/ 2>/dev/null | xargs -r rm -f
+    rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf \
+          /etc/apt/apt.conf.d/20snapd.conf \
+          /etc/apt/apt.conf.d/20packagekit 2>/dev/null || true
+    cat >/etc/systemd/network/05-totalvm.link <<'EOF'
+    [Match]
+    Driver=virtio_net
+
+    [Link]
+    TCPSegmentationOffload=false
+    TCP6SegmentationOffload=false
+    GenericSegmentationOffload=false
+    GenericReceiveOffload=false
+    LargeReceiveOffload=false
+    EOF
+    cat >/etc/systemd/network/10-totalvm.network <<'EOF'
+    [Match]
+    Name=en* eth*
+
+    [Link]
+    MTUBytes=1400
+
+    [Network]
+    DHCP=yes
+    IPv6AcceptRA=no
+
+    [DHCP]
+    UseMTU=false
+    EOF
+    systemctl enable systemd-networkd systemd-resolved
+    cat >/usr/local/sbin/totalvm-build-provision <<'EOF'
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -f /var/lib/totalvm-provisioned ]; then
+      exit 0
+    fi
+    mkdir -p /mnt/totalvm-seed /var/log/totalvm
+    NIC="$(find /sys/class/net -mindepth 1 -maxdepth 1 ! -name lo -exec basename {} \; | head -n1)"
+    if [ -n "${NIC}" ]; then
+      ip link set dev "${NIC}" up >/dev/null 2>&1 || true
+      ip link set dev "${NIC}" mtu 1400 >/dev/null 2>&1 || true
+    fi
+    systemctl start systemd-resolved >/dev/null 2>&1 || true
+    GATEWAY="$(ip route show default | awk 'NR==1 { print $3 }')"
+    if [ -n "${NIC}" ] && [ -n "${GATEWAY}" ]; then
+      resolvectl dns "${NIC}" "${GATEWAY}" >/dev/null 2>&1 || true
+      resolvectl default-route "${NIC}" yes >/dev/null 2>&1 || true
+    fi
+    for attempt in $(seq 1 90); do
+      if getent hosts ports.ubuntu.com >/dev/null 2>&1; then
+        break
+      fi
+      if [ "${attempt}" -eq 10 ] && [ -n "${GATEWAY}" ]; then
+        rm -f /etc/resolv.conf
+        printf 'nameserver %s\noptions timeout:2 attempts:3\n' "${GATEWAY}" > /etc/resolv.conf
+      fi
+      echo "Waiting for DNS/network (${attempt}/90)..."
+      sleep 2
+    done
+    if ! getent hosts ports.ubuntu.com >/dev/null 2>&1; then
+      echo "TotalVM provisioning: no network/DNS after 90 attempts, aborting." >&2
+      ip -br link >&2 || true
+      ip -br address >&2 || true
+      ip route >&2 || true
+      networkctl status --no-pager >&2 || true
+      resolvectl status --no-pager >&2 || true
+      exit 1
+    fi
+    mountpoint -q /mnt/totalvm-seed || mount -o ro /dev/disk/by-label/CIDATA /mnt/totalvm-seed
+    export TOTALVM_ASSETS=/mnt/totalvm-seed/assets
+    set +e
+    bash /mnt/totalvm-seed/provision/run.sh 2>&1 | tee /var/log/totalvm/provision.log
+    PROV_STATUS=${PIPESTATUS[0]}
+    set -e
+    if [ "${PROV_STATUS}" -eq 0 ]; then
+      touch /var/lib/totalvm-provisioned
+      umount /mnt/totalvm-seed || true
+      systemctl poweroff
+    else
+      echo "TotalVM provisioning FAILED (status ${PROV_STATUS}); leaving VM up." >&2
+    fi
+    EOF
+    chmod +x /usr/local/sbin/totalvm-build-provision
+    cat >/etc/systemd/system/totalvm-build-provision.service <<'EOF'
+    [Unit]
+    Description=Total.js Developer Server image provisioning
+    After=network-online.target
+    Wants=network-online.target
+    ConditionPathExists=!/var/lib/totalvm-provisioned
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/local/sbin/totalvm-build-provision
+    TimeoutSec=0
+    StandardOutput=tty
+    StandardError=tty
+    TTYPath=/dev/hvc0
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    systemctl daemon-reload
+    systemctl enable totalvm-build-provision.service
+
+runcmd:
+  - systemctl start totalvm-build-provision.service --no-block
+
+final_message: "Total.js Developer Server provisioning finished after $UPTIME seconds"

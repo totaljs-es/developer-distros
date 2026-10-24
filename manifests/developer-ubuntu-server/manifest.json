@@ -1,0 +1,39 @@
+{
+  "id": "developer-ubuntu-server",
+  "name": "Total.js Developer Server (Ubuntu 24.04 LTS)",
+  "version": "0.1.0",
+  "os": "ubuntu",
+  "arch": "arm64",
+  "format": "raw",
+  "compression": "applearchive",
+  "memory": 2048,
+  "cpus": 2,
+  "disk": 15,
+  "download": "https://totalvm.totaljs.es/developer-ubuntu-server/developer.raw.aar",
+  "size": 2705303086,
+  "size_uncompressed": 17179869184,
+  "sha256": "761e4992983dd7c44b58546e308a52e78fa85078da319bcc1fff2178600651a9",
+  "icon": "icon.svg",
+  "accent": "#5F6368",
+  "description": "Headless Total.js server environment on Ubuntu 24.04 LTS with Docker, Code, Flow, PostgreSQL, nginx-proxy and Total.js Center preinstalled.",
+  "highlights": [
+    {
+      "title": "Server only",
+      "systemImage": "terminal"
+    },
+    {
+      "title": "Ubuntu 24.04 LTS",
+      "systemImage": "checkmark.shield"
+    },
+    {
+      "title": "Node.js + Total.js",
+      "systemImage": "shippingbox"
+    },
+    {
+      "title": "Code + Flow",
+      "systemImage": "server.rack"
+    }
+  ],
+  "author": "Total.js",
+  "built_at": "2026-07-09T19:44:32Z"
+}

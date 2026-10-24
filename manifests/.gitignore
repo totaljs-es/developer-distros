@@ -1,0 +1,12 @@
+.DS_Store
+
+# Release artifacts live in GitHub Releases, not in the catalog repo.
+*.raw
+*.raw.zst
+*.qcow2
+*.iso
+*.nvram
+
+# Generated local build output.
+build/
+dist/

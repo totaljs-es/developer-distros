@@ -1,0 +1,24 @@
+{
+  "id": "developer-arch-server",
+  "name": "Total.js Developer Distro (Server Edition)",
+  "version": "0.1.0",
+  "os": "arch",
+  "release": "rolling",
+  "arch": "arm64",
+  "base_installer_url": "https://release.archboot.com/aarch64/latest/iso/",
+  "base_rootfs_url": "http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz",
+  "disk_gb": 15,
+  "build": {
+    "cpus": 2,
+    "memory_mb": 4096,
+    "requires_package_repo": true,
+    "stage_menu_icons": false
+  },
+  "runtime": {
+    "memory": 2048,
+    "cpus": 2,
+    "disk": 15
+  },
+  "description": "Headless Total.js Developer Distro with Docker, Code, Flow, PostgreSQL, nginx-proxy, Total.js Center and Intel Linux binary support through Apple Rosetta. Minimum recommended HDD: 15 GB.",
+  "author": "Total.js"
+}
