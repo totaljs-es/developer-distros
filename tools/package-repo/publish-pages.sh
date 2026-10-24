@@ -3,10 +3,12 @@
 #
 #   tools/package-repo/build.sh                 # signs with the key of Total.js on this computer
 #   tools/package-repo/publish-pages.sh         # prepares build/pages and shows what would be published
-#   tools/package-repo/publish-pages.sh --push  # and pushes it (a single commit, replacing the branch)
+#   tools/package-repo/publish-pages.sh --push  # and pushes it (a new commit on top of the published branch)
+#   tools/package-repo/publish-pages.sh --fresh # a single commit with no history, which replaces the branch (needs --push to be a forced push)
 #
-# The branch has no history on purpose: a repository is a set of files that is replaced as a whole, and old versions of
-# binary files would only make the repository grow. The signing key never leaves this computer: only signed files are published.
+# By default the new version is a commit on top of the one that is published: the branch moves forward, so it can be published with any
+# tool (GitHub Desktop included) and nobody has to force anything. --fresh starts the history again, because old versions of binary files
+# only make the repository grow. The signing key never leaves this computer: only signed files are published.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -34,10 +36,27 @@ cat > "${PAGES}/index.html" <<'HTML'
 <p>The APT and Pacman repository of the Total.js Developer Distros. It is used by the system, not by a browser.</p>
 HTML
 
+FRESH=0
+PUSH=0
+for arg in "$@"; do
+  case "${arg}" in
+    --fresh) FRESH=1 ;;
+    --push) PUSH=1 ;;
+    *) echo "unknown option ${arg}" >&2; exit 1 ;;
+  esac
+done
+REMOTE="$(git -C "${ROOT}" remote get-url origin)"
+MESSAGE="Package repository $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
 cd "${PAGES}"
 git init -q -b pages
 git add -A
-git -c user.name="${GIT_AUTHOR_NAME:-Total.js}" -c user.email="${GIT_AUTHOR_EMAIL:-repository@totaljs.com}" commit -q -m "Package repository $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+git -c user.name="${GIT_AUTHOR_NAME:-Total.js}" -c user.email="${GIT_AUTHOR_EMAIL:-repository@totaljs.com}" commit -q -m "${MESSAGE}"
+if [ "${FRESH}" = 0 ] && git fetch -q "${REMOTE}" pages 2>/dev/null; then
+  # the same files, on top of what is published
+  NEW="$(git -c user.name="${GIT_AUTHOR_NAME:-Total.js}" -c user.email="${GIT_AUTHOR_EMAIL:-repository@totaljs.com}" commit-tree 'HEAD^{tree}' -p FETCH_HEAD -m "${MESSAGE}")"
+  git update-ref refs/heads/pages "${NEW}"
+fi
 
 echo "prepared ${PAGES}: $(git ls-files | wc -l | tr -d ' ') files, $(du -sh . | cut -f1)"
 
@@ -50,9 +69,8 @@ else
   echo "the branch pages of this repository is now the prepared one ($(git -C "${ROOT}" rev-parse --short pages))"
 fi
 
-if [ "${1:-}" = "--push" ]; then
-  REMOTE="$(git -C "${ROOT}" remote get-url origin)"
-  git push --force "${REMOTE}" pages
+if [ "${PUSH}" = 1 ]; then
+  if [ "${FRESH}" = 1 ]; then git push --force "${REMOTE}" pages; else git push "${REMOTE}" pages; fi
   echo "published to the branch pages of ${REMOTE}"
 else
   echo "nothing was pushed. To publish it: $0 --push"
