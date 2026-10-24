@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="Total.js Developer">
+    <item label="Total.js Center" icon="/usr/share/totaljs-developer/icons/total-center.svg"><action name="Execute"><command>totaljs-open http://totaljs.developer</command></action></item>
+    <menu id="developer-menu" label="Developer" icon="/usr/share/totaljs-developer/icons/developer.svg">
+      <item label="Code"><action name="Execute"><command>totaljs-open http://code.totaljs.developer</command></action></item>
+      <item label="Flow"><action name="Execute"><command>totaljs-open http://flow.totaljs.developer</command></action></item>
+      <item label="pgAdmin"><action name="Execute"><command>totaljs-open http://pgadmin.totaljs.developer</command></action></item>
+    </menu>
+    <item label="Projects" icon="/usr/share/totaljs-developer/icons/projects.svg"><action name="Execute"><command>pcmanfm /www</command></action></item>
+    <item label="Terminal" icon="/usr/share/totaljs-developer/icons/terminal.svg"><action name="Execute"><command>alacritty</command></action></item>
+    <item label="Web Browser" icon="/usr/share/totaljs-developer/icons/browser.svg"><action name="Execute"><command>totaljs-open http://totaljs.developer</command></action></item>
+    <separator />
+    <menu id="apps-menu" label="Applications" execute="python3 /usr/bin/totaljs-appmenu" icon="/usr/share/totaljs-developer/icons/applications.svg" />
+    <menu id="preferences-menu" label="Preferences" icon="/usr/share/totaljs-developer/icons/preferences.svg">
+      <item label="Appearance"><action name="Execute"><command>lxappearance</command></action></item>
+      <item label="Window borders"><action name="Execute"><command>obconf</command></action></item>
+      <item label="Network"><action name="Execute"><command>nm-connection-editor</command></action></item>
+      <item label="Volume control"><action name="Execute"><command>pavucontrol</command></action></item>
+      <menu id="wallpaper-menu" label="Wallpaper">
+        <item label="Change wallpaper (Super+W)"><action name="Execute"><command>totaljs-wallpaper next</command></action></item>
+        <item label="Pin current wallpaper"><action name="Execute"><command>totaljs-wallpaper pin</command></action></item>
+        <item label="Shuffle on login"><action name="Execute"><command>totaljs-wallpaper shuffle</command></action></item>
+        <item label="Total.js signature"><action name="Execute"><command>totaljs-wallpaper signature</command></action></item>
+      </menu>
+    </menu>
+    <menu id="totaljs-menu" label="Total.js" icon="/usr/share/totaljs-developer/icons/totaljs.svg">
+      <item label="Documentation"><action name="Execute"><command>totaljs-open https://docs.totaljs.com</command></action></item>
+      <item label="Blog"><action name="Execute"><command>totaljs-open https://blog.totaljs.com</command></action></item>
+      <item label="Website"><action name="Execute"><command>totaljs-open https://www.totaljs.com</command></action></item>
+      <item label="Total.js Account"><action name="Execute"><command>totaljs-open https://account.totaljs.com</command></action></item>
+    </menu>
+    <separator />
+    <item label="Open launcher" icon="/usr/share/totaljs-developer/icons/launcher.svg"><action name="Execute"><command>rofi -show drun</command></action></item>
+    <separator />
+    <item label="Log out" icon="/usr/share/totaljs-developer/icons/logout.svg"><action name="Execute"><command>openbox --exit</command></action></item>
+    <item label="Restart" icon="/usr/share/totaljs-developer/icons/restart.svg"><action name="Execute"><command>systemctl reboot</command></action></item>
+    <item label="Shutdown" icon="/usr/share/totaljs-developer/icons/shutdown.svg"><action name="Execute"><command>systemctl poweroff</command></action></item>
+  </menu>
+  <menu id="client-menu">
+    <item label="Always on all desktops"><action name="ToggleOmnipresent"/></item>
+    <item label="Always on top"><action name="ToggleAlwaysOnTop"/></item>
+    <item label="Maximize"><action name="ToggleMaximizeFull"/></item>
+    <item label="Minimize"><action name="Iconify"/></item>
+    <separator />
+    <item label="Move"><action name="Move"/></item>
+    <item label="Resize"><action name="Resize"/></item>
+    <separator />
+    <item label="Close"><action name="Close"/></item>
+  </menu>
+</openbox_menu>

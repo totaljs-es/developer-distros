@@ -1,0 +1,47 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    drun-display-format: "{name}";
+    font: "Noto Sans 11";
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+}
+
+* {
+    bg:      #1c2024;
+    bg-alt:  #24282e;
+    fg:      #d7d9dc;
+    fg-alt:  #8b949e;
+    accent:  #6ac043;
+    on-accent: #11161a;
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    background-color: @bg;
+    border: 2px;
+    border-color: @accent;
+    border-radius: 12px;
+    width: 600px;
+    padding: 0;
+}
+mainbox { padding: 14px; spacing: 12px; }
+inputbar {
+    background-color: @bg-alt;
+    border-radius: 8px;
+    padding: 11px 14px;
+    spacing: 10px;
+    children: [ prompt, entry ];
+}
+prompt { text-color: @accent; }
+entry  { placeholder: "Search…"; placeholder-color: @fg-alt; }
+listview { lines: 8; spacing: 4px; scrollbar: false; }
+element { padding: 9px 12px; border-radius: 8px; spacing: 11px; }
+element normal active   { text-color: @accent; }
+element selected normal { background-color: @accent; text-color: @on-accent; }
+element selected active  { background-color: @accent; text-color: @on-accent; }
+element-icon { size: 22px; vertical-align: 0.5; }
+element-text { vertical-align: 0.5; }

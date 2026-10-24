@@ -1,0 +1,4 @@
+# Firefox comes from Mozilla: the one of Ubuntu is a transitional package that installs a snap
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000

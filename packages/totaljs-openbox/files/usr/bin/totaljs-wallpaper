@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Picks the developer's pinned wallpaper, or a random one from the pack.
+#   totaljs-wallpaper            apply pinned wallpaper, or a random one
+#   totaljs-wallpaper next       show a different wallpaper
+#   totaljs-wallpaper shuffle    force a new random pick (ignores the pin)
+#   totaljs-wallpaper pin        pin whatever is currently showing
+#   totaljs-wallpaper shuffle    go back to a random wallpaper each login
+#   totaljs-wallpaper signature  use the Total.js signature background
+set -euo pipefail
+PACK_DIR=/usr/share/backgrounds/totaljs
+STATE_DIR="$HOME/.config/totaljs"
+PINNED="${STATE_DIR}/wallpaper"
+CURRENT="${STATE_DIR}/wallpaper.current"
+mkdir -p "${STATE_DIR}"
+
+case "${1:-show}" in
+    pin)
+        [ -f "${CURRENT}" ] && cp "${CURRENT}" "${PINNED}"
+        notify-send "Total.js Developer" "Wallpaper pinned." 2>/dev/null || true
+        exit 0
+        ;;
+    unpin)
+        rm -f "${PINNED}"
+        exec "$0" shuffle
+        ;;
+    next)
+        OPTIONS=()
+        while IFS= read -r candidate; do
+            OPTIONS+=("${candidate}")
+        done < <(find "${PACK_DIR}" -maxdepth 1 -type f -name '*.jpg' | shuf)
+        [ "${#OPTIONS[@]}" -gt 0 ] || exit 0
+        CHOICE=""
+        for candidate in "${OPTIONS[@]}"; do
+            if [ ! -f "${CURRENT}" ] || ! cmp -s "${candidate}" "${CURRENT}"; then
+                CHOICE="${candidate}"
+                break
+            fi
+        done
+        [ -n "${CHOICE}" ] || CHOICE="${OPTIONS[0]}"
+        rm -f "${PINNED}"
+        ;;
+    shuffle)
+        rm -f "${PINNED}"
+        FORCE_RANDOM=1
+        ;;
+    signature)
+        cp /usr/share/backgrounds/totaljs/mascot.jpg "${PINNED}"
+        CHOICE="${PINNED}"
+        ;;
+esac
+
+if [ -z "${FORCE_RANDOM:-}" ] && [ -f "${PINNED}" ]; then
+    CHOICE="${PINNED}"
+elif [ -d "${PACK_DIR}" ] && [ -n "$(find "${PACK_DIR}" -maxdepth 1 -name '*.jpg' 2>/dev/null)" ]; then
+    CHOICE="$(find "${PACK_DIR}" -maxdepth 1 -type f -name '*.jpg' | shuf -n 1)"
+else
+    CHOICE=""
+fi
+
+[ -n "${CHOICE}" ] || { xsetroot -solid "#0b0f0d"; exit 0; }
+cp "${CHOICE}" "${CURRENT}"
+feh --bg-fill "${CHOICE}"

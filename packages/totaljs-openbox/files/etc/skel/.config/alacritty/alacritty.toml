@@ -1,0 +1,39 @@
+[window]
+padding = { x = 12, y = 12 }
+opacity = 0.96
+
+[font]
+normal = { family = "Fira Code", style = "Regular" }
+size = 12
+
+[colors.primary]
+background = "#15181c"
+foreground = "#d7d9dc"
+
+[colors.normal]
+black = "#15181c"
+red = "#e75a5a"
+green = "#6ac043"
+yellow = "#d8b45d"
+blue = "#4da3ff"
+magenta = "#b47cff"
+cyan = "#55c7c2"
+white = "#d7d9dc"
+
+[colors.bright]
+black = "#2a3036"
+red = "#ff7b7b"
+green = "#9ad959"
+yellow = "#e8c87a"
+blue = "#74b9ff"
+magenta = "#cda0ff"
+cyan = "#74d6d1"
+white = "#ffffff"
+
+[colors.cursor]
+cursor = "#6ac043"
+text = "#15181c"
+
+[colors.selection]
+background = "#2c3a22"
+text = "CellForeground"

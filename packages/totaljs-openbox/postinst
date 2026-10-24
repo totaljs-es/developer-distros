@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# Alacritty is the terminal of the desktop: for the programs that open "a terminal" and for PCManFM
+update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 60 >/dev/null 2>&1 || true
+update-alternatives --set x-terminal-emulator /usr/bin/alacritty >/dev/null 2>&1 || true
+
+# The people that already exist get the configuration of the desktop when they have none (the new ones get it from /etc/skel). What
+# a person has is never replaced.
+for home in /home/*; do
+  [ -d "${home}" ] || continue
+  owner="$(stat -c %U "${home}")"
+  [ "${owner}" != root ] || continue
+  [ ! -e "${home}/.config/openbox" ] || continue
+  mkdir -p "${home}/.config"
+  for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm; do
+    [ ! -e "${home}/.config/${dir}" ] || continue
+    cp -a "/etc/skel/.config/${dir}" "${home}/.config/${dir}"
+    chown -R "${owner}:$(stat -c %G "${home}")" "${home}/.config/${dir}"
+  done
+done
+
+# The system starts in the graphical session
+systemctl set-default graphical.target >/dev/null 2>&1 || true
+
+exit 0

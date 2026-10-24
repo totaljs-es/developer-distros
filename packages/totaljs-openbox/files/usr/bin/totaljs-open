@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+url="${1:?Usage: totaljs-open URL}"
+mkdir -p "${HOME}/.cache"
+nohup gio open "${url}" >"${HOME}/.cache/totaljs-browser.log" 2>&1 &

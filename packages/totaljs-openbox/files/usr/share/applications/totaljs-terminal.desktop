@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Terminal
+Comment=Alacritty
+Exec=alacritty
+Icon=utilities-terminal
+Terminal=false
+NoDisplay=true
+Categories=Development;

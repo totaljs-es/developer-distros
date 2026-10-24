@@ -1,0 +1,62 @@
+window.active.border.color: #6ac043
+window.inactive.border.color: #2a3036
+window.active.title.bg: flat solid
+window.active.title.bg.color: #20262c
+window.inactive.title.bg: flat solid
+window.inactive.title.bg.color: #181b1f
+window.active.label.text.color: #d7d9dc
+window.inactive.label.text.color: #6b7178
+window.active.button.unpressed.image.color: #d7d9dc
+window.inactive.button.unpressed.image.color: #6b7178
+window.active.button.hover.image.color: #6ac043
+window.active.button.pressed.image.color: #4a8a2c
+window.active.button.disabled.image.color: #4a4f55
+window.label.text.justify: left
+# A 2px green frame reads clearly all the way around (corners included) now that
+# picom no longer rounds — and the handle/grips share the title background so the
+# bottom edge sits inside the same frame instead of showing a default-coloured block.
+border.width: 2
+window.handle.width: 4
+window.active.handle.bg: flat solid
+window.active.handle.bg.color: #20262c
+window.inactive.handle.bg: flat solid
+window.inactive.handle.bg.color: #181b1f
+window.active.grip.bg: flat solid
+window.active.grip.bg.color: #20262c
+window.inactive.grip.bg: flat solid
+window.inactive.grip.bg.color: #181b1f
+window.client.padding.width: 0
+padding.width: 5
+padding.height: 4
+menu.title.bg: flat solid
+menu.title.bg.color: #20262c
+menu.title.text.color: #d7d9dc
+menu.items.bg: flat solid
+menu.items.bg.color: #181b1f
+menu.items.text.color: #d7d9dc
+menu.items.disabled.text.color: #6b7178
+menu.items.active.bg: flat solid
+menu.items.active.bg.color: #2c3a22
+menu.items.active.text.color: #ffffff
+menu.separator.color: #4a565f
+menu.separator.width: 1
+menu.separator.padding.width: 4
+menu.separator.padding.height: 4
+osd.bg: flat solid
+osd.bg.color: #20262c
+osd.label.bg: flat solid
+osd.label.bg.color: #20262c
+osd.label.text.color: #d7d9dc
+osd.hilight.bg: flat solid
+osd.hilight.bg.color: #6ac043
+osd.unhilight.bg: flat solid
+osd.unhilight.bg.color: #2a3036
+osd.border.color: #6ac043
+osd.border.width: 1
+window.active.shadow: true
+window.inactive.shadow: true
+font: shadow=n place=ActiveWindowTitle font="Noto Sans" size=11 weight=bold slant=normal
+font: shadow=n place=InactiveWindowTitle font="Noto Sans" size=11 weight=bold slant=normal
+font: shadow=n place=MenuHeader font="Noto Sans" size=10 weight=bold slant=normal
+font: shadow=n place=MenuItem font="Noto Sans" size=11 weight=normal slant=normal
+font: shadow=n place=OnScreenDisplay font="Noto Sans" size=10 weight=bold slant=normal

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Browser
+Comment=Firefox
+Exec=totaljs-open http://totaljs.developer
+Icon=web-browser
+Terminal=false
+NoDisplay=true
+Categories=Development;

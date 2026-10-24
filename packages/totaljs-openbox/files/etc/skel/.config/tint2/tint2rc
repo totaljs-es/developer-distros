@@ -1,0 +1,77 @@
+# Background 1: system bar
+rounded = 0
+border_width = 0
+border_sides = B
+background_color = #11161a 96
+border_color = #303840 100
+
+# Background 2: interactive hover surface
+rounded = 5
+border_width = 0
+background_color = #20272d 0
+background_color_hover = #2a3239 100
+background_color_pressed = #334028 100
+
+panel_items = LTSC
+panel_size = 100% 34
+panel_margin = 0 0
+panel_padding = 18 2 8
+panel_position = top center horizontal
+panel_background_id = 1
+panel_dock = 0
+panel_layer = top
+strut_policy = none
+wm_menu = 1
+font_shadow = 0
+
+launcher_padding = 5 2 4
+launcher_background_id = 2
+launcher_icon_background_id = 0
+launcher_icon_size = 24
+launcher_tooltip = 1
+launcher_icon_theme = Papirus-Dark
+launcher_icon_theme_override = 1
+launcher_item_app = /usr/share/applications/totaljs-menu.desktop
+launcher_item_app = /usr/share/applications/totaljs-center.desktop
+launcher_item_app = /usr/share/applications/totaljs-terminal.desktop
+launcher_item_app = /usr/share/applications/totaljs-files.desktop
+launcher_item_app = /usr/share/applications/totaljs-browser.desktop
+
+taskbar_mode = single_desktop
+taskbar_padding = 4 2 4
+taskbar_background_id = 0
+taskbar_name = 0
+task_text = 1
+task_icon = 1
+task_centered = 0
+task_maximum_size = 180 30
+task_padding = 8 3 4
+task_background_id = 2
+task_active_background_id = 2
+task_font = Noto Sans 9
+task_font_color = #aeb6be 100
+task_active_font_color = #e4e8eb 100
+urgent_nb_of_blink = 6
+
+systray_padding = 7 3 5
+systray_background_id = 0
+systray_sort = right2left
+systray_icon_size = 18
+# Render status icons as white silhouettes on the dark panel while preserving
+# each icon's alpha mask (network state and volume remain recognisable).
+systray_icon_asb = 100 -100 100
+
+time1_format = %a %d %b   %H:%M
+time1_font = Noto Sans Bold 9
+clock_font_color = #e4e8eb 100
+clock_padding = 10 2
+clock_background_id = 2
+clock_tooltip = %A, %d %B %Y
+clock_lclick_command = gsimplecal
+
+tooltip_padding = 8 5
+tooltip_show_timeout = 0.4
+tooltip_hide_timeout = 0.1
+tooltip_background_id = 1
+tooltip_font_color = #e4e8eb 100
+tooltip_font = Noto Sans 9

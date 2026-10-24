@@ -1,0 +1,10 @@
+{
+  "policies": {
+    "DontCheckDefaultBrowser": true,
+    "Homepage": {
+      "URL": "http://totaljs.developer",
+      "Locked": false,
+      "StartPage": "homepage"
+    }
+  }
+}

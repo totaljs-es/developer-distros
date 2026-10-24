@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+process="${1:?process name required}"
+shift
+while IFS= read -r pid; do
+    # pgrep sees this helper too because the target command is one of its own
+    # arguments. Ignore this shell and its parent; only a real existing target
+    # should suppress a second launch.
+    [ "${pid}" = "$$" ] || [ "${pid}" = "${PPID}" ] || exit 0
+done < <(pgrep -u "$(id -u)" -f "${process}" 2>/dev/null || true)
+mkdir -p "${HOME}/.cache"
+nohup "$@" >"${HOME}/.cache/${process}.log" 2>&1 &

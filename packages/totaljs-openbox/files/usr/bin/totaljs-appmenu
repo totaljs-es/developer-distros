@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Openbox pipe menu — lists every installed application, grouped by category.
+
+Wired into the right-click menu as a <menu ... execute="..."/> entry. Openbox
+runs this each time the submenu is opened, so anything the user installs later
+(another browser, VS Code, LibreOffice, ...) shows up automatically as long as
+it ships a .desktop file — no menu editing needed.
+"""
+import glob
+import html
+import os
+import shlex
+from configparser import RawConfigParser
+
+DIRS = [
+    "/usr/share/applications",
+    "/usr/local/share/applications",
+    os.path.expanduser("~/.local/share/applications"),
+]
+
+# freedesktop main category -> friendly group label. Visible folders are sorted
+# alphabetically below; Other remains last as the catch-all destination.
+GROUPS = [
+    ("Development", "Development"),
+    ("Network", "Internet"),
+    ("Office", "Office"),
+    ("Graphics", "Graphics"),
+    ("AudioVideo", "Multimedia"),
+    ("Game", "Games"),
+    ("System", "System"),
+    ("Settings", "Settings"),
+    ("Utility", "Accessories"),
+]
+FIELD_CODES = ("%f", "%F", "%u", "%U", "%c", "%k", "%i", "%d", "%D", "%n", "%N", "%v", "%m")
+ICON_THEMES = ("Papirus-Dark", "Papirus", "Adwaita", "hicolor")
+ICON_CONTEXTS = (
+    "scalable/apps", "symbolic/apps", "128x128/apps", "64x64/apps",
+    "48x48/apps", "32x32/apps", "24x24/apps", "22x22/apps", "16x16/apps",
+)
+INTERNAL_EXECUTABLES = {
+    "avahi-discover", "bssh", "bvnc", "conky", "info", "pasystray",
+    "picom", "qv4l2", "qvidcap", "rofi", "rofi-theme-selector", "tint2",
+    "tint2conf", "uxterm", "xterm",
+}
+
+
+def resolve_icon(name):
+    if not name:
+        return None
+    if os.path.isabs(name):
+        return name if os.path.exists(name) else None
+    stem, extension = os.path.splitext(name)
+    names = (name,) if extension else (name + ".svg", name + ".png", name + ".xpm")
+    for theme in ICON_THEMES:
+        root = os.path.join("/usr/share/icons", theme)
+        for context in ICON_CONTEXTS:
+            for filename in names:
+                candidate = os.path.join(root, context, filename)
+                if os.path.exists(candidate):
+                    return candidate
+    for filename in names:
+        candidate = os.path.join("/usr/share/pixmaps", filename)
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
+def parse(path):
+    cp = RawConfigParser(interpolation=None, strict=False, delimiters=("=",))
+    try:
+        cp.read(path, encoding="utf-8")
+        if not cp.has_section("Desktop Entry"):
+            return None
+        e = cp["Desktop Entry"]
+        if e.get("Type") != "Application":
+            return None
+        if e.get("NoDisplay", "false").lower() == "true":
+            return None
+        if e.get("Hidden", "false").lower() == "true":
+            return None
+        name = e.get("Name")
+        command = e.get("Exec")
+        icon = resolve_icon(e.get("Icon"))
+        if not name or not command:
+            return None
+        for code in FIELD_CODES:
+            command = command.replace(code, "")
+        command = command.strip()
+        try:
+            executable = os.path.basename(shlex.split(command)[0])
+        except (IndexError, ValueError):
+            return None
+        if executable in INTERNAL_EXECUTABLES:
+            return None
+        cats = [c for c in e.get("Categories", "").split(";") if c]
+        terminal = e.get("Terminal", "false").lower() == "true"
+        return name, command, cats, terminal, icon
+    except Exception:
+        return None
+
+
+def collect():
+    apps, seen = {}, set()
+    for directory in DIRS:
+        for path in sorted(glob.glob(os.path.join(directory, "*.desktop"))):
+            base = os.path.basename(path)
+            if base in seen:
+                continue
+            seen.add(base)
+            parsed = parse(path)
+            if parsed:
+                apps[base] = parsed
+    return apps
+
+
+def main():
+    apps = collect()
+    buckets = {label: [] for _, label in GROUPS}
+    buckets["Other"] = []
+    for name, command, cats, terminal, icon in apps.values():
+        label = next((lbl for key, lbl in GROUPS if key in cats), "Other")
+        buckets[label].append((name, command, terminal, icon))
+
+    out = ["<openbox_pipe_menu>"]
+    order = sorted((label for _, label in GROUPS), key=str.casefold) + ["Other"]
+    any_items = False
+    for label in order:
+        items = sorted(buckets[label], key=lambda x: x[0].lower())
+        if not items:
+            continue
+        any_items = True
+        out.append(f'<menu id="apps-{html.escape(label)}" label="{html.escape(label)}">')
+        for name, command, terminal, icon in items:
+            if terminal:
+                command = f"alacritty -e {command}"
+            icon_attr = f' icon="{html.escape(icon)}"' if icon else ""
+            out.append(
+                f'<item label="{html.escape(name)}"{icon_attr}>'
+                f'<action name="Execute"><command>{html.escape(command)}</command></action></item>'
+            )
+        out.append("</menu>")
+    if not any_items:
+        out.append('<item label="(no applications found)"/>')
+    out.append("</openbox_pipe_menu>")
+    print("\n".join(out))
+
+
+if __name__ == "__main__":
+    # main() builds the whole menu and prints it once at the very end, so if
+    # anything fails before that, nothing was emitted and this fallback keeps
+    # Openbox happy with valid (if empty) XML.
+    try:
+        main()
+    except Exception:
+        print('<openbox_pipe_menu><item label="(menu unavailable)"/></openbox_pipe_menu>')

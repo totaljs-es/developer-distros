@@ -13,7 +13,7 @@ on:
 jobs:
   repo:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
@@ -42,3 +42,17 @@ jobs:
       # The layer in a clean Ubuntu 26.04 (the series of the repository): the sources, the install, what it promises, and the removal
       - name: The server layer on Ubuntu 26.04
         run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:26.04 bash /test.sh
+
+      # The desktop edition: installed in the same clean Ubuntu, and its session started in a virtual screen, with screenshots
+      - name: The desktop edition on Ubuntu 26.04
+        run: |
+          mkdir -p build/desktop
+          docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-desktop.sh:/test.sh:ro" -v "$PWD/build/desktop:/out" ubuntu:26.04 bash /test.sh
+
+      - name: Screenshots of the desktop
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-screenshots
+          path: build/desktop
+          if-no-files-found: ignore

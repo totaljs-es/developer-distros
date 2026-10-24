@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Files
+Comment=The files and the projects
+Exec=pcmanfm /www
+Icon=system-file-manager
+Terminal=false
+NoDisplay=true
+Categories=Development;

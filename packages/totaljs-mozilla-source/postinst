@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# The key is the official one: its fingerprint is checked here too, so that a changed file cannot be used by mistake
+fpr="$(gpg --show-keys --with-colons /usr/share/keyrings/packages.mozilla.org.asc 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }')"
+if [ -n "${fpr}" ] && [ "${fpr}" != 35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3 ]; then
+  echo "totaljs-mozilla-source: the key of Mozilla has an unexpected fingerprint (${fpr})" >&2
+  exit 1
+fi
+
+install -m 0644 /usr/share/totaljs-developer/mozilla.sources /etc/apt/sources.list.d/mozilla.sources
+
+exit 0

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Total.js Center
+Comment=The front door of Total.js Developer
+Exec=totaljs-open http://totaljs.developer
+Icon=/usr/share/totaljs-developer/icons/total-center.svg
+Terminal=false
+NoDisplay=true
+Categories=Development;

@@ -1,0 +1,13 @@
+Package: totaljs-developer-desktop
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: metapackages
+Priority: optional
+Depends: totaljs-developer-server (= 1.0.0-1), totaljs-openbox (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), firefox
+Homepage: https://www.totaljs.com
+Description: Total.js Developer Distro, desktop edition
+ The server edition plus the Openbox desktop: the theme, the panel, the launcher, the terminal, the files,
+ the wallpapers and Firefox. This package installs the pieces; each one is a package of its own and can be
+ updated alone. To install it, install totaljs-developer-release, totaljs-docker-source and
+ totaljs-mozilla-source first, update the lists of apt, and then this one.
