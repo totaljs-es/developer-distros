@@ -50,6 +50,13 @@ echo "==> the tools and the source that the release package wrote"
 for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done
 grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources || { cat /etc/apt/sources.list.d/totaljs-developer.sources >&2; exit 1; }
 
+echo "==> the source that the package wrote works by itself"
+# the test source and the one of the package point to the same repository with different keys: apt refuses both at once
+rm /etc/apt/sources.list.d/totaljs-test.list
+apt-get update -qq
+POLICY="$(apt-cache policy totaljs-node)"
+case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'totaljs-node is not available from the source of the package' >&2; exit 1 ;; esac
+
 echo "==> installing it again changes nothing"
 apt-get install -y --reinstall totaljs-node >/dev/null
 test "$(node --version)" = "${NODE_VERSION}"
