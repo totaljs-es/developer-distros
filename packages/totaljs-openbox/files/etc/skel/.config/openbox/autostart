@@ -8,6 +8,6 @@ nm-applet &
 pasystray &
 # Openbox has no agent of Polkit of its own, and the tools of the desktop that need a password ask for it through one
 for agent in /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1; do
-  if [ -x "$agent" ]; then totaljs-launch-once '[p]olkit-gnome-authentication-agent-1' "$agent" & break; fi
+  if [ -x "$agent" ]; then totaljs-launch-once polkit-gnome-authentication-agent-1 "$agent" & break; fi
 done
-totaljs-launch-once '[d]unst' dunst &
+totaljs-launch-once dunst dunst &

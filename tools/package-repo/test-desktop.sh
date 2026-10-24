@@ -60,7 +60,9 @@ mkdir -p "${XDG_RUNTIME_DIR}"; chmod 700 "${XDG_RUNTIME_DIR}"
 export LIBGL_ALWAYS_SOFTWARE=1
 openbox-session >/tmp/openbox.log 2>&1 &
 sleep 14
-for p in openbox tint2 picom dunst; do pgrep -x "${p}" >/dev/null || { echo "${p} is not running" >&2; cat /tmp/openbox.log >&2; exit 1; }; done
+for p in openbox tint2 picom dunst; do
+    pgrep -x "${p}" >/dev/null || { echo "${p} is not running" >&2; cat /tmp/openbox.log >&2; tail -n +1 "${HOME}"/.cache/*.log >&2 2>/dev/null || true; exit 1; }
+done
 import -window root /out/desktop.png
 # the launcher and the right-click menu
 alacritty >/tmp/alacritty.log 2>&1 &

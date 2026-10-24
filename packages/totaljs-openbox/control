@@ -6,7 +6,7 @@ Section: x11
 Priority: optional
 Depends: totaljs-wallpapers (>= 1.0.0), xorg, openbox, obconf, tint2, picom, rofi, dunst, libnotify-bin, feh, alacritty,
  pcmanfm, gvfs, xarchiver, lightdm, lightdm-gtk-greeter, lxappearance, papirus-icon-theme, adwaita-icon-theme-full,
- librsvg2-common, shared-mime-info, fonts-firacode, fonts-noto, gsimplecal, python3, network-manager, network-manager-gnome,
+ librsvg2-common, shared-mime-info, fonts-firacode, fonts-noto, gsimplecal, python3, python3-xdg, network-manager, network-manager-gnome,
  policykit-1-gnome, pipewire, pipewire-pulse, wireplumber, alsa-utils, pavucontrol, pasystray, dbus-x11, xdg-utils,
  x11-xserver-utils, x11-utils, xdotool, scrot, mesa-utils, libgl1-mesa-dri, libglx-mesa0, plymouth-label
 Homepage: https://www.totaljs.com

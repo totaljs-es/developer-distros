@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
+# totaljs-launch-once NAME COMMAND [ARGUMENTS...]: starts COMMAND unless a process called NAME is already running for this person.
+# The name is the one of the process (not a pattern of its command line, which this very script would also match).
 set -euo pipefail
 process="${1:?process name required}"
 shift
-while IFS= read -r pid; do
-    # pgrep sees this helper too because the target command is one of its own
-    # arguments. Ignore this shell and its parent; only a real existing target
-    # should suppress a second launch.
-    [ "${pid}" = "$$" ] || [ "${pid}" = "${PPID}" ] || exit 0
-done < <(pgrep -u "$(id -u)" -f "${process}" 2>/dev/null || true)
+# the kernel keeps only the first 15 characters of the name of a process
+pgrep -u "$(id -u)" -x "${process:0:15}" >/dev/null 2>&1 && exit 0
 mkdir -p "${HOME}/.cache"
 nohup "$@" >"${HOME}/.cache/${process}.log" 2>&1 &
