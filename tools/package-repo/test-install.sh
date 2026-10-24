@@ -105,20 +105,26 @@ kill "${DNS_PID}" 2>/dev/null || true
 echo "==> Total.js Center"
 test -f /usr/lib/systemd/system/totaljs-center.service
 test -f /usr/share/totaljs-developer/center/public/logo.svg
-id -nG totalcenter | grep -qv -w docker   # it has no access to Docker
+case " $(id -nG totalcenter) " in *' docker '*) echo 'totalcenter is in docker' >&2; exit 1 ;; esac   # it has no access to Docker
 test -f /var/lib/totaljs-center/index.js
 # the unit needs systemd, which a container does not have: run the same command as the same user
 su -s /bin/sh totalcenter -c 'cd /var/lib/totaljs-center && NODE_ENV=production NODE_PATH=/usr/local/lib/node_modules exec node index.js' >/tmp/center.log 2>&1 &
 CENTER_PID=$!
 for _ in 1 2 3 4 5 6 7 8 9 10; do curl -fsS http://127.0.0.1:8010/health/ >/dev/null 2>&1 && break; sleep 1; done
-curl -fsS http://127.0.0.1:8010/health/ | grep -q '"ok":true' || { cat /tmp/center.log >&2; exit 1; }
-curl -fsS http://127.0.0.1:8010/ | grep -q '<title>Total.js Center</title>'
-curl -fsS http://127.0.0.1:8010/logo.svg | grep -q '<svg'
-curl -fsS http://127.0.0.1:8010/api/status/ | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8")); if (d.domain !== "totaljs.developer" || d.services.length !== 3 || !d.machine.kernel) process.exit(1)'
+# the output is kept first: grep -q closes the pipe before curl has written everything, and with pipefail that is an error
+HEALTH="$(curl -fsS http://127.0.0.1:8010/health/ || { cat /tmp/center.log >&2; exit 1; })"
+case "${HEALTH}" in *'"ok":true'*) ;; *) echo "${HEALTH}" >&2; exit 1 ;; esac
+PAGE="$(curl -fsS http://127.0.0.1:8010/)"
+case "${PAGE}" in *'<title>Total.js Center</title>'*) ;; *) echo 'the page of Center is wrong' >&2; exit 1 ;; esac
+LOGO="$(curl -fsS http://127.0.0.1:8010/logo.svg)"
+case "${LOGO}" in *'<svg'*) ;; *) echo 'the logo of Center is wrong' >&2; exit 1 ;; esac
+STATUS="$(curl -fsS http://127.0.0.1:8010/api/status/)"
+printf '%s' "${STATUS}" | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8")); if (d.domain !== "totaljs.developer" || d.services.length !== 3 || !d.machine.kernel) process.exit(1)'
 kill "${CENTER_PID}" 2>/dev/null || true
 
 echo "==> the summary of the terminal"
-totalfetch | grep -q 'Total.js Developer'
+FETCH="$(totalfetch)"
+case "${FETCH}" in *'Total.js Developer'*) ;; *) echo 'totalfetch shows nothing' >&2; exit 1 ;; esac
 test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1
 
 echo "==> the source that the package wrote works by itself"
