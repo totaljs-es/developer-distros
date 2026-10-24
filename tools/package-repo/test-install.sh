@@ -26,7 +26,8 @@ echo "the first person is ${FIRST}"
 install -m 0644 /repo/totaljs-developer.gpg /usr/share/keyrings/totaljs-test.gpg
 echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file:///repo/ubuntu ${CODENAME} main" > /etc/apt/sources.list.d/totaljs-test.list
 apt-get update -qq
-apt-cache policy totaljs-developer-server | grep -q 'Candidate: 1.0.0-1'
+POLICY="$(apt-cache policy totaljs-developer-server)"
+case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'totaljs-developer-server 1.0.0-1 is not the candidate' >&2; exit 1 ;; esac
 
 echo "==> installing totaljs-developer-server"
 apt-get install -y totaljs-developer-server
@@ -41,13 +42,13 @@ node -e "require('/usr/local/lib/node_modules/total5/package.json')"
 
 echo "==> the group and the first person"
 getent group totaljs-developer
-id -nG "${FIRST}" | tr ' ' '\n' | grep -qx totaljs-developer
+case " $(id -nG "${FIRST}") " in *' totaljs-developer '*) ;; *) echo "${FIRST} is not in totaljs-developer: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
 test "$(cat /var/lib/totaljs-developer/first-user)" = "${FIRST}"
 test -f /usr/lib/systemd/system/totaljs-developer-first-user.service
 
 echo "==> the tools and the source that the release package wrote"
 for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done
-grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources
+grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources || { cat /etc/apt/sources.list.d/totaljs-developer.sources >&2; exit 1; }
 
 echo "==> installing it again changes nothing"
 apt-get install -y --reinstall totaljs-node >/dev/null
