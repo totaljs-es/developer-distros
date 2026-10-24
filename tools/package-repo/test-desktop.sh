@@ -22,10 +22,19 @@ echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file:///repo/ubuntu $
 apt-get update -qq
 
 echo "==> the sources and the desktop edition"
-apt-get install -y totaljs-developer-release totaljs-docker-source totaljs-mozilla-source >/dev/null
+# the output is kept, and the end of it is shown when apt fails: a failed postinst says which package is the one
+install_logged() {
+    if ! apt-get install -y "$@" >/tmp/apt.log 2>&1; then
+        grep -n -i -E "^E:|dpkg: error|error processing|subprocess|returned error|failed" /tmp/apt.log | tail -30 >&2 || true
+        echo "---- the end of the log of apt ----" >&2
+        tail -60 /tmp/apt.log >&2
+        exit 1
+    fi
+}
+install_logged totaljs-developer-release totaljs-docker-source totaljs-mozilla-source
 rm /etc/apt/sources.list.d/totaljs-test.list   # the release package wrote the same source with its own key
 apt-get update -qq
-apt-get install -y totaljs-developer-desktop >/dev/null
+install_logged totaljs-developer-desktop
 
 echo "==> what the desktop promises"
 for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/tint2/tint2rc \
