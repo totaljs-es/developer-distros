@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Total.js Developer
+Description=The logo of Total.js comes together, and a ring of light goes around it while the system starts.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/totaljs
+ScriptFile=/usr/share/plymouth/themes/totaljs/totaljs.script

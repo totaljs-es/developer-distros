@@ -1,0 +1,68 @@
+name: plymouth
+
+# Runs the boot splash in a real Plymouth, on a virtual screen (Xvfb), and keeps screenshots of the animation.
+# It proves that the script loads and draws; how it looks is judged in the screenshots (artifact `splash-screenshots`).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'shared/plymouth/**'
+      - '.github/workflows/plymouth.yml'
+
+jobs:
+  splash:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y plymouth plymouth-x11 xvfb imagemagick x11-utils
+
+      - name: The theme
+        run: |
+          sudo mkdir -p /usr/share/plymouth/themes/totaljs
+          sudo cp shared/plymouth/totaljs/* /usr/share/plymouth/themes/totaljs/
+          sudo plymouth-set-default-theme totaljs
+          plymouth-set-default-theme --list
+          grep -r Theme /etc/plymouth/plymouthd.conf || true
+
+      - name: Show it on a virtual screen
+        run: |
+          mkdir -p shots
+          Xvfb :99 -screen 0 1920x1080x24 >/tmp/xvfb.log 2>&1 &
+          export DISPLAY=:99
+          sleep 2
+          sudo -E plymouthd --debug --debug-file=/tmp/plymouthd.log --mode=boot --attach-to-session
+          sleep 1
+          sudo -E plymouth show-splash
+          previous=0
+          for second in 1 2 3 4 6 9; do
+            sleep $(( second - previous ))
+            previous=$second
+            import -display :99 -window root "shots/at-${second}s.png"
+          done
+          sudo -E plymouth quit || true
+          echo "--- the log of plymouthd"
+          sudo tail -80 /tmp/plymouthd.log || true
+
+      - name: The screen is not empty
+        run: |
+          for shot in shots/*.png; do
+            echo "$shot: deviation $(convert "$shot" -format '%[fx:standard_deviation]' info:)"
+          done
+          # once the logo has come together there is more on the screen than the background
+          deviation="$(convert shots/at-9s.png -format '%[fx:standard_deviation]' info:)"
+          awk -v d="$deviation" 'BEGIN { exit (d > 0.03) ? 0 : 1 }' || { echo "the screen at 9 seconds is empty: the theme did not draw"; exit 1; }
+
+      - name: Keep the screenshots and the log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: splash-screenshots
+          path: |
+            shots/
+            /tmp/plymouthd.log
+            /tmp/xvfb.log

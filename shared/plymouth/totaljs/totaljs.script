@@ -1,0 +1,214 @@
+# Total.js Developer: boot splash.
+#
+# 1. The logo comes together: its body, its light side and its arrow slide in from three sides.
+# 2. A flash, and the parts give way to the whole logo (the art of Total.js, with its shadows).
+# 3. A ring in the shape of the logo (a hexagon of points) lights up with the progress of the boot,
+#    and a point of light goes around it all the time, so that the screen never looks stopped.
+#
+# The theme is drawn for a screen of 1080 pixels of height and scales to any other. The images are made by
+# shared/plymouth/generate.py, and shared/plymouth/preview.py draws this same choreography on a sheet.
+# The animation is a function of the frame (the refresh function is called about 50 times a second).
+
+Window.SetBackgroundTopColor(0.040, 0.057, 0.050);
+Window.SetBackgroundBottomColor(0.075, 0.105, 0.090);
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+unit = screen_height / 1080;
+PI = 3.14159265;
+
+center_x = screen_width / 2;
+center_y = screen_height / 2 - 36 * unit;
+
+# --- the images: all the pieces are squares of 1024 pixels where the logo is 560 high, so they go in the same place
+logo_height = 290 * unit;
+side = logo_height * 1024 / 560;
+origin_x = center_x - side / 2;
+origin_y = center_y - side / 2;
+
+body_image = Image("body.png").Scale(side, side);
+side_image = Image("side.png").Scale(side, side);
+arrow_image = Image("arrow.png").Scale(side, side);
+logo_image = Image("logo.png").Scale(side, side);
+glow_size = side * 2.4;
+glow_image = Image("glow.png").Scale(glow_size, glow_size);
+
+glow_sprite = Sprite(glow_image);
+glow_sprite.SetPosition(center_x - glow_size / 2, center_y - glow_size / 2, 1);
+glow_sprite.SetOpacity(0);
+
+body_sprite = Sprite(body_image);
+body_sprite.SetOpacity(0);
+body_sprite.SetZ(3);
+
+side_sprite = Sprite(side_image);
+side_sprite.SetOpacity(0);
+side_sprite.SetZ(4);
+
+arrow_sprite = Sprite(arrow_image);
+arrow_sprite.SetOpacity(0);
+arrow_sprite.SetZ(5);
+
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetPosition(origin_x, origin_y, 6);
+logo_sprite.SetOpacity(0);
+
+# --- the ring: points along the sides of a hexagon with a vertex at the top, like the logo
+ring_points = 72;
+ring_radius = logo_height * 0.80;
+dot_size = 20 * unit;
+dot_off_image = Image("dot-off.png").Scale(dot_size, dot_size);
+dot_on_image = Image("dot-on.png").Scale(dot_size, dot_size);
+
+fun vertex_x(j) { return center_x + ring_radius * Math.Cos((-90 + 60 * j) * PI / 180); }
+fun vertex_y(j) { return center_y + ring_radius * Math.Sin((-90 + 60 * j) * PI / 180); }
+
+for (i = 0; i < ring_points; i++) {
+    where = i * 6 / ring_points;
+    edge = Math.Int(where);
+    part = where - edge;
+    x0 = vertex_x(edge);
+    y0 = vertex_y(edge);
+    x1 = vertex_x(edge + 1);
+    y1 = vertex_y(edge + 1);
+    dot_x[i] = x0 + (x1 - x0) * part - dot_size / 2;
+    dot_y[i] = y0 + (y1 - y0) * part - dot_size / 2;
+
+    dot_off[i] = Sprite(dot_off_image);
+    dot_off[i].SetPosition(dot_x[i], dot_y[i], 7);
+    dot_off[i].SetOpacity(0);
+
+    dot_on[i] = Sprite(dot_on_image);
+    dot_on[i].SetPosition(dot_x[i], dot_y[i], 8);
+    dot_on[i].SetOpacity(0);
+}
+
+# --- the name
+title_image = Image.Text("Total.js Developer", 0.92, 0.97, 0.90, 1, "Sans 20");
+title_sprite = Sprite(title_image);
+title_sprite.SetPosition(center_x - title_image.GetWidth() / 2, center_y + ring_radius + 56 * unit, 9);
+title_sprite.SetOpacity(0);
+
+# --- what the animation reads
+frame = 0;
+boot_progress = 0;
+shown_progress = 0;
+password_sprite = NULL;
+message_sprite = NULL;
+
+fun clamp01(v) {
+    if (v < 0) return 0;
+    if (v > 1) return 1;
+    return v;
+}
+
+# 0 before `from`, 1 after `to`, and a straight line in between
+fun ramp(t, start, end) { return clamp01((t - start) / (end - start)); }
+
+# fast at the start and slow at the end: the parts arrive and settle
+fun ease_out(u) {
+    v = 1 - clamp01(u);
+    return 1 - v * v * v;
+}
+
+fun refresh() {
+    frame = frame + 1;
+    t = frame / 50;
+
+    # 1. the parts come together: the body from the right, the side from the left, the arrow from further left
+    u_body = ease_out(ramp(t, 0.10, 1.00));
+    u_side = ease_out(ramp(t, 0.30, 1.15));
+    u_arrow = ease_out(ramp(t, 0.55, 1.35));
+
+    # 2. the whole logo takes over
+    whole = ramp(t, 1.45, 1.85);
+    parts = 1 - whole;
+
+    body_sprite.SetPosition(origin_x + (1 - u_body) * 260 * unit, origin_y, 3);
+    body_sprite.SetOpacity(ramp(t, 0.10, 0.55) * parts);
+    side_sprite.SetPosition(origin_x - (1 - u_side) * 300 * unit, origin_y, 4);
+    side_sprite.SetOpacity(ramp(t, 0.30, 0.70) * parts);
+    arrow_sprite.SetPosition(origin_x - (1 - u_arrow) * 520 * unit, origin_y, 5);
+    arrow_sprite.SetOpacity(ramp(t, 0.55, 0.90) * parts);
+
+    # the whole logo floats a little, once it is there
+    float_y = 0;
+    if (t > 1.85) float_y = 5 * unit * Math.Sin((t - 1.85) * 2 * PI / 4);
+    logo_sprite.SetPosition(origin_x, origin_y + float_y, 6);
+    logo_sprite.SetOpacity(whole);
+
+    # the light behind: it grows while the parts arrive, flashes when they meet, and then it breathes
+    light = 0.12 + 0.22 * ramp(t, 0, 1.4);
+    if (t >= 1.4) {
+        decay = 1 - ramp(t, 1.4, 2.2);
+        light = 0.34 + 0.66 * decay;
+        if (t >= 2.2) light = 0.40 + 0.12 * Math.Sin((t - 2.2) * 2 * PI / 3.2);
+    }
+    glow_sprite.SetOpacity(light);
+
+    # 3. the ring
+    ring_alpha = ramp(t, 1.2, 2.0);
+    shown_progress = shown_progress + (boot_progress - shown_progress) * 0.04;
+    head = t / 2.6 * ring_points;
+    tail = ring_points * 0.32;
+
+    for (i = 0; i < ring_points; i++) {
+        # how far behind the point of light this point is, in points
+        d = head - i;
+        while (d < 0) { d = d + ring_points; }
+        while (d >= ring_points) { d = d - ring_points; }
+
+        comet = 0;
+        if (d < tail) {
+            c = 1 - d / tail;
+            comet = c * c;
+        }
+        lit = 0;
+        if ((i + 1) / ring_points <= shown_progress) lit = 0.55;
+        level = comet;
+        if (lit > level) level = lit;
+
+        dot_off[i].SetOpacity(0.40 * ring_alpha);
+        dot_on[i].SetOpacity(level * ring_alpha);
+    }
+
+    title_sprite.SetOpacity(ramp(t, 1.5, 2.3));
+}
+
+Plymouth.SetRefreshFunction(refresh);
+
+fun boot_progress_callback(duration, progress) {
+    boot_progress = clamp01(progress);
+}
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+
+# --- the passphrase of an encrypted disk
+fun display_password_callback(prompt, bullets) {
+    password_text = prompt;
+    password_stars = "";
+    for (i = 0; i < bullets; i++) password_stars = password_stars + "*";
+
+    prompt_image = Image.Text(password_text, 0.92, 0.97, 0.90, 1, "Sans 14");
+    stars_image = Image.Text(password_stars, 0.60, 0.85, 0.35, 1, "Sans 18");
+
+    password_sprite = Sprite(prompt_image);
+    password_sprite.SetPosition(center_x - prompt_image.GetWidth() / 2, screen_height - 190 * unit, 20);
+    stars_sprite = Sprite(stars_image);
+    stars_sprite.SetPosition(center_x - stars_image.GetWidth() / 2, screen_height - 150 * unit, 20);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback() {
+    password_sprite = NULL;
+    stars_sprite = NULL;
+    message_sprite = NULL;
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+# --- a message of the system (a check of the disk, for example)
+fun message_callback(text) {
+    message_image = Image.Text(text, 0.75, 0.82, 0.74, 1, "Sans 12");
+    message_sprite = Sprite(message_image);
+    message_sprite.SetPosition(center_x - message_image.GetWidth() / 2, screen_height - 90 * unit, 20);
+}
+Plymouth.SetMessageFunction(message_callback);

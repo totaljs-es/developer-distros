@@ -6,4 +6,6 @@ The Total.js layer that every distro has in common: the desktop and its configur
 
 `wallpapers/` has the six wallpapers of the desktop (4K, drawn with code, with the official logo): see its README.
 
+`plymouth/` has the boot splash, an animation of the logo coming together with a ring of light that follows the progress of the boot: see its README.
+
 The rest is empty on purpose. The files are still inside the recipes (`tools/image-builder/images/developer-ubuntu/assets/`) and move here one piece at a time, each with a build that proves nothing changed.

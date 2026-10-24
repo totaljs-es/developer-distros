@@ -114,7 +114,47 @@ if (python.status === 0) {
 	Fs.rmSync(temp, { recursive: true, force: true });
 }
 
-// 5. The files for agents mention only what exists
+// 5. The boot splash: its script uses images that exist, its brackets close, and its SVGs are what the generator makes
+const splash = Path.join(ROOT, 'shared/plymouth/totaljs');
+
+if (Fs.existsSync(splash)) {
+
+	const script = Fs.readFileSync(Path.join(splash, 'totaljs.script'), 'utf8');
+	const open = (text, a, b) => text.split(a).length - text.split(b).length;
+
+	for (const [a, b] of [['{', '}'], ['(', ')'], ['[', ']']])
+		if (open(script, a, b) !== 0)
+			problems.push('shared/plymouth/totaljs/totaljs.script: ' + a + ' and ' + b + ' do not match');
+
+	for (const match of script.matchAll(/Image\("([^"]+)"\)/g))
+		if (!Fs.existsSync(Path.join(splash, match[1])))
+			problems.push('shared/plymouth/totaljs/totaljs.script uses ' + match[1] + ', which does not exist: run shared/plymouth/export.sh');
+
+	const theme = Fs.readFileSync(Path.join(splash, 'totaljs.plymouth'), 'utf8');
+	if (!/ModuleName=script/.test(theme) || !/ScriptFile=.*totaljs\.script/.test(theme) || !/ImageDir=.*themes\/totaljs$/m.test(theme))
+		problems.push('shared/plymouth/totaljs/totaljs.plymouth does not point to the script of the theme');
+
+	if (python.status === 0) {
+		const folder = Fs.mkdtempSync(Path.join(require('os').tmpdir(), 'splash-'));
+		const made = spawnSync('python3', [Path.join(ROOT, 'shared/plymouth/generate.py'), folder], { encoding: 'utf8' });
+
+		if (made.status !== 0)
+			problems.push('shared/plymouth/generate.py failed: ' + made.stderr.trim());
+		else {
+			for (const name of Fs.readdirSync(folder)) {
+				const committed = Path.join(ROOT, 'shared/plymouth/svg', name);
+				if (!Fs.existsSync(committed) || Fs.readFileSync(committed, 'utf8') !== Fs.readFileSync(Path.join(folder, name), 'utf8'))
+					problems.push('shared/plymouth/svg/' + name + ' is not what generate.py makes: run shared/plymouth/export.sh');
+				if (!Fs.existsSync(Path.join(splash, name.replace(/\.svg$/, '.png'))))
+					problems.push('shared/plymouth/totaljs/' + name.replace(/\.svg$/, '.png') + ' does not exist: run shared/plymouth/export.sh');
+			}
+		}
+
+		Fs.rmSync(folder, { recursive: true, force: true });
+	}
+}
+
+// 6. The files for agents mention only what exists
 const everything = new Set(files.map(relative));
 const folders = new Set();
 
