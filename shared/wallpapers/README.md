@@ -1,6 +1,6 @@
 # Wallpapers
 
-Six wallpapers for the desktop of the Total.js Developer Distros, drawn with code so that they are reproducible, small and can be made for any size. All of them use the official logo of Total.js (`../branding/logo-totaljs.svg`), the green of the logo and a graphite background, with a fine grain that keeps the dark gradients from showing bands.
+Twelve wallpapers for the desktop of the Total.js Developer Distros, drawn with code so that they are reproducible, small and can be made for any size. All of them use the official logo of Total.js (`../branding/logo-totaljs.svg`), the green of the logo and a graphite background, with a fine grain that keeps the dark gradients from showing bands.
 
 | | |
 |---|---|
@@ -10,6 +10,14 @@ Six wallpapers for the desktop of the Total.js Developer Distros, drawn with cod
 | `horizon` | Night, with the land in layers and the logo above the horizon |
 | `mascot` | The logo out of focus, and the mascot (`../branding/mascot.png`) in the corner |
 | `daylight` | The light one |
+| `ember` | Warm ribbons of light on aubergine, with the logo at the start of them |
+| `aubergine` | Soft lights of aubergine, magenta and orange, with the logo calm in the middle |
+| `sunrise` | Bands of light around the logo, from aubergine to orange |
+| `prism` | Sharp facets in blue, lit around the logo |
+| `blueprint` | A technical drawing: a grid, marks and the construction lines of the logo |
+| `syntax` | The shape of code, in bars, like an editor out of focus, with a calm place for the logo |
+
+The first six are the identity of Total.js (graphite and the green of the logo). The last six are for people who like the colors of the two distros that Total.js runs on: `ember`, `aubergine` and `sunrise` use an aubergine and orange palette (Ubuntu), `prism`, `blueprint` and `syntax` a blue one (Arch). They take the **colors only**: the logos and marks of Ubuntu and Arch are not used, and the desktop of the distros stays the same on both.
 
 ## Files
 

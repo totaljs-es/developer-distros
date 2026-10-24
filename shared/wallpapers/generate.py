@@ -17,6 +17,9 @@ GREEN = '#66b639'      # the green of the logo of Total.js
 LIGHT = '#9ad959'      # its light side
 DEEP = '#2e5a1a'
 INK = '#0b0f0d'        # the graphite of the dark wallpapers
+# Colors that remind of Ubuntu (aubergine and orange) and of Arch (blue): the palettes only, never their logos, which are marks
+AUBERGINE, PLUM, PURPLE, ORANGE, AMBER, MAGENTA = '#2c001e', '#5e2750', '#77216f', '#e95420', '#f2874b', '#ad2b6b'
+NAVY, DEEP_BLUE, BLUE, ICE = '#08131f', '#0d3a5c', '#1793d1', '#7cc4ec'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BRANDING = os.path.join(HERE, '..', 'branding')
@@ -60,11 +63,12 @@ def logo(cx, cy, height):
     return f'<g style="fill-rule:evenodd;clip-rule:evenodd" transform="translate({cx:.1f},{cy:.1f}) scale({k:.4f}) translate(-63,-63)">{LOGO_BODY}</g>'
 
 
-def logo_echo(cx, cy, height, color, opacity, width):
+def logo_echo(cx, cy, height, color, opacity, width, dash=''):
     """The silhouette of the logo as a line: an echo of it, `height` pixels high."""
     k = height / PATH_H
     return (f'<path d="{LOGO_OUTLINE}" transform="translate({cx:.1f},{cy:.1f}) scale({k:.4f}) translate(-{PATH_CENTER},-{PATH_CENTER})" '
-            f'fill="none" stroke="{color}" stroke-opacity="{opacity}" stroke-width="{width / k:.2f}" stroke-linejoin="round"/>\n')
+            f'fill="none" stroke="{color}" stroke-opacity="{opacity}" stroke-width="{width / k:.2f}" stroke-linejoin="round"'
+            + (' stroke-dasharray="' + ' '.join('%.2f' % (float(v) / k) for v in dash.split()) + '"' if dash else '') + '/>\n')
 
 
 def logo_shape(cx, cy, height, color, opacity, extra=''):
@@ -229,6 +233,140 @@ def daylight():
     return svg(body, defs, light=True, with_logo=True)
 
 
+def _mix(a, b, t):
+    """The color between two #rrggbb colors; t = 0 is a, t = 1 is b."""
+    t = max(0.0, min(1.0, t))
+    pa, pb = [int(a[i:i + 2], 16) for i in (1, 3, 5)], [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return '#%02x%02x%02x' % tuple(round(pa[i] + (pb[i] - pa[i]) * t) for i in range(3))
+
+
+def ember():
+    """Ubuntu-like: ribbons of warm light on aubergine, and the logo at the start of them."""
+    rnd = random.Random(31)
+    ribbons = ''
+    palette = [ORANGE, AMBER, MAGENTA, PURPLE, '#c34113', '#f4a261']
+    for i in range(11):
+        base = 1500 - i * 90 + rnd.uniform(-30, 30)
+        a1, a2 = rnd.uniform(110, 230), rnd.uniform(40, 90)
+        f1, f2 = rnd.uniform(0.0007, 0.0013), rnd.uniform(0.002, 0.004)
+        p1, p2, q = rnd.uniform(0, 6.28), rnd.uniform(0, 6.28), rnd.uniform(0, 6.28)
+        top, bottom = [], []
+        for x in range(1300, W + 32, 32):
+            fade = min(1.0, (x - 1300) / 900)
+            y = base - (x - 1300) * 0.22 + a1 * math.sin(x * f1 + p1) + a2 * math.sin(x * f2 + p2)
+            th = (30 + 120 * (0.5 + 0.5 * math.sin(x * 0.0011 + q))) * fade
+            top.append((x, y))
+            bottom.append((x, y + th))
+        pts = top + bottom[::-1]
+        color = palette[i % len(palette)]
+        ribbons += f'<polygon points="{" ".join("%d,%.1f" % p for p in pts)}" fill="{color}" fill-opacity="{rnd.uniform(0.10, 0.42):.3f}"/>\n'
+        ribbons += f'<polyline points="{" ".join("%d,%.1f" % p for p in top)}" fill="none" stroke="{color}" stroke-opacity="0.55" stroke-width="2.5"/>\n'
+    defs = f"""<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0013"/><stop offset="0.55" stop-color="{AUBERGINE}"/><stop offset="1" stop-color="#4a0d3b"/></linearGradient>
+<radialGradient id="warm" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.50"/><stop offset="0.5" stop-color="{ORANGE}" stop-opacity="0.16"/><stop offset="1" stop-color="{ORANGE}" stop-opacity="0"/></radialGradient>"""
+    body = f'<rect width="{W}" height="{H}" fill="url(#bg)"/>\n<circle cx="1050" cy="1100" r="900" fill="url(#warm)"/>\n{ribbons}{logo(1050, 1100, 640)}'
+    return svg(body, defs, with_logo=True)
+
+
+def aubergine():
+    """Ubuntu-like: soft lights of aubergine, magenta and orange, with the logo calm in the middle."""
+    # each light is a radial gradient (no filter): it fades to nothing, so the colors do not turn brown where they meet
+    lights = [(3000, 1900, 1500, ORANGE, .62), (700, 1800, 1300, MAGENTA, .55), (500, 300, 1300, PURPLE, .70), (1900, 700, 1000, '#9b3a78', .30),
+              (3300, 450, 1100, PLUM, .55), (2200, 2000, 900, AMBER, .28)]
+    defs = f'''<radialGradient id="bg" cx="0.5" cy="0.5" r="0.85"><stop offset="0" stop-color="#34082a"/><stop offset="1" stop-color="#1a0013"/></radialGradient>
+<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffd9c0" stop-opacity="0.22"/><stop offset="1" stop-color="#ffd9c0" stop-opacity="0"/></radialGradient>'''
+    glows = ''
+    for i, (x, y, r, color, op) in enumerate(lights):
+        defs += f'\n<radialGradient id="l{i}" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{color}" stop-opacity="{op}"/><stop offset="0.55" stop-color="{color}" stop-opacity="{op * 0.45:.3f}"/><stop offset="1" stop-color="{color}" stop-opacity="0"/></radialGradient>'
+        glows += f'<circle cx="{x}" cy="{y}" r="{r}" fill="url(#l{i})"/>\n'
+    body = f'<rect width="{W}" height="{H}" fill="url(#bg)"/>\n{glows}<circle cx="1920" cy="1080" r="640" fill="url(#halo)"/>\n{logo(1920, 1080, 560)}'
+    return svg(body, defs, with_logo=True)
+
+
+def sunrise():
+    """Ubuntu-like: bands of light around a center that goes from aubergine to orange, with the logo in it."""
+    cx, cy = 2700, 1500
+    discs = ''
+    radii = list(range(2900, 300, -220))
+    for i, r in enumerate(radii):
+        t = i / (len(radii) - 1)
+        color = _mix(AUBERGINE, ORANGE, t * 1.12) if t < 0.89 else _mix(ORANGE, '#ffb86b', (t - 0.89) / 0.11)
+        discs += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}"/>\n'
+    defs = f"""<radialGradient id="shade" cx="0.7" cy="0.69" r="0.95"><stop offset="0" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.5"/></radialGradient>
+<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffd0a0" stop-opacity="0.28"/><stop offset="1" stop-color="#ffd0a0" stop-opacity="0"/></radialGradient>"""
+    body = f'<rect width="{W}" height="{H}" fill="{AUBERGINE}"/>\n{discs}<rect width="{W}" height="{H}" fill="url(#shade)" opacity="0.8"/>\n<circle cx="{cx}" cy="{cy}" r="560" fill="url(#halo)"/>\n{logo(cx, cy, 600)}'
+    return svg(body, defs, with_logo=True)
+
+
+def prism():
+    """Arch-like: sharp facets in blue, cold and minimal, with the logo lit in them."""
+    rnd = random.Random(13)
+    cols, rows = 20, 11
+    cw, ch = W / (cols - 1), H / (rows - 1)
+    pts = [[(c * cw + (rnd.uniform(-.34, .34) * cw if 0 < c < cols - 1 else 0), r * ch + (rnd.uniform(-.34, .34) * ch if 0 < r < rows - 1 else 0))
+            for c in range(cols)] for r in range(rows)]
+    fx, fy = 2650, 1080
+    faces = ''
+    for r in range(rows - 1):
+        for c in range(cols - 1):
+            a, b, d, e = pts[r][c], pts[r][c + 1], pts[r + 1][c], pts[r + 1][c + 1]
+            for tri in ((a, b, d), (b, e, d)) if (r + c) % 2 else ((a, b, e), (a, e, d)):
+                mx, my = sum(p[0] for p in tri) / 3, sum(p[1] for p in tri) / 3
+                near = max(0.0, 1 - math.hypot(mx - fx, my - fy) / 2300)
+                t = 0.06 + 0.55 * near ** 1.4 + rnd.uniform(-0.05, 0.07)
+                color = _mix(NAVY, BLUE, t)
+                faces += f'<polygon points="{" ".join("%.1f,%.1f" % p for p in tri)}" fill="{color}" stroke="{color}" stroke-width="1.5" stroke-linejoin="round"/>\n'
+    defs = f"""<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{ICE}" stop-opacity="0.45"/><stop offset="1" stop-color="{ICE}" stop-opacity="0"/></radialGradient>
+<radialGradient id="vignette" cx="0.7" cy="0.5" r="0.85"><stop offset="0.55" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.6"/></radialGradient>"""
+    body = f'<rect width="{W}" height="{H}" fill="{NAVY}"/>\n{faces}<rect width="{W}" height="{H}" fill="url(#vignette)"/>\n<circle cx="{fx}" cy="{fy}" r="700" fill="url(#halo)"/>\n{logo(fx, fy, 700)}'
+    return svg(body, defs, with_logo=True)
+
+
+def blueprint():
+    """Arch-like: a technical drawing. A grid, marks, and the logo drawn on it with its construction lines."""
+    cx, cy = 2550, 1080
+    grid = ''
+    for x in range(0, W + 1, 60):
+        major = x % 300 == 0
+        grid += f'<line x1="{x}" y1="0" x2="{x}" y2="{H}" stroke="{BLUE}" stroke-opacity="{0.20 if major else 0.075}" stroke-width="{2 if major else 1.2}"/>\n'
+    for y in range(0, H + 1, 60):
+        major = y % 300 == 0
+        grid += f'<line x1="0" y1="{y}" x2="{W}" y2="{y}" stroke="{BLUE}" stroke-opacity="{0.20 if major else 0.075}" stroke-width="{2 if major else 1.2}"/>\n'
+    marks = ''
+    for x in range(300, W, 300):
+        for y in range(300, H, 300):
+            marks += f'<path d="M{x - 14},{y} H{x + 14} M{x},{y - 14} V{y + 14}" stroke="{ICE}" stroke-opacity="0.45" stroke-width="2.2"/>\n'
+    construction = (f'<line x1="{cx}" y1="0" x2="{cx}" y2="{H}" stroke="{ICE}" stroke-opacity="0.30" stroke-width="2" stroke-dasharray="28 16"/>\n'
+                    f'<line x1="0" y1="{cy}" x2="{W}" y2="{cy}" stroke="{ICE}" stroke-opacity="0.30" stroke-width="2" stroke-dasharray="28 16"/>\n'
+                    f'<circle cx="{cx}" cy="{cy}" r="620" fill="none" stroke="{ICE}" stroke-opacity="0.30" stroke-width="2" stroke-dasharray="6 14"/>\n'
+                    + logo_echo(cx, cy, 980, ICE, 0.42, 3, '34 18') + logo_echo(cx, cy, 1280, ICE, 0.24, 3, '34 18'))
+    defs = f"""<radialGradient id="bg" cx="0.66" cy="0.5" r="0.9"><stop offset="0" stop-color="#0f2a42"/><stop offset="1" stop-color="{NAVY}"/></radialGradient>"""
+    body = f'<rect width="{W}" height="{H}" fill="url(#bg)"/>\n{grid}{marks}{construction}{logo(cx, cy, 640)}'
+    return svg(body, defs, with_logo=True)
+
+
+def syntax():
+    """Arch-like: the shape of code, in bars, like an editor out of focus. A dark place is left for the logo."""
+    rnd = random.Random(44)
+    colors = [ICE, BLUE, '#4fb3a9', '#8a7fd1', LIGHT, '#8aa0b3']
+    bars = ''
+    for row in range(0, int(H / 52)):
+        y = 40 + row * 52
+        x = 120 + rnd.choice([0, 0, 1, 2, 2, 3]) * 90
+        for _ in range(rnd.randint(2, 7)):
+            w = rnd.choice([60, 90, 140, 200, 280, 380])
+            if x + w > W - 100:
+                break
+            bars += f'<rect x="{x}" y="{y}" width="{w}" height="22" rx="6" fill="{rnd.choice(colors)}" fill-opacity="{rnd.uniform(0.10, 0.30):.3f}"/>\n'
+            x += w + rnd.choice([18, 18, 30])
+        if rnd.random() < 0.12:
+            continue
+    defs = f"""<radialGradient id="calm" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{NAVY}" stop-opacity="0.97"/><stop offset="0.7" stop-color="{NAVY}" stop-opacity="0.85"/><stop offset="1" stop-color="{NAVY}" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{ICE}" stop-opacity="0.28"/><stop offset="1" stop-color="{ICE}" stop-opacity="0"/></radialGradient>"""
+    body = f'<rect width="{W}" height="{H}" fill="{NAVY}"/>\n{bars}<circle cx="2400" cy="1080" r="980" fill="url(#calm)"/>\n<circle cx="2400" cy="1080" r="620" fill="url(#halo)"/>\n{logo(2400, 1080, 640)}'
+    return svg(body, defs, with_logo=True)
+
+
+
 WALLPAPERS = {
     'signal': signal,
     'lattice': lattice,
@@ -236,6 +374,12 @@ WALLPAPERS = {
     'horizon': horizon,
     'mascot': mascot,
     'daylight': daylight,
+    'ember': ember,
+    'aubergine': aubergine,
+    'sunrise': sunrise,
+    'prism': prism,
+    'blueprint': blueprint,
+    'syntax': syntax,
 }
 
 if __name__ == '__main__':
