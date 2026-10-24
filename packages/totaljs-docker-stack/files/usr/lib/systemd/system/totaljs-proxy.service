@@ -1,0 +1,20 @@
+[Unit]
+Description=Total.js Developer reverse proxy (nginx-proxy)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/www/proxy
+# the network that every service joins, so that the proxy can reach it
+ExecStartPre=-/usr/bin/docker network create proxy
+# the first start downloads the images: it can take a while
+TimeoutStartSec=1800
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up -d
+ExecStop=/usr/bin/docker compose -f docker-compose.yml down --timeout 10
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

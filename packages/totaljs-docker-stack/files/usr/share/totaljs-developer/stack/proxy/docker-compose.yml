@@ -1,0 +1,35 @@
+# The reverse proxy: every container with a VIRTUAL_HOST gets the address <name>.totaljs.developer, with no per-service nginx editing.
+# Total.js Center, the entry point of the system, is the root domain. Changes go in this file and `systemctl restart totaljs-proxy`.
+services:
+  nginx-proxy:
+    container_name: totaljs-proxy
+    image: nginxproxy/nginx-proxy:1.8.0
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - DISABLE_ACCESS_LOGS=true
+      - DEFAULT_HOST=totaljs.developer
+    volumes:
+      - ./data/vhost.d:/etc/nginx/vhost.d
+      - ./data/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  totalcenter-gateway:
+    container_name: totalcenter-gateway
+    image: nginx:1.27-alpine
+    restart: always
+    expose:
+      - "80"
+    environment:
+      - VIRTUAL_HOST=totaljs.developer
+      - VIRTUAL_PORT=80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./totalcenter-gateway/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  default:
+    name: proxy
+    external: true

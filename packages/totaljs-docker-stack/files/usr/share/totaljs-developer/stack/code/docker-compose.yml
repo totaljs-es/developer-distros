@@ -1,0 +1,28 @@
+# Total.js Code: the official code-cloud compose, without SSL. Each project that Code starts is published at <project>.totaljs.developer.
+services:
+  code:
+    container_name: code
+    image: totalplatform/code:latest
+    restart: always
+    volumes:
+      - codedata:/code/databases
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /www/www/:/www/www
+      - /www/node_modules/:/www/node_modules
+    environment:
+      - UID=code
+      - FOLDER_WWW=/www/www/
+      - FOLDER_NPM=/www/node_modules/
+      - ORIGIN=http://{0}.totaljs.developer
+      - VIRTUAL_HOST=code.totaljs.developer
+      - VIRTUAL_PORT=8000
+      - VIRTUAL_MAX_UPLOAD=100
+      - DISABLE_ACCESS_LOGS=1
+
+volumes:
+  codedata:
+
+networks:
+  default:
+    name: proxy
+    external: true

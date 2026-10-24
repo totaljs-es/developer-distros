@@ -28,7 +28,8 @@ What is **TotalVM only** and must not reach an ISO: the kernel of the HWE bootst
 totaljs-developer-server      meta-package: depends on everything below
   totaljs-developer-release   the key and the source of APT / Pacman (exists)
   totaljs-node                Node.js LTS, total5 and total.js
-  totaljs-docker-stack        /www with the Compose stacks, their units and helpers
+  totaljs-docker-stack        Docker Engine, /www with the Compose stacks and their units (done)
+  totaljs-docker-source       the repository of Docker (done)
   totaljs-dns                 wildcard DNS for totaljs.developer, network guard
   totaljs-center              Total.js Center
   totaljs-fetch               the terminal summary
@@ -68,7 +69,7 @@ The versions are in `packages/totaljs-node/files/usr/share/totaljs-node/versions
 
 ## Order of work
 
-1. **Started:** `packages/totaljs-node` (Node.js 24 LTS, pinned for amd64 and arm64, with `total5` and `total.js`) and the meta-package `totaljs-developer-server` (the group, the tools, SSH, the firewall). `tools/package-repo/build.sh` builds them and the CI installs them in a clean Ubuntu 24.04 and 26.04 and removes them. `totaljs-brand` (the boot splash of `shared/plymouth` and the quiet-boot setting of GRUB) is in `totaljs-developer-server`, and `totaljs-wallpapers` (the twelve wallpapers, 17 MB) is a package of its own for the desktop. Still to come, one package each: the Docker stack, the DNS, Total.js Center and the terminal summary.
+1. **Started:** `packages/totaljs-node` (Node.js 24 LTS, pinned for amd64 and arm64, with `total5` and `total.js`) and the meta-package `totaljs-developer-server` (the group, the tools, SSH, the firewall). `tools/package-repo/build.sh` builds them and the CI installs them in a clean Ubuntu 24.04 and 26.04 and removes them. `totaljs-brand` (the boot splash of `shared/plymouth` and the quiet-boot setting of GRUB) is in `totaljs-developer-server`, and `totaljs-wallpapers` (the twelve wallpapers, 17 MB) is a package of its own for the desktop. `totaljs-docker-stack` (Docker Engine and the services of `/www`: the proxy, Code, Flow, PostgreSQL and pgAdmin, as Compose files that are copied to `/www` only when missing, with a systemd service each) and `totaljs-docker-source` (the key and the source of the repository of Docker, written for the series of the system) are done. Because Docker comes from its own repository, the installer does the install in two steps: first `totaljs-developer-release` and `totaljs-docker-source`, then `apt-get update`, then the layer. Still to come, one package each: the DNS, Total.js Center and the terminal summary.
 2. The seed of the ISO installs it (menu entry *Server*), and the CI boots the result and checks the services.
 3. The image builder installs it too, and `totalvm-guest` takes what is only for TotalVM.
 4. The desktop edition on the same base.

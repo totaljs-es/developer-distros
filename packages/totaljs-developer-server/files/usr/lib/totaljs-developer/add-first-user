@@ -16,5 +16,7 @@ FIRST="$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')"
 [ -n "${FIRST}" ] || exit 0
 
 usermod -aG totaljs-developer "${FIRST}"
+# the person works with Docker: the group `docker` can start containers (and so it is as powerful as root; that is what a developer machine is)
+if getent group docker >/dev/null; then usermod -aG docker "${FIRST}"; fi
 mkdir -p "$(dirname "${MARKER}")"
 printf '%s\n' "${FIRST}" > "${MARKER}"

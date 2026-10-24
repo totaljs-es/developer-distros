@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Total.js PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "Username": "totaljs",
+      "MaintenanceDB": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}

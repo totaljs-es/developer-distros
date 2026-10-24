@@ -1,0 +1,18 @@
+[Unit]
+Description=Total.js Developer PostgreSQL and pgAdmin
+Requires=docker.service totaljs-proxy.service
+After=docker.service network-online.target totaljs-proxy.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/www/services/postgres
+# the first start downloads the images: it can take a while
+TimeoutStartSec=1800
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up -d
+ExecStop=/usr/bin/docker compose -f docker-compose.yml down --timeout 10
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

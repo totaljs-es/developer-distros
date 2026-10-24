@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# /www and the files of the services (never overwriting what is there)
+/usr/lib/totaljs-developer/seed-www
+
+systemctl daemon-reload >/dev/null 2>&1 || true
+for unit in totaljs-proxy totaljs-code totaljs-flow totaljs-postgres; do
+  systemctl enable "${unit}.service" >/dev/null 2>&1 || true
+done
+
+# On a system that is already running (not one that is being installed), start the services now: they download their images in the background
+if [ -d /run/systemd/system ]; then
+  systemctl start --no-block totaljs-proxy.service totaljs-code.service totaljs-flow.service totaljs-postgres.service >/dev/null 2>&1 || true
+fi
+
+exit 0

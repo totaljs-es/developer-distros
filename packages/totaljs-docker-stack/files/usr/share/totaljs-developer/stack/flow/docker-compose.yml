@@ -1,0 +1,20 @@
+services:
+  flow:
+    container_name: flow
+    image: totalplatform/flow:latest
+    restart: always
+    environment:
+      - VIRTUAL_HOST=flow.totaljs.developer
+      - VIRTUAL_PORT=8000
+    volumes:
+      - databases:/www/.src/databases/
+      - flowstream:/www/.src/flowstream/
+
+volumes:
+  databases:
+  flowstream:
+
+networks:
+  default:
+    name: proxy
+    external: true

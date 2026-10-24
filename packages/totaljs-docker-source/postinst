@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+codename="$(. /etc/os-release && echo "${VERSION_CODENAME:-}")"
+if [ -n "${codename}" ]; then
+  sed "s/@SUITE@/${codename}/" /usr/share/totaljs-developer/docker.sources.in > /etc/apt/sources.list.d/docker.sources
+fi
+
+exit 0

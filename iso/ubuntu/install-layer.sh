@@ -38,6 +38,10 @@ Components: main
 Signed-By: /usr/share/keyrings/totaljs-developer-archive-keyring.gpg
 EOF
 
+# In two steps: Docker Engine comes from the repository of Docker, so its source (a package of ours) has to be there, and the lists
+# updated, before apt resolves the layer
+curtin in-target --target="${TARGET}" -- apt-get update
+curtin in-target --target="${TARGET}" -- env DEBIAN_FRONTEND=noninteractive apt-get install -y totaljs-developer-release totaljs-docker-source
 curtin in-target --target="${TARGET}" -- apt-get update
 curtin in-target --target="${TARGET}" -- env DEBIAN_FRONTEND=noninteractive apt-get install -y "${PACKAGE}"
 

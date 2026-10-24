@@ -1,0 +1,13 @@
+Package: totaljs-docker-source
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: ca-certificates
+Homepage: https://docs.docker.com/engine/install/ubuntu/
+Description: The repository of Docker, for the Total.js Developer Distros
+ The signing key and the source of apt of the repository of Docker (download.docker.com),
+ where Docker Engine and its Compose plugin come from. The key is the official one of Docker
+ (fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88). The source is written for
+ the series of the system, like the one of the repository of Total.js.

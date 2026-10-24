@@ -1,0 +1,16 @@
+Package: totaljs-docker-stack
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: totaljs-docker-source (>= 1.0.0), docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin
+Homepage: https://www.totaljs.com
+Description: Docker and the services of the Total.js Developer Distros
+ Docker Engine with its Compose plugin, and the services that a Total.js developer
+ uses, as editable Compose files in /www: a reverse proxy (nginx-proxy), Total.js Code,
+ Total.js Flow, and PostgreSQL with pgAdmin. Each one is a systemd service
+ (totaljs-proxy, totaljs-code, totaljs-flow, totaljs-postgres) that starts at boot
+ and downloads its images the first time it starts, not while the package is installed.
+ The files are copied to /www only if they are not there, so what the person edits is
+ never overwritten by an update.

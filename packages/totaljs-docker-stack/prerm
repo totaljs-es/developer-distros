@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    for unit in totaljs-postgres totaljs-flow totaljs-code totaljs-proxy; do
+      if [ -d /run/systemd/system ]; then systemctl stop "${unit}.service" >/dev/null 2>&1 || true; fi
+      systemctl disable "${unit}.service" >/dev/null 2>&1 || true
+    done
+    ;;
+esac
+
+# /www is not touched: it is where the person works
+exit 0

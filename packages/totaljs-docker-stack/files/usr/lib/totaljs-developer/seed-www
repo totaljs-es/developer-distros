@@ -1,0 +1,38 @@
+#!/bin/sh
+# Puts the Compose files of the services in /www, which belongs to the group of the people who develop on this system.
+#
+# It copies what is missing and never overwrites what is there: /www is the place of the person (the projects, the Compose files that
+# they edit), and a new version of the package must not change it. A file that was deleted on purpose comes back, though: to start from
+# the original again is to delete it and run this script.
+set -eu
+
+SOURCE=/usr/share/totaljs-developer/stack
+GROUP=totaljs-developer
+
+getent group "${GROUP}" >/dev/null || groupadd --system "${GROUP}"
+
+# the folders: group of the developers, with the setgid bit so that what is created in them belongs to the group too
+for dir in /www /www/proxy /www/proxy/data /www/proxy/data/vhost.d /www/proxy/data/html /www/proxy/totalcenter-gateway \
+           /www/code /www/flow /www/www /www/node_modules /www/services /www/services/postgres; do
+    mkdir -p "${dir}"
+    chgrp "${GROUP}" "${dir}" 2>/dev/null || true
+    chmod 2775 "${dir}" 2>/dev/null || true
+done
+
+(cd "${SOURCE}" && find . -type f | sort) | while read -r file; do
+    target="/www/${file#./}"
+    if [ ! -e "${target}" ]; then
+        cp "${SOURCE}/${file}" "${target}"
+        chgrp "${GROUP}" "${target}" 2>/dev/null || true
+        chmod 0664 "${target}" 2>/dev/null || true
+    fi
+done
+
+# The password of pgAdmin: a different one on every system, not the same in all of them. Only people of the group read it.
+ENV=/www/services/postgres/.env
+if [ ! -e "${ENV}" ]; then
+    PASSWORD="$(od -An -N12 -tx1 /dev/urandom | tr -d ' \n')"
+    (umask 027; printf 'PGADMIN_PASSWORD=%s\n' "${PASSWORD}" > "${ENV}")
+    chgrp "${GROUP}" "${ENV}" 2>/dev/null || true
+    chmod 0640 "${ENV}" 2>/dev/null || true
+fi

@@ -29,6 +29,15 @@ apt-get update -qq
 POLICY="$(apt-cache policy totaljs-developer-server)"
 case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'totaljs-developer-server 1.0.0-1 is not the candidate' >&2; exit 1 ;; esac
 
+# Two steps, as the installer does them: first the packages that configure the sources of apt (ours and Docker's), then, with the lists
+# updated, the layer. Docker Engine comes from the repository of Docker, which apt has to know about before it resolves the layer.
+echo "==> the sources: the release package and the source of Docker"
+apt-get install -y totaljs-developer-release totaljs-docker-source
+# the test source and the one of the package point to the same repository with different keys: apt refuses both at once
+rm /etc/apt/sources.list.d/totaljs-test.list
+apt-get update -qq
+grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/docker.sources || { cat /etc/apt/sources.list.d/docker.sources >&2; exit 1; }
+
 echo "==> installing totaljs-developer-server"
 apt-get install -y totaljs-developer-server
 
@@ -60,9 +69,27 @@ case "${ALTERNATIVE}" in *'Value: /usr/share/plymouth/themes/totaljs/totaljs.ply
 grep -q 'quiet splash' /etc/default/grub.d/99-totaljs.cfg
 dpkg -s plymouth-label >/dev/null
 
+echo "==> Docker and the services"
+docker --version
+docker compose version
+case " $(id -nG "${FIRST}") " in *' docker '*) ;; *) echo "${FIRST} is not in docker: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
+for stack in proxy code flow services/postgres; do
+    test -f "/www/${stack}/docker-compose.yml"
+    docker compose -f "/www/${stack}/docker-compose.yml" config -q
+done
+test -f /www/proxy/totalcenter-gateway/default.conf
+test "$(stat -c %a /www/services/postgres/.env)" = 640
+grep -q -E '^PGADMIN_PASSWORD=[0-9a-f]{24}$' /www/services/postgres/.env
+test "$(stat -c %G /www)" = totaljs-developer
+for unit in totaljs-proxy totaljs-code totaljs-flow totaljs-postgres; do test -f "/usr/lib/systemd/system/${unit}.service"; done
+# what the person edits is not overwritten, and what is missing comes back
+echo '# edited' >> /www/proxy/docker-compose.yml
+rm /www/flow/docker-compose.yml
+/usr/lib/totaljs-developer/seed-www
+grep -q '^# edited$' /www/proxy/docker-compose.yml
+test -f /www/flow/docker-compose.yml
+
 echo "==> the source that the package wrote works by itself"
-# the test source and the one of the package point to the same repository with different keys: apt refuses both at once
-rm /etc/apt/sources.list.d/totaljs-test.list
 apt-get update -qq
 POLICY="$(apt-cache policy totaljs-node)"
 case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'totaljs-node is not available from the source of the package' >&2; exit 1 ;; esac
@@ -78,12 +105,15 @@ apt-get install -y --reinstall totaljs-node >/dev/null
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"
 test ! -e /usr/local/lib/node_modules/total5
 test ! -e /usr/share/plymouth/themes/totaljs
+test ! -e /usr/lib/systemd/system/totaljs-proxy.service
+test ! -e /etc/apt/sources.list.d/docker.sources
+test -f /www/proxy/docker-compose.yml   # /www is where the person works: it stays
 test ! -e /etc/default/grub.d/99-totaljs.cfg
 REMAINING="$(update-alternatives --query default.plymouth 2>/dev/null || true)"
 case "${REMAINING}" in *'themes/totaljs/totaljs.plymouth'*) echo 'the alternative of the theme is still there' >&2; exit 1 ;; esac
