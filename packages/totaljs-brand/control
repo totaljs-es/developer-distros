@@ -1,0 +1,12 @@
+Package: totaljs-brand
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: misc
+Priority: optional
+Depends: plymouth, plymouth-label, fonts-dejavu-core
+Homepage: https://www.totaljs.com
+Description: The identity of the Total.js Developer Distros: boot splash
+ The boot splash of the Total.js Developer Distros: the logo comes together and a
+ ring of light follows the progress of the boot. It makes it the theme of Plymouth
+ and asks the kernel for a quiet, graphical boot.

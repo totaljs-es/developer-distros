@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    update-alternatives --remove default.plymouth /usr/share/plymouth/themes/totaljs/totaljs.plymouth || true
+    if [ -f /etc/plymouth/plymouthd.conf ]; then sed -i '/^Theme=totaljs$/d' /etc/plymouth/plymouthd.conf; fi
+    ;;
+esac
+
+exit 0

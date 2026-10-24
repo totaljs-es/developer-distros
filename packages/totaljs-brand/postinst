@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+THEME=/usr/share/plymouth/themes/totaljs/totaljs.plymouth
+
+# Ubuntu chooses the theme with the alternative default.plymouth; the configuration of the daemon says it too
+update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "${THEME}" 200
+update-alternatives --set default.plymouth "${THEME}"
+mkdir -p /etc/plymouth
+if [ ! -f /etc/plymouth/plymouthd.conf ] || ! grep -q '^Theme=' /etc/plymouth/plymouthd.conf; then
+  printf '[Daemon]\nTheme=totaljs\nShowDelay=0\n' > /etc/plymouth/plymouthd.conf
+else
+  sed -i 's/^Theme=.*/Theme=totaljs/' /etc/plymouth/plymouthd.conf
+fi
+
+# The splash is shown from the initramfs, and the kernel is asked for it by the grub of the system. Both are best effort: on a system
+# that is being installed, or in a container, there may be no initramfs to rebuild or no grub to update.
+if command -v update-initramfs >/dev/null 2>&1; then update-initramfs -u || true; fi
+if command -v update-grub >/dev/null 2>&1; then update-grub || true; fi
+
+exit 0

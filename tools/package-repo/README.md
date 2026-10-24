@@ -26,6 +26,10 @@ It updates both `/etc/skel` and existing user profiles. Migrations must remain
 idempotent and must not replace user projects, Compose files or unrelated
 home-directory configuration.
 
+## The packages of the layer
+
+`packages/<name>/` has the source of a package: `control`, the maintainer scripts, `files/` (what it installs, as it is) and, optionally, `include`: lines `<path in this repository> <path in the package>`, for what the repository already has and must not be copied twice (the splash theme of `shared/plymouth`, the wallpapers of `shared/wallpapers`). `build.sh` builds all of them. `test-install.sh` installs them in a clean Ubuntu and checks them.
+
 ## Where the repository is served from
 
 `build.sh` writes the repository to `build/site/repo` (not committed) and the address that the packages will update from is written inside them. Both can be set:

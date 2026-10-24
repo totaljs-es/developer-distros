@@ -50,6 +50,22 @@ echo "==> the tools and the source that the release package wrote"
 for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done
 grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources || { cat /etc/apt/sources.list.d/totaljs-developer.sources >&2; exit 1; }
 
+echo "==> the brand: the theme of the splash, and the settings of the boot"
+test -f /usr/share/plymouth/themes/totaljs/totaljs.script
+test -f /usr/share/plymouth/themes/totaljs/logo.png
+test -f /usr/share/plymouth/themes/totaljs/totaljs.plymouth
+grep -q '^Theme=totaljs$' /etc/plymouth/plymouthd.conf
+ALTERNATIVE="$(update-alternatives --query default.plymouth)"
+case "${ALTERNATIVE}" in *'Value: /usr/share/plymouth/themes/totaljs/totaljs.plymouth'*) ;; *) echo "${ALTERNATIVE}" >&2; echo 'default.plymouth is not the theme of Total.js' >&2; exit 1 ;; esac
+grep -q 'quiet splash' /etc/default/grub.d/99-totaljs.cfg
+dpkg -s plymouth-label >/dev/null
+
+echo "==> the wallpapers (a package of its own: only the desktop needs them)"
+apt-get install -y totaljs-wallpapers >/dev/null
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
+apt-get remove -y totaljs-wallpapers >/dev/null
+test ! -e /usr/share/backgrounds/totaljs
+
 echo "==> the source that the package wrote works by itself"
 # the test source and the one of the package point to the same repository with different keys: apt refuses both at once
 rm /etc/apt/sources.list.d/totaljs-test.list
@@ -62,10 +78,15 @@ apt-get install -y --reinstall totaljs-node >/dev/null
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"
 test ! -e /usr/local/lib/node_modules/total5
+test ! -e /usr/share/plymouth/themes/totaljs
+test ! -e /etc/default/grub.d/99-totaljs.cfg
+REMAINING="$(update-alternatives --query default.plymouth 2>/dev/null || true)"
+case "${REMAINING}" in *'themes/totaljs/totaljs.plymouth'*) echo 'the alternative of the theme is still there' >&2; exit 1 ;; esac
+if grep -q '^Theme=totaljs$' /etc/plymouth/plymouthd.conf; then echo 'plymouthd.conf still names the theme' >&2; exit 1; fi
 
 echo "OK ${CODENAME}"

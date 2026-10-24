@@ -1,0 +1,2 @@
+# the theme of Plymouth is kept in shared/plymouth, where it is made and checked
+shared/plymouth/totaljs usr/share/plymouth/themes/totaljs

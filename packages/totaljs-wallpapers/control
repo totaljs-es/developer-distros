@@ -1,0 +1,11 @@
+Package: totaljs-wallpapers
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: x11
+Priority: optional
+Homepage: https://www.totaljs.com
+Description: Wallpapers of the Total.js Developer Distros
+ Twelve wallpapers at 3840 x 2160 with the logo of Total.js: six in graphite and
+ the green of the logo, three with colors that remind of Ubuntu and three of Arch.
+ They are installed in /usr/share/backgrounds/totaljs.

@@ -213,6 +213,21 @@ build_package() {
   work="${WORK}/pkg-${name}"
   mkdir -p "${work}/control" "${work}/data"
   [ ! -d "${dir}/files" ] || cp -R "${dir}/files/." "${work}/data/"
+  # `include`: lines "<path in this repository> <path in the package>", so that what the repository already has (the splash theme, the
+  # wallpapers) is not copied into packages/ and kept twice
+  if [ -f "${dir}/include" ]; then
+    while read -r source target; do
+      case "${source}" in ''|'#'*) continue ;; esac
+      [ -e "${ROOT}/${source}" ] || { echo "${dir}/include: ${source} does not exist" >&2; exit 1; }
+      if [ -d "${ROOT}/${source}" ]; then
+        mkdir -p "${work}/data/${target}"
+        cp -R "${ROOT}/${source}/." "${work}/data/${target}/"
+      else
+        mkdir -p "${work}/data/$(dirname "${target}")"
+        cp "${ROOT}/${source}" "${work}/data/${target}"
+      fi
+    done < "${dir}/include"
+  fi
   cp "${dir}/control" "${work}/control/control"
   printf 'Installed-Size: %s\n' "$(du -sk "${work}/data" | awk '{print $1}')" >> "${work}/control/control"
   for script in preinst postinst prerm postrm; do

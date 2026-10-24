@@ -32,10 +32,11 @@ totaljs-developer-server      meta-package: depends on everything below
   totaljs-dns                 wildcard DNS for totaljs.developer, network guard
   totaljs-center              Total.js Center
   totaljs-fetch               the terminal summary
-  totaljs-brand               Plymouth theme and GRUB settings
+  totaljs-brand               Plymouth theme and GRUB settings (done)
 
 totaljs-developer-desktop     meta-package: the server layer plus
   totaljs-desktop             Openbox integration (exists), the menu, Total Center in the desktop, the browser, the clipboard...
+  totaljs-wallpapers          the twelve wallpapers (done)
 
 totalvm-guest                 only for TotalVM: Rosetta, the virtiofs /www and its seed, growroot, the workarounds of the NAT of Apple
 ```
@@ -67,7 +68,7 @@ The versions are in `packages/totaljs-node/files/usr/share/totaljs-node/versions
 
 ## Order of work
 
-1. **Started:** `packages/totaljs-node` (Node.js 24 LTS, pinned for amd64 and arm64, with `total5` and `total.js`) and the meta-package `totaljs-developer-server` (the group, the tools, SSH, the firewall). `tools/package-repo/build.sh` builds them and the CI installs them in a clean Ubuntu 24.04 and 26.04 and removes them. Still to come, one package each: the Docker stack, the DNS, Total.js Center, the terminal summary and the brand.
+1. **Started:** `packages/totaljs-node` (Node.js 24 LTS, pinned for amd64 and arm64, with `total5` and `total.js`) and the meta-package `totaljs-developer-server` (the group, the tools, SSH, the firewall). `tools/package-repo/build.sh` builds them and the CI installs them in a clean Ubuntu 24.04 and 26.04 and removes them. `totaljs-brand` (the boot splash of `shared/plymouth` and the quiet-boot setting of GRUB) is in `totaljs-developer-server`, and `totaljs-wallpapers` (the twelve wallpapers, 17 MB) is a package of its own for the desktop. Still to come, one package each: the Docker stack, the DNS, Total.js Center and the terminal summary.
 2. The seed of the ISO installs it (menu entry *Server*), and the CI boots the result and checks the services.
 3. The image builder installs it too, and `totalvm-guest` takes what is only for TotalVM.
 4. The desktop edition on the same base.
