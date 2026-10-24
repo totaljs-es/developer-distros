@@ -34,11 +34,15 @@ jobs:
       - name: Show it on a virtual screen
         run: |
           mkdir -p shots
+          # the daemon runs as root: its log has to be readable by whoever uploads it
+          sudo install -m 666 /dev/null /tmp/plymouthd.log
           Xvfb :99 -screen 0 1920x1080x24 >/tmp/xvfb.log 2>&1 &
           export DISPLAY=:99
           sleep 2
+          xdpyinfo -display :99 | head -8
           sudo -E plymouthd --debug --debug-file=/tmp/plymouthd.log --mode=boot --attach-to-session
           sleep 1
+          sudo -E plymouth --ping && echo "plymouthd answers"
           sudo -E plymouth show-splash
           previous=0
           for second in 1 2 3 4 6 9; do
@@ -46,9 +50,11 @@ jobs:
             previous=$second
             import -display :99 -window root "shots/at-${second}s.png"
           done
+          xwininfo -display :99 -root -tree | head -30 || true
           sudo -E plymouth quit || true
+          sudo chmod a+r /tmp/plymouthd.log
           echo "--- the log of plymouthd"
-          sudo tail -80 /tmp/plymouthd.log || true
+          cat /tmp/plymouthd.log
 
       - name: The screen is not empty
         run: |
