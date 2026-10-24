@@ -58,8 +58,8 @@ jobs:
           sleep 2
           curl -fsS http://127.0.0.1:8080/repo/totaljs-developer.gpg -o /dev/null
 
-      # Two ways of slimming, to see which one the installer accepts. The failure of the first try (the installer stopped in
-      # `apt-get update` of the target) happened with /pool and /dists out: the CD is a source of apt, and a source without its Release fails.
+      # The ISO is slimmed taking /pool out and keeping /dists. Taking /dists out too (SLIM=all) does not install: the installer stops in
+      # `apt-get update` of the target, because the CD is a source of apt and a source without its Release fails (seen in the CI).
       - name: Build the ISO that installs the layer (SLIM=pool)
         env:
           GRUB_TIMEOUT: '1'
@@ -71,28 +71,11 @@ jobs:
 
       - name: Install it, boot it and look for the layer (SLIM=pool)
         id: install_pool
-        continue-on-error: true
+        continue-on-error: true   # the verdict step below fails the job, after the summary and the logs have been written
         env:
           WORK_DIR: build/iso-layer-pool
           MARKER_PATTERN: 'TOTALJS-ISO-TEST-OK node=v24\.[0-9]+\.[0-9]+ group=totaljs-developer'
         run: iso/ubuntu/test-install.sh build/layer-pool-amd64.iso
-
-      - name: Build the ISO that installs the layer (SLIM=all)
-        env:
-          GRUB_TIMEOUT: '1'
-          EXTRA_KERNEL: console=ttyS0,115200n8
-          REPO_URL: http://10.0.2.2:8080/repo
-          WORK_DIR: build/iso-layer-all
-          SLIM: all
-        run: iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci-layer build/layer-all-amd64.iso
-
-      - name: Install it, boot it and look for the layer (SLIM=all)
-        id: install_all
-        continue-on-error: true
-        env:
-          WORK_DIR: build/iso-layer-all
-          MARKER_PATTERN: 'TOTALJS-ISO-TEST-OK node=v24\.[0-9]+\.[0-9]+ group=totaljs-developer'
-        run: iso/ubuntu/test-install.sh build/layer-all-amd64.iso
 
       # The seed that people will use asks the questions that the installer asks: it is only built here, an install needs a person
       - name: Build the ISO of the server edition
@@ -108,9 +91,7 @@ jobs:
             ls -l build/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
             [ -f build/iso/timings.txt ] && echo "- control (not slimmed): $(cat build/iso/timings.txt)"
             [ -f build/iso-layer-pool/timings.txt ] && echo "- SLIM=pool: $(cat build/iso-layer-pool/timings.txt)"
-            [ -f build/iso-layer-all/timings.txt ] && echo "- SLIM=all: $(cat build/iso-layer-all/timings.txt)"
             echo "- install with SLIM=pool: ${{ steps.install_pool.outcome }}"
-            echo "- install with SLIM=all: ${{ steps.install_all.outcome }}"
             if [ -f build/iso-product/contents.txt ]; then
               echo
               echo '#### What is inside the ISO'
@@ -124,7 +105,6 @@ jobs:
       - name: The slimmed ISO installs
         run: |
           echo "SLIM=pool: ${{ steps.install_pool.outcome }}"
-          echo "SLIM=all: ${{ steps.install_all.outcome }}"
           [ "${{ steps.install_pool.outcome }}" = success ]
 
       - name: Keep the logs
@@ -141,8 +121,5 @@ jobs:
             build/iso-layer-pool/boot.log
             build/iso-layer-pool/timings.txt
             build/iso-layer-pool/contents.txt
-            build/iso-layer-all/install.log
-            build/iso-layer-all/boot.log
-            build/iso-layer-all/timings.txt
             build/iso-product/contents.txt
             ${{ runner.temp }}/http.log

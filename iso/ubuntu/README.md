@@ -39,7 +39,15 @@ This distro installs over the network, so `build-iso.sh` can take the packages o
 - `SLIM=all` takes out `pool/` and `dists/`. **It does not work**: the installer stopped in `apt-get update` of the new system (`returned non-zero exit status 100`). The CD is a source of apt of the installer, and a source without its `Release` file fails, so `dists/` has to stay.
 - `SLIM=0` leaves the ISO as Ubuntu made it (2.7 GiB).
 
-The workflow builds one ISO without slimming (the control) and the ones with the layer in both slim modes, so if a slim one does not install and the control does, the cause is what was taken out. `SLIM=pool` is the candidate for the release: it has not been installed yet at the time of writing. If its installer asks for something of `pool/`, the way out is to keep it and publish the ISO split in two files, or somewhere other than a release.
+The workflow builds one ISO without slimming (the control) and one with `SLIM=pool` that it installs and boots. Measured in the CI:
+
+| | Size | Install | First boot |
+|---|---|---|---|
+| Original of Ubuntu (`SLIM=0`, control) | 2792 MiB | 395 s | 15 s |
+| `SLIM=pool` | **1578 MiB** | 425 s | 16 s |
+| `SLIM=all` | 1578 MiB | fails in `apt-get update` | |
+
+The ISO of `SLIM=pool` installs the Total.js layer unattended, boots, and has Node.js 24 and its first person in the group `totaljs-developer`. It is 470 MiB under the limit of 2 GiB of a file of a release.
 
 ## The server edition
 
