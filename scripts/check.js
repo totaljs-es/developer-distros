@@ -85,7 +85,36 @@ for (const file of files.filter(file => file.endsWith('.sh') || /\/(apply-menu-i
 		problems.push(relative(file) + ': ' + result.stderr.trim());
 }
 
-// 4. The files for agents mention only what exists
+// 4. The wallpapers are what their generator makes, and every one has its image at 4K
+const python = spawnSync('python3', ['--version'], { encoding: 'utf8' });
+
+if (python.status === 0) {
+
+	const temp = Fs.mkdtempSync(Path.join(require('os').tmpdir(), 'wallpapers-'));
+	// the generator writes the path of the mascot relative to the folder of the SVGs: use the same depth
+	const folder = Path.join(temp, 'shared', 'wallpapers', 'svg');
+	Fs.mkdirSync(folder, { recursive: true });
+	Fs.mkdirSync(Path.join(temp, 'shared', 'branding'), { recursive: true });
+	Fs.copyFileSync(Path.join(ROOT, 'shared/branding/mascot.png'), Path.join(temp, 'shared/branding/mascot.png'));
+
+	const made = spawnSync('python3', [Path.join(ROOT, 'shared/wallpapers/generate.py'), folder], { encoding: 'utf8', env: { ...process.env, MASCOT: Path.join(temp, 'shared/branding/mascot.png'), LOGO: Path.join(ROOT, 'shared/branding/logo-totaljs.svg') } });
+
+	if (made.status !== 0)
+		problems.push('shared/wallpapers/generate.py failed: ' + made.stderr.trim());
+	else {
+		for (const name of Fs.readdirSync(folder)) {
+			const committed = Path.join(ROOT, 'shared/wallpapers/svg', name);
+			if (!Fs.existsSync(committed) || Fs.readFileSync(committed, 'utf8') !== Fs.readFileSync(Path.join(folder, name), 'utf8'))
+				problems.push('shared/wallpapers/svg/' + name + ' is not what generate.py makes: run shared/wallpapers/export.sh');
+			if (!Fs.existsSync(Path.join(ROOT, 'shared/wallpapers/4k', name.replace(/\.svg$/, '.jpg'))))
+				problems.push('shared/wallpapers/4k/' + name.replace(/\.svg$/, '.jpg') + ' does not exist: run shared/wallpapers/export.sh');
+		}
+	}
+
+	Fs.rmSync(temp, { recursive: true, force: true });
+}
+
+// 5. The files for agents mention only what exists
 const everything = new Set(files.map(relative));
 const folders = new Set();
 

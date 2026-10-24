@@ -18,3 +18,5 @@ tools/image-builder/images/*/assets/totaljs-release.*
 
 # Local builds
 build/
+__pycache__/
+*.pyc
