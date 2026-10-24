@@ -33,7 +33,13 @@ The official ISO of Ubuntu Server 26.04.1 is 2927296512 bytes (2792 MiB), and a 
 | `casper/` (the installer and the system that it installs) | about 1560 MiB, of which `ubuntu-server-minimal.squashfs` is 1273 MiB |
 | `pool/` and `dists/` (packages to install without a network) | about 1230 MiB (what is left of the ISO) |
 
-This distro installs over the network, so `build-iso.sh` takes `pool/` and `dists/` out (`SLIM=1`, the default; `SLIM=0` keeps them) and removes them from `md5sum.txt`. That leaves the ISO at about 1.5 GiB. The workflow builds one ISO without slimming (`SLIM=0`, the control) and the ones with the layer slimmed, so if the slim ones do not install and the control does, the cause is what was taken out.
+This distro installs over the network, so `build-iso.sh` can take the packages out of the ISO (`SLIM`):
+
+- `SLIM=pool` (the default) takes out `pool/`, about 1.2 GiB, and keeps `dists/`. The ISO is then about 1.6 GiB.
+- `SLIM=all` takes out `pool/` and `dists/`. **It does not work**: the installer stopped in `apt-get update` of the new system (`returned non-zero exit status 100`). The CD is a source of apt of the installer, and a source without its `Release` file fails, so `dists/` has to stay.
+- `SLIM=0` leaves the ISO as Ubuntu made it (2.7 GiB).
+
+The workflow builds one ISO without slimming (the control) and the ones with the layer in both slim modes, so if a slim one does not install and the control does, the cause is what was taken out. `SLIM=pool` is the candidate for the release: it has not been installed yet at the time of writing. If its installer asks for something of `pool/`, the way out is to keep it and publish the ISO split in two files, or somewhere other than a release.
 
 ## The server edition
 

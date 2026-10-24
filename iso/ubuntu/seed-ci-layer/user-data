@@ -18,6 +18,11 @@ autoinstall:
       name: direct
   updates: security
   shutdown: poweroff
+  # When the install fails, say on the console what the target had in apt: the failure of `apt-get update` cannot be understood without it
+  error-commands:
+    - 'echo "=== the sources of apt of the target" > /dev/ttyS0; cat /target/etc/apt/sources.list /target/etc/apt/sources.list.d/* > /dev/ttyS0 2>&1'
+    - 'echo "=== the CD" > /dev/ttyS0; ls -la /cdrom /cdrom/dists /target/cdrom > /dev/ttyS0 2>&1'
+    - 'echo "=== apt-get update in the target" > /dev/ttyS0; chroot /target apt-get update > /dev/ttyS0 2>&1; echo "=== end" > /dev/ttyS0'
   late-commands:
     - sh /cdrom/nocloud/install-layer.sh /target __REPO_URL__ totaljs-developer-server
     # A service that says on the serial console that the installed system booted, and what it has

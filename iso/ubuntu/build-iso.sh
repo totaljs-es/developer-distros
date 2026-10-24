@@ -13,8 +13,11 @@
 #   GRUB_TIMEOUT     seconds before the first boot entry starts (unset: the menu of Ubuntu is kept)
 #   EXTRA_KERNEL     more arguments for the kernel of the installer (the CI test adds the serial console)
 #   REPO_URL         the address of the package repository that the seed installs from (default: GitHub Pages)
-#   SLIM             1 (default) takes /pool and /dists out of the ISO: they are the packages for installing without a network,
-#                    about 1.2 GiB, and the installer of this distro always has one. SLIM=0 keeps the ISO as Ubuntu made it.
+#   SLIM             what to take out of the ISO, which is big because of the packages for installing without a network:
+#                      pool   (default) /pool, about 1.2 GiB. /dists stays: the installer has the CD as a source of apt, and
+#                             `apt-get update` fails if the Release file of that source is not there
+#                      all    /pool and /dists (the installer failed in `apt-get update` with this one)
+#                      0      nothing: the ISO as Ubuntu made it
 set -euo pipefail
 
 SEED="${1:?usage: build-iso.sh <seed-dir> <output.iso>}"
@@ -112,15 +115,23 @@ mkdir -p "$(dirname "${OUT}")"
 
 ARGS=(-indev "${WORK}/${ISO_NAME}" -outdev "${OUT}" -boot_image any replay)
 
-if [ "${SLIM:-1}" = 1 ]; then
+case "${SLIM:-pool}" in
+    0|none) REMOVE=() ;;
+    all|1) REMOVE=(/pool /dists) ;;
+    pool) REMOVE=(/pool) ;;
+    *) die "SLIM is pool, all or 0" ;;
+esac
+
+if [ "${#REMOVE[@]}" -gt 0 ]; then
     # The disk check of the installer reads md5sum.txt: it must not list what is no longer there
     xorriso -osirrox on -indev "${WORK}/${ISO_NAME}" -extract /md5sum.txt "${WORK}/md5sum.txt" >/dev/null 2>&1 \
         || die "could not read /md5sum.txt from the ISO"
     chmod u+w "${WORK}/md5sum.txt"
-    grep -v -E '  \./(pool|dists)/' "${WORK}/md5sum.txt" > "${WORK}/md5sum.slim" || true
-    [ -s "${WORK}/md5sum.slim" ] || die "md5sum.txt has nothing left once /pool and /dists are out"
-    ARGS+=(-rm_r /pool /dists -- -map "${WORK}/md5sum.slim" /md5sum.txt)
-    log "slim: /pool and /dists are taken out"
+    PATTERN="$(printf '%s\n' "${REMOVE[@]}" | sed 's|^/||' | paste -sd'|' -)"
+    grep -v -E "  \./(${PATTERN})/" "${WORK}/md5sum.txt" > "${WORK}/md5sum.slim" || true
+    [ -s "${WORK}/md5sum.slim" ] || die "md5sum.txt has nothing left once ${REMOVE[*]} are out"
+    ARGS+=(-rm_r "${REMOVE[@]}" -- -map "${WORK}/md5sum.slim" /md5sum.txt)
+    log "slim: ${REMOVE[*]} taken out"
 fi
 
 ARGS+=(-map "${WORK}/grub.cfg" /boot/grub/grub.cfg -map "${WORK}/nocloud" /nocloud)

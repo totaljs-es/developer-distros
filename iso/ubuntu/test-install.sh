@@ -42,23 +42,46 @@ run_qemu() {
 # 1. The install: the autoinstall seed ends with a power off, and -no-reboot makes that end QEMU
 log "installing (up to ${INSTALL_TIMEOUT} s)"
 START=$(date +%s)
-# A sign of life every minute: how much the installer has written to the serial console, and the end of it
-(
-    while sleep 60; do
-        printf -- '--- %s s: install.log is %s bytes; its end: %s\n' "$(( $(date +%s) - START ))" \
-            "$(wc -c < "${WORK}/install.log" 2>/dev/null | tr -d ' ')" \
-            "$(tail -c 400 "${WORK}/install.log" 2>/dev/null | tr -cd '[:print:]' | tail -c 200)"
-    done
-) &
-PROGRESS=$!
 set +e
-timeout "${INSTALL_TIMEOUT}" qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
+qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
     -drive "file=${DISK},if=virtio,format=qcow2" -cdrom "${ISO}" -boot d \
     -nic user,model=virtio-net-pci -display none -no-reboot \
-    -serial "file:${WORK}/install.log"
-STATUS=$?
+    -serial "file:${WORK}/install.log" &
+QEMU=$!
+
+# The installer powers the machine off when it is done. When it fails it stays on an error screen and never ends, so the test
+# does not wait for the limit: it looks at the console, and when it sees the error it gives the commands of the seed a moment
+# to say what they know and stops.
+STATUS=""
+LAST_SIGN=0
+while kill -0 "${QEMU}" 2>/dev/null; do
+    sleep 5
+    ELAPSED=$(( $(date +%s) - START ))
+
+    if grep -a -q "An error occurred. Press enter to start a shell" "${WORK}/install.log" 2>/dev/null; then
+        log "the installer reports an error: waiting 25 s for its error commands, then stopping"
+        sleep 25
+        STATUS=99
+        break
+    fi
+    if [ "${ELAPSED}" -ge "${INSTALL_TIMEOUT}" ]; then STATUS=124; break; fi
+
+    if [ $(( ELAPSED - LAST_SIGN )) -ge 60 ]; then
+        LAST_SIGN=${ELAPSED}
+        printf -- '--- %s s: install.log is %s bytes; its end: %s\n' "${ELAPSED}" \
+            "$(wc -c < "${WORK}/install.log" 2>/dev/null | tr -d ' ')" \
+            "$(tail -c 400 "${WORK}/install.log" 2>/dev/null | tr -cd '[:print:]' | tail -c 200)"
+    fi
+done
+
+if [ -n "${STATUS}" ]; then
+    kill "${QEMU}" 2>/dev/null
+    wait "${QEMU}" 2>/dev/null
+else
+    wait "${QEMU}"
+    STATUS=$?
+fi
 set -e
-kill "${PROGRESS}" 2>/dev/null || true
 INSTALL_SECONDS=$(( $(date +%s) - START ))
 
 if [ "${STATUS}" -ne 0 ]; then
