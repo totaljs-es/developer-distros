@@ -31,10 +31,12 @@ jobs:
           sudo udevadm trigger --name-match=kvm || true
           ls -l /dev/kvm || echo "no /dev/kvm on this runner"
 
+      # The control: this one is not slimmed, so if the others fail and this one does not, the cause is what was taken out
       - name: Build the ISO
         env:
           GRUB_TIMEOUT: '1'
           EXTRA_KERNEL: console=ttyS0,115200n8
+          SLIM: '0'
         run: iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci build/totaljs-developer-ubuntu-server-amd64.iso
 
       - name: Install it and boot the installed system

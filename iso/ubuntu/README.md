@@ -24,6 +24,17 @@ iso/ubuntu/test-install.sh build/test.iso
 
 The workflow `.github/workflows/iso-ubuntu.yml` runs both, and keeps the logs of the installer and of the first boot.
 
+## The size
+
+The official ISO of Ubuntu Server 26.04.1 is 2927296512 bytes (2792 MiB), and a file of a GitHub release can have 2 GiB at most. What is inside, measured in the CI:
+
+| | Size |
+|---|---|
+| `casper/` (the installer and the system that it installs) | about 1560 MiB, of which `ubuntu-server-minimal.squashfs` is 1273 MiB |
+| `pool/` and `dists/` (packages to install without a network) | about 1230 MiB (what is left of the ISO) |
+
+This distro installs over the network, so `build-iso.sh` takes `pool/` and `dists/` out (`SLIM=1`, the default; `SLIM=0` keeps them) and removes them from `md5sum.txt`. That leaves the ISO at about 1.5 GiB. The workflow builds one ISO without slimming (`SLIM=0`, the control) and the ones with the layer slimmed, so if the slim ones do not install and the control does, the cause is what was taken out.
+
 ## The server edition
 
 `seed/` is the seed that people use: it keeps the installer's own questions (keyboard, network, disk, who you are) and, when it has installed Ubuntu, `install-layer.sh` downloads the key and the source of the Total.js repository and installs `totaljs-developer-server` into the new system. The address of the repository is `REPO_URL` (the default is GitHub Pages). It needs a network connection: if the repository cannot be reached it says so and stops.

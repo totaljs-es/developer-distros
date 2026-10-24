@@ -13,6 +13,8 @@
 #   GRUB_TIMEOUT     seconds before the first boot entry starts (unset: the menu of Ubuntu is kept)
 #   EXTRA_KERNEL     more arguments for the kernel of the installer (the CI test adds the serial console)
 #   REPO_URL         the address of the package repository that the seed installs from (default: GitHub Pages)
+#   SLIM             1 (default) takes /pool and /dists out of the ISO: they are the packages for installing without a network,
+#                    about 1.2 GiB, and the installer of this distro always has one. SLIM=0 keeps the ISO as Ubuntu made it.
 set -euo pipefail
 
 SEED="${1:?usage: build-iso.sh <seed-dir> <output.iso>}"
@@ -107,16 +109,39 @@ PY
 log "writing ${OUT}"
 rm -f "${OUT}"
 mkdir -p "$(dirname "${OUT}")"
-xorriso -indev "${WORK}/${ISO_NAME}" -outdev "${OUT}" \
-    -boot_image any replay \
-    -map "${WORK}/grub.cfg" /boot/grub/grub.cfg \
-    -map "${WORK}/nocloud" /nocloud \
-    >"${WORK}/xorriso.log" 2>&1 || { tail -20 "${WORK}/xorriso.log" >&2; die "xorriso failed"; }
 
-# What makes the ISO big (informational: a failure here never fails the build)
+ARGS=(-indev "${WORK}/${ISO_NAME}" -outdev "${OUT}" -boot_image any replay)
+
+if [ "${SLIM:-1}" = 1 ]; then
+    # The disk check of the installer reads md5sum.txt: it must not list what is no longer there
+    xorriso -osirrox on -indev "${WORK}/${ISO_NAME}" -extract /md5sum.txt "${WORK}/md5sum.txt" >/dev/null 2>&1 \
+        || die "could not read /md5sum.txt from the ISO"
+    chmod u+w "${WORK}/md5sum.txt"
+    grep -v -E '  \./(pool|dists)/' "${WORK}/md5sum.txt" > "${WORK}/md5sum.slim" || true
+    [ -s "${WORK}/md5sum.slim" ] || die "md5sum.txt has nothing left once /pool and /dists are out"
+    ARGS+=(-rm_r /pool /dists -- -map "${WORK}/md5sum.slim" /md5sum.txt)
+    log "slim: /pool and /dists are taken out"
+fi
+
+ARGS+=(-map "${WORK}/grub.cfg" /boot/grub/grub.cfg -map "${WORK}/nocloud" /nocloud)
+xorriso "${ARGS[@]}" >"${WORK}/xorriso.log" 2>&1 || { tail -20 "${WORK}/xorriso.log" >&2; die "xorriso failed"; }
+
+# What makes an ISO big, of the original and of the result (informational: a failure here never fails the build)
+report() {   # report <iso>
+    echo "# $(basename "$1"): $(wc -c < "$1" | tr -d ' ') bytes"
+    for dir in /casper /pool /dists /boot /EFI /nocloud; do
+        xorriso -indev "$1" -dus "${dir}" 2>&1 | grep -v -E '^(xorriso|libisofs|libburn|Drive|Media|Boot|Volume)' | sed "s|^|${dir}  |" || true
+    done
+}
 {
-    echo "# ${ISO_NAME}: $(wc -c < "${OUT}" | tr -d ' ') bytes"
-    xorriso -indev "${OUT}" -lsl /casper/ -dus /pool/ /boot/ /EFI/ /dists/ 2>&1 || true
+    echo "## the original of Ubuntu"
+    report "${WORK}/${ISO_NAME}" || true
+    echo
+    echo "## the result"
+    report "${OUT}" || true
+    echo
+    echo "## /casper of the result"
+    xorriso -indev "${OUT}" -lsl /casper/ 2>&1 | grep -E "^-" || true
 } > "${WORK}/contents.txt"
 
 log "done: $(du -h "${OUT}" | cut -f1) $(basename "${OUT}") (from ${ISO_NAME})"
