@@ -21,6 +21,7 @@ The desktop belongs to Total.js, not to Ubuntu or Arch. The operating system is 
 tools/image-builder/   builds an image from a stock cloud image or rootfs (macOS, Apple Virtualization)
   images/<id>/         the recipe of each distro: image.json, provision/*.sh, cloud-init, assets
 tools/package-repo/    builds and signs the APT and Pacman repository with the Total.js packages
+iso/ubuntu/            the installable ISO for amd64 (in progress), remastered from the official Ubuntu ISO
 manifests/             the catalog that TotalVM reads: index.json and one manifest.json per image
 shared/                the Total.js layer common to every distro (being moved here from the recipes)
 scripts/check.js       the checks that run on every change
@@ -50,7 +51,7 @@ It validates the JSON files, that the catalog and the recipes agree on the ids, 
 ## Roadmap
 
 1. **Now:** the recipes and the catalog are in this repository, with checks in GitHub Actions.
-2. A build of `developer-ubuntu-server` for amd64 in GitHub Actions, measuring size and time.
+2. **In progress:** the Ubuntu ISO for amd64 in GitHub Actions (`iso/ubuntu/`), which installs over the network and is tested by installing and booting it in QEMU.
 3. The installable ISO for amd64, with a boot test in QEMU, and the same for Arch.
 4. The shared Total.js layer in `shared/`, used by every distro and by the images of TotalVM.
 5. The package repository served from GitHub Pages.

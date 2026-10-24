@@ -10,6 +10,7 @@ Official Total.js Developer Distros: Linux environments for Total.js development
 
 - `tools/image-builder/` builds an image: `scripts/build.sh <id>`, a Swift runner in `Sources/` that boots the VM with Apple's Virtualization framework, and one recipe per distro in `images/<id>/` (`image.json`, `provision/*.sh` run in order inside the guest, `cloud-init/`, `assets/`).
 - `tools/package-repo/` builds and signs the APT and Pacman repository (`build.sh`). Its scripts assume the layout of this repository.
+- `iso/ubuntu/` builds the installable ISO for amd64 by remastering the official Ubuntu `live-server` ISO (`build-iso.sh`) and tests it by installing and booting it in QEMU (`test-install.sh`); `.github/workflows/iso-ubuntu.yml` runs both. The seed in `iso/ubuntu/seed-ci/` is only for that test.
 - `manifests/` is the catalog: `index.json` and `manifests/<id>/manifest.json`. `size` and `sha256` are filled when an image is published.
 - `shared/` is the Total.js layer common to every distro. It is empty and receives files from the recipes one piece at a time.
 - `scripts/check.js` is the check that runs in `.github/workflows/check.yml`.

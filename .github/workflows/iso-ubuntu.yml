@@ -1,0 +1,59 @@
+name: iso-ubuntu
+
+# Builds the installable ISO of Ubuntu for amd64 from the newest LTS and proves that it installs and boots in QEMU.
+# Nothing is published: it measures the size and the time, and keeps the logs.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'iso/**'
+      - '.github/workflows/iso-ubuntu.yml'
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso qemu-system-x86 qemu-utils gnupg
+
+      # QEMU needs access to /dev/kvm; without it the install is emulated and very slow
+      - name: Allow KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+          ls -l /dev/kvm || echo "no /dev/kvm on this runner"
+
+      - name: Build the ISO
+        env:
+          GRUB_TIMEOUT: '1'
+          EXTRA_KERNEL: console=ttyS0,115200n8
+        run: iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci build/totaljs-developer-ubuntu-server-amd64.iso
+
+      - name: Install it and boot the installed system
+        run: iso/ubuntu/test-install.sh build/totaljs-developer-ubuntu-server-amd64.iso
+
+      - name: What was measured
+        if: always()
+        run: |
+          {
+            echo '### Ubuntu ISO (amd64)'
+            ls -l build/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
+            [ -f build/iso/timings.txt ] && echo "- $(cat build/iso/timings.txt)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: iso-ubuntu-logs
+          path: |
+            build/iso/install.log
+            build/iso/boot.log
+            build/iso/xorriso.log
+            build/iso/timings.txt

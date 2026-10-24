@@ -1,0 +1,33 @@
+#cloud-config
+# Only for the test of the CI: an unattended install of the stock server, to prove that the ISO can be remastered, that it
+# installs and that the installed system boots. The password is a random one that build-iso.sh writes and nobody knows.
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: totaljs-ci
+    username: ci
+    password: "__PASSWORD_HASH__"
+  ssh:
+    install-server: true
+  storage:
+    layout:
+      name: direct
+  updates: security
+  shutdown: poweroff
+  late-commands:
+    # A service that says on the serial console that the installed system booted
+    - |
+      cat > /target/etc/systemd/system/totaljs-iso-test.service <<'UNIT'
+      [Unit]
+      Description=Says on the serial console that the installed system booted
+      After=multi-user.target
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c 'echo TOTALJS-ISO-TEST-OK > /dev/ttyS0'
+      [Install]
+      WantedBy=multi-user.target
+      UNIT
+    - curtin in-target --target=/target -- systemctl enable totaljs-iso-test.service

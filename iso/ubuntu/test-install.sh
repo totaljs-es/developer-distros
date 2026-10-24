@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# test-install.sh - installs an ISO unattended in QEMU, then boots the installed system and waits for its marker.
+#
+#   iso/ubuntu/test-install.sh <image.iso>
+#
+# It needs qemu-system-x86_64 and qemu-img. With /dev/kvm it takes minutes; without it QEMU emulates the CPU and it takes
+# much longer. The logs of the serial console stay in WORK_DIR (install.log and boot.log).
+set -euo pipefail
+
+ISO="${1:?usage: test-install.sh <image.iso>}"
+WORK="${WORK_DIR:-build/iso}"
+INSTALL_TIMEOUT="${INSTALL_TIMEOUT:-3000}"
+BOOT_TIMEOUT="${BOOT_TIMEOUT:-600}"
+MARKER="TOTALJS-ISO-TEST-OK"
+
+log() { printf '==> %s\n' "$*"; }
+die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+[ -f "${ISO}" ] || die "${ISO} does not exist"
+mkdir -p "${WORK}"
+
+DISK="${WORK}/disk.qcow2"
+rm -f "${DISK}" "${WORK}/install.log" "${WORK}/boot.log"
+qemu-img create -f qcow2 "${DISK}" 20G >/dev/null
+
+if [ -w /dev/kvm ]; then
+    ACCEL="kvm"
+    log "KVM is available"
+else
+    ACCEL="tcg"
+    log "KVM is NOT available: QEMU will emulate the CPU and this will be slow"
+fi
+
+run_qemu() {
+    qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
+        -drive "file=${DISK},if=virtio,format=qcow2" \
+        -nic user,model=virtio-net-pci \
+        -display none -no-reboot "$@"
+}
+
+# 1. The install: the autoinstall seed ends with a power off, and -no-reboot makes that end QEMU
+log "installing (up to ${INSTALL_TIMEOUT} s)"
+START=$(date +%s)
+set +e
+timeout "${INSTALL_TIMEOUT}" qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
+    -drive "file=${DISK},if=virtio,format=qcow2" -cdrom "${ISO}" -boot d \
+    -nic user,model=virtio-net-pci -display none -no-reboot \
+    -serial "file:${WORK}/install.log"
+STATUS=$?
+set -e
+INSTALL_SECONDS=$(( $(date +%s) - START ))
+
+if [ "${STATUS}" -ne 0 ]; then
+    echo "--- the end of the install log ---"; tail -40 "${WORK}/install.log" || true
+    die "the install did not finish (status ${STATUS}) after ${INSTALL_SECONDS} s"
+fi
+log "installed in ${INSTALL_SECONDS} s"
+
+# 2. The installed system: it has to say that it booted
+log "booting the installed system (up to ${BOOT_TIMEOUT} s)"
+START=$(date +%s)
+run_qemu -serial "file:${WORK}/boot.log" &
+QEMU=$!
+
+FOUND=0
+for _ in $(seq 1 "${BOOT_TIMEOUT}"); do
+    if grep -q "${MARKER}" "${WORK}/boot.log" 2>/dev/null; then FOUND=1; break; fi
+    kill -0 "${QEMU}" 2>/dev/null || break
+    sleep 1
+done
+BOOT_SECONDS=$(( $(date +%s) - START ))
+kill "${QEMU}" 2>/dev/null || true
+wait "${QEMU}" 2>/dev/null || true
+
+if [ "${FOUND}" -ne 1 ]; then
+    echo "--- the end of the boot log ---"; tail -40 "${WORK}/boot.log" || true
+    die "the installed system did not say ${MARKER} in ${BOOT_SECONDS} s"
+fi
+log "the installed system booted in ${BOOT_SECONDS} s"
+
+printf 'accel=%s install_seconds=%s boot_seconds=%s\n' "${ACCEL}" "${INSTALL_SECONDS}" "${BOOT_SECONDS}" > "${WORK}/timings.txt"
