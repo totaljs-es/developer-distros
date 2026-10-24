@@ -1,0 +1,105 @@
+name: release-iso
+
+# Builds the ISO that people use (the server edition of the Total.js Developer Distro for amd64), with its checksums and a signed
+# attestation of where it came from, and publishes it in a release of GitHub when a tag `iso-v*` is pushed.
+# By hand (Run workflow) it builds the same and keeps the ISO as an artifact of the run, without publishing: to try it.
+#
+# The ISO installs the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the
+# ISO is published: an ISO whose repository does not exist cannot install anything. The workflow checks it and stops if it does not.
+on:
+  workflow_dispatch:
+    inputs:
+      repository_url:
+        description: Address of the repository of packages that the ISO installs from
+        default: https://totaljs-es.github.io/developer-distros/repo
+      require_repository:
+        description: Stop if that address does not answer (leave it on for a release)
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'iso-v*'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      REPO_URL: ${{ inputs.repository_url || 'https://totaljs-es.github.io/developer-distros/repo' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso gnupg
+
+      - name: The repository of packages answers
+        run: |
+          echo "repository: ${REPO_URL}"
+          failed=0
+          for path in totaljs-developer.gpg ubuntu/dists/resolute/InRelease; do
+            if curl -fsSI "${REPO_URL}/${path}" >/dev/null; then echo "ok: ${path}"; else echo "NOT FOUND: ${REPO_URL}/${path}"; failed=1; fi
+          done
+          if [ "${failed}" = 1 ]; then
+            if [ "${{ inputs.require_repository }}" = false ]; then
+              echo "::warning::the repository does not answer: this ISO cannot install the packages of Total.js until it does"
+            else
+              echo "::error::the repository of packages does not answer, so the ISO could not install anything. Publish it first (tools/package-repo/publish-pages.sh)"
+              exit 1
+            fi
+          fi
+
+      - name: Build the ISO
+        run: |
+          mkdir -p dist
+          iso/ubuntu/build-iso.sh iso/ubuntu/seed dist/totaljs-developer-server-amd64.iso
+          (cd dist && sha256sum totaljs-developer-server-amd64.iso > SHA256SUMS && cat SHA256SUMS)
+          ls -l dist
+
+      # The attestation says that this file was built by this workflow from this commit: whoever downloads it can check it
+      - name: Attest where it came from
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/totaljs-developer-server-amd64.iso
+
+      - name: Keep it as an artifact of the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-developer-server-amd64
+          path: dist/
+          retention-days: 14
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/iso-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE="$(grep -m1 '^# ubuntu-' build/iso/contents.txt | sed 's/^# ubuntu-//; s/-live-server.*//')"
+          SIZE="$(ls -l dist/totaljs-developer-server-amd64.iso | awk '{ printf "%.0f", $5 / 1048576 }')"
+          cat > notes.md <<NOTES
+          ## Total.js Developer Distro, server edition (amd64)
+
+          The installer of Ubuntu Server ${BASE}, remastered to install the Total.js layer (Node.js, Total.js and the tools of a developer) over the network. The installer asks the usual questions: language, keyboard, network, disk and who you are.
+
+          - **It needs a network connection** (cable or Wi-Fi) while it installs: it downloads the packages from ${REPO_URL}.
+          - Size: ${SIZE} MiB.
+          - Based on Ubuntu, not an official Ubuntu release.
+
+          ### Check the download
+
+          \`\`\`bash
+          sha256sum -c SHA256SUMS
+          gh attestation verify totaljs-developer-server-amd64.iso --repo ${GITHUB_REPOSITORY}
+          \`\`\`
+          NOTES
+          sed -i 's/^          //' notes.md
+          flags=""
+          case "${GITHUB_REF_NAME}" in *-rc*|*-beta*|*-alpha*) flags="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" dist/totaljs-developer-server-amd64.iso dist/SHA256SUMS \
+            --title "Total.js Developer Distro, server edition (${GITHUB_REF_NAME#iso-v})" --notes-file notes.md ${flags}

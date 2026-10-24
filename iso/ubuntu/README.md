@@ -55,6 +55,12 @@ The ISO of `SLIM=pool` installs the Total.js layer unattended, boots, and has No
 
 The workflow builds a repository with a throwaway key, serves it on the computer of the runner (`10.0.2.2` for the guest of QEMU) and installs the ISO of `seed-ci-layer/` unattended. The installed system must boot, have Node.js 24 and have its first person in the group `totaljs-developer`. The ISO of `seed/` is only built there: its questions need a person.
 
+## Publishing it
+
+The workflow `release-iso` builds the ISO of the server edition (the seed of `seed/`, slimmed), its `SHA256SUMS` and an attestation of where it came from, and publishes them in a release of GitHub when a tag `iso-v*` is pushed (`iso-v26.04.1`; `-rc`, `-beta` or `-alpha` in the tag make it a prerelease). By hand (*Run workflow*) it builds the same and keeps the ISO as an artifact of the run for 14 days, without publishing it: that is how to get an ISO to try.
+
+The ISO installs the packages of Total.js from the address of the repository of packages, so **that repository has to be published first** (`tools/package-repo/publish-pages.sh`). The workflow checks that the address answers and stops if it does not, because an ISO with no repository installs Ubuntu and then fails.
+
 ## What is not done yet
 
 - The rest of the layer in the seed: today `totaljs-developer-server` has the runtime, the tools and SSH; the Docker stack, the DNS, Total.js Center and the brand are still to be packages. The desktop edition and its entry in the boot menu.
