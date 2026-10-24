@@ -17,7 +17,7 @@ BASE_URL="${BASE_URL:-https://totaljs-es.github.io/developer-distros/repo}"
 # of writing into the public folder of a website.
 if [ -n "${WEBSITE_ROOT:-}" ]; then OUT="${WEBSITE_ROOT}/public/repo"; else OUT="${REPO_OUT:-${ROOT}/build/site/repo}"; fi
 # The Ubuntu series and the architectures of the repository. Packages are Architecture: all, so the same files serve every one
-SUITES="${SUITES:-noble resolute}"
+SUITES="${SUITES:-resolute}"
 DEB_ARCHES="${DEB_ARCHES:-arm64 amd64}"
 ARCH_DIRS="${ARCH_DIRS:-aarch64 x86_64}"
 ASSETS="${ROOT}/tools/image-builder/images/developer-ubuntu/assets/repository"
@@ -52,7 +52,7 @@ mkdir -p "${DEBROOT}/usr/share/keyrings" "${DEBROOT}/usr/share/totaljs-developer
   "${DEBROOT}/usr/local/sbin" "${DEBROOT}/etc/systemd/system"
 cp "${OUT}/totaljs-developer.gpg" "${DEBROOT}/usr/share/keyrings/totaljs-developer-archive-keyring.gpg"
 printf '%s\n' "${VERSION}" > "${DEBROOT}/usr/share/totaljs-developer/release"
-# The series (noble, resolute...) is the one of the system: the postinst writes the source from this template
+# The series (resolute, noble...) is the one of the system: the postinst writes the source from this template
 cat > "${DEBROOT}/usr/share/totaljs-developer/totaljs-developer.sources.in" <<EOF
 Types: deb
 URIs: ${BASE_URL}/ubuntu

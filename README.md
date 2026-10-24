@@ -58,7 +58,7 @@ It validates the JSON files, that the catalog and the recipes agree on the ids, 
 2. **In progress:** the Ubuntu ISO for amd64 in GitHub Actions (`iso/ubuntu/`), which installs over the network and is tested by installing and booting it in QEMU.
 3. The installable ISO for amd64, with a boot test in QEMU, and the same for Arch.
 4. The shared Total.js layer in `shared/`, used by every distro and by the images of TotalVM.
-5. **In progress:** the package repository served from GitHub Pages (`tools/package-repo/`), for Ubuntu 24.04 and 26.04 on arm64 and amd64, and for Arch on aarch64 and x86_64.
+5. **In progress:** the package repository served from GitHub Pages (`tools/package-repo/`), for Ubuntu 26.04 on arm64 and amd64, and for Arch on aarch64 and x86_64.
 6. The Total.js layer as packages (a server and a desktop meta-package) that the ISOs and the images of TotalVM install.
 
 ## License

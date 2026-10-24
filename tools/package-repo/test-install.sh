@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # test-install.sh - uses the repository the way a system does, inside a clean Ubuntu container (the CI runs it for each series).
 #
-#   docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:24.04 bash /test.sh
+#   docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:26.04 bash /test.sh
 #
 # The repository has to be built with BASE_URL=file:///repo and signed with a throwaway key. It installs the server layer,
 # checks what it promises, removes it and checks that nothing of it stays.

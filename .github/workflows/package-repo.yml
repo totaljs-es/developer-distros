@@ -39,41 +39,6 @@ jobs:
       - name: What was built
         run: find build/site/repo -type f | sort
 
-      - name: Use it with APT, as a system does
-        run: |
-          set -x
-          # the packages carry the address file:///repo
-          sudo ln -s "$PWD/build/site/repo" /repo
-          REPO="$PWD/build/site/repo"
-          CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
-          sudo install -m 0644 "$REPO/totaljs-developer.gpg" /usr/share/keyrings/totaljs-test.gpg
-          echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file://$REPO/ubuntu $CODENAME main" | sudo tee /etc/apt/sources.list.d/totaljs-test.list
-          sudo apt-get update
-          apt-cache policy totaljs-developer-release totaljs-desktop | tee policy.txt
-          grep -q 'Candidate: 1.0.9-1' policy.txt
-
-          # The package writes its own source, with the series of this system
-          sudo apt-get install -y totaljs-developer-release
-          cat /etc/apt/sources.list.d/totaljs-developer.sources
-          grep -q "Suites: $CODENAME" /etc/apt/sources.list.d/totaljs-developer.sources
-          sudo rm /etc/apt/sources.list.d/totaljs-test.list
-          sudo apt-get update
-          apt-cache policy totaljs-desktop | grep -q 'Candidate: 1.0.5-1'
-
-          # and removes it
-          sudo apt-get remove -y totaljs-developer-release
-          test ! -e /etc/apt/sources.list.d/totaljs-developer.sources
-
-      # The server layer in a clean Ubuntu of each series: install, what it promises, remove
-      - name: The server layer on Ubuntu 24.04
-        run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:24.04 bash /test.sh
-
+      # The layer in a clean Ubuntu 26.04 (the series of the repository): the sources, the install, what it promises, and the removal
       - name: The server layer on Ubuntu 26.04
         run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:26.04 bash /test.sh
-
-      - name: The other series (resolute) is valid too
-        run: |
-          REPO="$PWD/build/site/repo"
-          echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file://$REPO/ubuntu resolute main" | sudo tee "$RUNNER_TEMP/resolute.list"
-          sudo apt-get update -o Dir::Etc::sourcelist="$RUNNER_TEMP/resolute.list" -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0
-          apt-cache policy totaljs-developer-release | head -5

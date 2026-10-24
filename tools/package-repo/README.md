@@ -42,7 +42,7 @@ BASE_URL=https://packages.example.org/repo tools/package-repo/build.sh
 |---|---|---|
 | `BASE_URL` | `https://totaljs-es.github.io/developer-distros/repo` | The address inside the packages: where every installed system will look for updates. Set the final one before a release. |
 | `REPO_OUT` | `build/site/repo` | Where the repository is written. `WEBSITE_ROOT` writes into `public/repo` of a website, as before. |
-| `SUITES` | `noble resolute` | The Ubuntu series. The package writes the source of APT with the series of the system it is installed on. |
+| `SUITES` | `resolute` | The Ubuntu series (26.04 is the one of this repository; the images of TotalVM, on 24.04, keep their own repository at totalvm.totaljs.es). The package writes the source of APT with the series of the system it is installed on. |
 | `DEB_ARCHES` | `arm64 amd64` | The architectures of the APT indexes. The packages are `Architecture: all`, so they are the same files. |
 | `ARCH_DIRS` | `aarch64 x86_64` | The directories of Pacman (`$arch` of pacman). Same files, same database and signatures. |
 | `TOTALJS_REPO_GNUPGHOME`, `TOTALJS_REPO_KEY` | the key of Total.js on this computer | What signs the repository. |
