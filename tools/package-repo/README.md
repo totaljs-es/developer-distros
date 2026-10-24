@@ -25,3 +25,34 @@ then waits for Tint2 to own the notification area before launching `pasystray`.
 It updates both `/etc/skel` and existing user profiles. Migrations must remain
 idempotent and must not replace user projects, Compose files or unrelated
 home-directory configuration.
+
+## Where the repository is served from
+
+`build.sh` writes the repository to `build/site/repo` (not committed) and the address that the packages will update from is written inside them. Both can be set:
+
+```sh
+BASE_URL=https://packages.example.org/repo tools/package-repo/build.sh
+```
+
+| Variable | Default | What it is |
+|---|---|---|
+| `BASE_URL` | `https://totaljs-es.github.io/developer-distros/repo` | The address inside the packages: where every installed system will look for updates. Set the final one before a release. |
+| `REPO_OUT` | `build/site/repo` | Where the repository is written. `WEBSITE_ROOT` writes into `public/repo` of a website, as before. |
+| `SUITES` | `noble resolute` | The Ubuntu series. The package writes the source of APT with the series of the system it is installed on. |
+| `DEB_ARCHES` | `arm64 amd64` | The architectures of the APT indexes. The packages are `Architecture: all`, so they are the same files. |
+| `ARCH_DIRS` | `aarch64 x86_64` | The directories of Pacman (`$arch` of pacman). Same files, same database and signatures. |
+| `TOTALJS_REPO_GNUPGHOME`, `TOTALJS_REPO_KEY` | the key of Total.js on this computer | What signs the repository. |
+
+The key of Total.js is never in GitHub. The workflow `package-repo` builds the repository with a throwaway key and uses it with the real APT of the runner: `apt-get update`, the install (the package writes its own source), the removal, and the series `resolute`.
+
+## Publish it with GitHub Pages
+
+```sh
+tools/package-repo/build.sh
+PAGES_CNAME=packages.example.org tools/package-repo/publish-pages.sh          # prepares build/pages
+PAGES_CNAME=packages.example.org tools/package-repo/publish-pages.sh --push   # and publishes it
+```
+
+The branch `pages` has a single commit that is replaced each time (a repository is a set of signed files, and the old versions of binary files would only make the repository grow). In the settings of the repository, *Pages* serves the branch `pages` from `/`. `PAGES_CNAME` is only for a custom domain, which also needs a `CNAME` record in its DNS.
+
+An installed system with the old address (`totalvm.totaljs.es/repo`) keeps updating from it. The version 1.0.9 of `totaljs-developer-release` writes its source with the new address, so those systems move to it the first time they install that version.

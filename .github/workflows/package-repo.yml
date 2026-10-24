@@ -1,0 +1,69 @@
+name: package-repo
+
+# Builds the APT and Pacman repository with a throwaway key and uses it the way a system would: apt-get update, install, remove.
+# The real repository is signed on a computer of the maintainers with the key of Total.js: that key is never in GitHub.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/package-repo/**'
+      - '.github/workflows/package-repo.yml'
+
+jobs:
+  repo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools zstd gnupg binutils
+
+      - name: A throwaway signing key
+        run: |
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          mkdir -m 700 "$GNUPGHOME"
+          gpg --batch --passphrase '' --quick-generate-key 'Throwaway Repo <test@example.com>' ed25519 sign never
+          echo "TOTALJS_REPO_GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          echo "TOTALJS_REPO_KEY=$(gpg --list-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')" >> "$GITHUB_ENV"
+
+      - name: Build the repository
+        env:
+          REPO_OUT: ${{ github.workspace }}/build/site/repo
+          BASE_URL: file://${{ github.workspace }}/build/site/repo
+        run: tools/package-repo/build.sh
+
+      - name: What was built
+        run: find build/site/repo -type f | sort
+
+      - name: Use it with APT, as a system does
+        run: |
+          set -x
+          REPO="$PWD/build/site/repo"
+          CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+          sudo install -m 0644 "$REPO/totaljs-developer.gpg" /usr/share/keyrings/totaljs-test.gpg
+          echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file://$REPO/ubuntu $CODENAME main" | sudo tee /etc/apt/sources.list.d/totaljs-test.list
+          sudo apt-get update
+          apt-cache policy totaljs-developer-release totaljs-desktop | tee policy.txt
+          grep -q 'Candidate: 1.0.9-1' policy.txt
+
+          # The package writes its own source, with the series of this system
+          sudo apt-get install -y totaljs-developer-release
+          cat /etc/apt/sources.list.d/totaljs-developer.sources
+          grep -q "Suites: $CODENAME" /etc/apt/sources.list.d/totaljs-developer.sources
+          sudo rm /etc/apt/sources.list.d/totaljs-test.list
+          sudo apt-get update
+          apt-cache policy totaljs-desktop | grep -q 'Candidate: 1.0.5-1'
+
+          # and removes it
+          sudo apt-get remove -y totaljs-developer-release
+          test ! -e /etc/apt/sources.list.d/totaljs-developer.sources
+
+      - name: The other series (resolute) is valid too
+        run: |
+          REPO="$PWD/build/site/repo"
+          echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file://$REPO/ubuntu resolute main" | sudo tee "$RUNNER_TEMP/resolute.list"
+          sudo apt-get update -o Dir::Etc::sourcelist="$RUNNER_TEMP/resolute.list" -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0
+          apt-cache policy totaljs-developer-release | head -5

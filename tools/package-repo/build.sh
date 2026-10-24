@@ -2,17 +2,24 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-WEBSITE_ROOT="${WEBSITE_ROOT:-/Users/gerag.guiles/Documents/TotalDesktop/TotalCode/Spanish Total -js/Totaljs-es/totalvm.totaljs.es}"
 GNUPGHOME="${TOTALJS_REPO_GNUPGHOME:-${HOME}/.config/totaljs/repository-signing}"
 KEY_FPR="${TOTALJS_REPO_KEY:-95454694523B8D18A376F7D5D722BA35C8427B40}"
-VERSION="${VERSION:-1.0.8}"
+VERSION="${VERSION:-1.0.9}"
 RELEASE=1
 PACKAGE=totaljs-developer-release
 DESKTOP_VERSION="${DESKTOP_VERSION:-1.0.5}"
 DESKTOP_RELEASE=1
 DESKTOP_PACKAGE=totaljs-desktop
-BASE_URL=https://totalvm.totaljs.es/repo
-OUT="${WEBSITE_ROOT}/public/repo"
+# Where the repository will be served from. It is written into the packages, so it is the address that every installed
+# system will update from: set it to the final address before a release (the default is the one of GitHub Pages).
+BASE_URL="${BASE_URL:-https://totaljs-es.github.io/developer-distros/repo}"
+# Where the repository is written: a folder of this repository (build/ is not committed). WEBSITE_ROOT keeps the old way
+# of writing into the public folder of a website.
+if [ -n "${WEBSITE_ROOT:-}" ]; then OUT="${WEBSITE_ROOT}/public/repo"; else OUT="${REPO_OUT:-${ROOT}/build/site/repo}"; fi
+# The Ubuntu series and the architectures of the repository. Packages are Architecture: all, so the same files serve every one
+SUITES="${SUITES:-noble resolute}"
+DEB_ARCHES="${DEB_ARCHES:-arm64 amd64}"
+ARCH_DIRS="${ARCH_DIRS:-aarch64 x86_64}"
 ASSETS="${ROOT}/tools/image-builder/images/developer-ubuntu/assets/repository"
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
@@ -23,13 +30,19 @@ done
 [ -d "${GNUPGHOME}" ] || { echo "Signing key home not found: ${GNUPGHOME}" >&2; exit 1; }
 
 export GNUPGHOME
+
+# macOS (BSD) and Linux (GNU) differ in these
+filesize() { if stat -c%s "$1" 2>/dev/null; then :; else stat -f%z "$1"; fi; }
+# bsdtar only knows --no-mac-metadata on some builds
+TAR_OPTS="--no-xattrs"
+if bsdtar --help 2>&1 | grep -q -- '--no-mac-metadata'; then TAR_OPTS="${TAR_OPTS} --no-mac-metadata"; fi
 # Never serialize Finder/provenance xattrs into Linux packages. dpkg rejects
 # libarchive's PAX xattr records even though bsdtar can read them on macOS.
 export COPYFILE_DISABLE=1
+ARCH_PRIMARY="${ARCH_DIRS%% *}"
 mkdir -p "${OUT}/ubuntu/pool/main/t/${PACKAGE}" \
   "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}" \
-  "${OUT}/ubuntu/dists/noble/main/binary-arm64" \
-  "${OUT}/arch/aarch64" "${ASSETS}"
+  "${OUT}/arch/${ARCH_PRIMARY}" "${ASSETS}"
 gpg --batch --yes --export "${KEY_FPR}" > "${OUT}/totaljs-developer.gpg"
 gpg --batch --yes --armor --export "${KEY_FPR}" > "${OUT}/totaljs-developer.asc"
 
@@ -39,12 +52,12 @@ mkdir -p "${DEBROOT}/usr/share/keyrings" "${DEBROOT}/usr/share/totaljs-developer
   "${DEBROOT}/usr/local/sbin" "${DEBROOT}/etc/systemd/system"
 cp "${OUT}/totaljs-developer.gpg" "${DEBROOT}/usr/share/keyrings/totaljs-developer-archive-keyring.gpg"
 printf '%s\n' "${VERSION}" > "${DEBROOT}/usr/share/totaljs-developer/release"
-cat > "${DEBROOT}/etc/apt/sources.list.d/totaljs-developer.sources" <<EOF
+# The series (noble, resolute...) is the one of the system: the postinst writes the source from this template
+cat > "${DEBROOT}/usr/share/totaljs-developer/totaljs-developer.sources.in" <<EOF
 Types: deb
 URIs: ${BASE_URL}/ubuntu
-Suites: noble
+Suites: @SUITE@
 Components: main
-Architectures: arm64
 Signed-By: /usr/share/keyrings/totaljs-developer-archive-keyring.gpg
 EOF
 cat > "${DEBROOT}/usr/local/sbin/totalvm-rosetta-setup" <<'EOF'
@@ -115,17 +128,31 @@ EOF
 cat > "${DEBBUILD}/postinst" <<'EOF'
 #!/bin/sh
 set -e
+codename="$(. /etc/os-release && echo "${VERSION_CODENAME:-}")"
+if [ -n "${codename}" ]; then
+  sed "s/@SUITE@/${codename}/" /usr/share/totaljs-developer/totaljs-developer.sources.in \
+    > /etc/apt/sources.list.d/totaljs-developer.sources
+fi
 systemctl daemon-reload >/dev/null 2>&1 || true
 systemctl enable totalvm-rosetta.service >/dev/null 2>&1 || true
 /usr/local/sbin/totalvm-rosetta-setup >/dev/null 2>&1 || true
 exit 0
 EOF
 chmod 0755 "${DEBBUILD}/postinst"
+cat > "${DEBBUILD}/postrm" <<'EOF'
+#!/bin/sh
+set -e
+case "$1" in
+  remove|purge) rm -f /etc/apt/sources.list.d/totaljs-developer.sources ;;
+esac
+exit 0
+EOF
+chmod 0755 "${DEBBUILD}/postrm"
 printf '2.0\n' > "${DEBBUILD}/debian-binary"
-(cd "${DEBBUILD}" && bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst)
-(cd "${DEBROOT}" && bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root -czf "${DEBBUILD}/data.tar.gz" .)
+(cd "${DEBBUILD}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst postrm)
+(cd "${DEBROOT}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DEBBUILD}/data.tar.gz" .)
 DEBFILE="${PACKAGE}_${VERSION}-${RELEASE}_all.deb"
-(cd "${DEBBUILD}" && bsdtar --no-xattrs --no-mac-metadata --format=ar -cf "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" debian-binary control.tar.gz data.tar.gz)
+(cd "${DEBBUILD}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" debian-binary control.tar.gz data.tar.gz)
 cp "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" "${ASSETS}/${DEBFILE}"
 cp "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" "${ROOT}/tools/image-builder/images/developer-ubuntu/assets/totaljs-release.deb"
 cp "${OUT}/totaljs-developer.gpg" "${ROOT}/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg"
@@ -166,18 +193,18 @@ exit 0
 EOF
 chmod 0755 "${DESKTOP_DEBBUILD}/postinst"
 printf '2.0\n' > "${DESKTOP_DEBBUILD}/debian-binary"
-(cd "${DESKTOP_DEBBUILD}" && bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst)
-(cd "${DESKTOP_DEBROOT}" && bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root -czf "${DESKTOP_DEBBUILD}/data.tar.gz" .)
+(cd "${DESKTOP_DEBBUILD}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst)
+(cd "${DESKTOP_DEBROOT}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DESKTOP_DEBBUILD}/data.tar.gz" .)
 DESKTOP_DEBFILE="${DESKTOP_PACKAGE}_${DESKTOP_VERSION}-${DESKTOP_RELEASE}_all.deb"
-(cd "${DESKTOP_DEBBUILD}" && bsdtar --no-xattrs --no-mac-metadata --format=ar -cf "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" debian-binary control.tar.gz data.tar.gz)
+(cd "${DESKTOP_DEBBUILD}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" debian-binary control.tar.gz data.tar.gz)
 cp "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" "${ASSETS}/${DESKTOP_DEBFILE}"
 
-DESKTOP_DEBSIZE="$(stat -f%z "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}")"
+DESKTOP_DEBSIZE="$(filesize "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}")"
 DESKTOP_DEBSHA="$(shasum -a 256 "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" | awk '{print $1}')"
 
-DEBSIZE="$(stat -f%z "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}")"
+DEBSIZE="$(filesize "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}")"
 DEBSHA="$(shasum -a 256 "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" | awk '{print $1}')"
-cat > "${OUT}/ubuntu/dists/noble/main/binary-arm64/Packages" <<EOF
+cat > "${WORK}/Packages.stanzas" <<EOF
 Package: ${PACKAGE}
 Version: ${VERSION}-${RELEASE}
 Architecture: all
@@ -208,30 +235,31 @@ Description: Total.js Developer desktop integration
  Applies compatible visual and desktop integration updates without replacing user projects.
 
 EOF
-gzip -9c "${OUT}/ubuntu/dists/noble/main/binary-arm64/Packages" > "${OUT}/ubuntu/dists/noble/main/binary-arm64/Packages.gz"
 
-RELEASE_DIR="${OUT}/ubuntu/dists/noble"
-(cd "${RELEASE_DIR}" && {
-  packages_size="$(stat -f%z main/binary-arm64/Packages)"
-  packages_gz_size="$(stat -f%z main/binary-arm64/Packages.gz)"
-  packages_sha="$(shasum -a 256 main/binary-arm64/Packages | awk '{print $1}')"
-  packages_gz_sha="$(shasum -a 256 main/binary-arm64/Packages.gz | awk '{print $1}')"
-  cat > Release <<EOF
-Origin: Total.js
-Label: Total.js Developer
-Suite: noble
-Codename: noble
-Date: $(LC_ALL=C date -Ru)
-Architectures: arm64
-Components: main
-Description: Official Total.js Developer packages
-SHA256:
- ${packages_sha} ${packages_size} main/binary-arm64/Packages
- ${packages_gz_sha} ${packages_gz_size} main/binary-arm64/Packages.gz
-EOF
-  gpg --batch --yes --local-user "${KEY_FPR}" --armor --detach-sign --output Release.gpg Release
-  gpg --batch --yes --local-user "${KEY_FPR}" --clearsign --output InRelease Release
-})
+# One index for every series and architecture: the packages are Architecture: all, so the files are the same
+for SUITE in ${SUITES}; do
+  RELEASE_DIR="${OUT}/ubuntu/dists/${SUITE}"
+  for DEB_ARCH in ${DEB_ARCHES}; do
+    mkdir -p "${RELEASE_DIR}/main/binary-${DEB_ARCH}"
+    cp "${WORK}/Packages.stanzas" "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages"
+    gzip -9nc "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages" > "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages.gz"
+  done
+
+  (cd "${RELEASE_DIR}" && {
+    {
+      printf 'Origin: Total.js\nLabel: Total.js Developer\nSuite: %s\nCodename: %s\n' "${SUITE}" "${SUITE}"
+      printf 'Date: %s\n' "$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')"
+      printf 'Architectures: %s\nComponents: main\nDescription: Official Total.js Developer packages\nSHA256:\n' "${DEB_ARCHES}"
+      for DEB_ARCH in ${DEB_ARCHES}; do
+        for FILE in Packages Packages.gz; do
+          printf ' %s %s main/binary-%s/%s\n' "$(shasum -a 256 "main/binary-${DEB_ARCH}/${FILE}" | awk '{print $1}')" "$(filesize "main/binary-${DEB_ARCH}/${FILE}")" "${DEB_ARCH}" "${FILE}"
+        done
+      done
+    } > Release
+    gpg --batch --yes --local-user "${KEY_FPR}" --armor --detach-sign --output Release.gpg Release
+    gpg --batch --yes --local-user "${KEY_FPR}" --clearsign --output InRelease Release
+  })
+done
 
 echo "[repo] building Pacman desktop package"
 DESKTOP_ARCHROOT="${WORK}/desktop-arch-root"
@@ -265,11 +293,11 @@ license = custom
 depend = openbox
 EOF
 DESKTOP_ARCHFILE="${DESKTOP_PACKAGE}-${DESKTOP_VERSION}-${DESKTOP_RELEASE}-any.pkg.tar.zst"
-bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root \
+bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root \
   -C "${DESKTOP_ARCHROOT}" -cf - .PKGINFO .INSTALL usr \
-  | zstd -19 -q -f -o "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}"
-gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}.sig" "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}"
-cp "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}" "${ASSETS}/${DESKTOP_ARCHFILE}"
+  | zstd -19 -q -f -o "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}"
+gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}.sig" "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}"
+cp "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}" "${ASSETS}/${DESKTOP_ARCHFILE}"
 
 echo "[repo] building Pacman bootstrap package"
 ARCHROOT="${WORK}/arch-root"
@@ -359,15 +387,15 @@ ARCHFILE="${PACKAGE}-${VERSION}-${RELEASE}-any.pkg.tar.zst"
 # Pacman 7 requires package metadata at the exact archive path `.PKGINFO`;
 # archiving `.` with BSD tar prefixes it as `./.PKGINFO` and Pacman reports an
 # otherwise valid package as "missing package metadata".
-bsdtar --no-xattrs --no-mac-metadata --uid 0 --gid 0 --uname root --gname root \
+bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root \
   -C "${ARCHROOT}" -cf - .PKGINFO .INSTALL etc usr \
-  | zstd -19 -q -f -o "${OUT}/arch/aarch64/${ARCHFILE}"
-gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/aarch64/${ARCHFILE}.sig" "${OUT}/arch/aarch64/${ARCHFILE}"
-cp "${OUT}/arch/aarch64/${ARCHFILE}" "${ASSETS}/${ARCHFILE}"
-cp "${OUT}/arch/aarch64/${ARCHFILE}" "${ROOT}/tools/image-builder/images/developer-ubuntu/assets/totaljs-release.pkg.tar.zst"
+  | zstd -19 -q -f -o "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}"
+gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}.sig" "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}"
+cp "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}" "${ASSETS}/${ARCHFILE}"
+cp "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}" "${ROOT}/tools/image-builder/images/developer-ubuntu/assets/totaljs-release.pkg.tar.zst"
 
-ARCHCSIZE="$(stat -f%z "${OUT}/arch/aarch64/${ARCHFILE}")"
-ARCHSHA="$(shasum -a 256 "${OUT}/arch/aarch64/${ARCHFILE}" | awk '{print $1}')"
+ARCHCSIZE="$(filesize "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}")"
+ARCHSHA="$(shasum -a 256 "${OUT}/arch/${ARCH_PRIMARY}/${ARCHFILE}" | awk '{print $1}')"
 DBROOT="${WORK}/db/${PACKAGE}-${VERSION}-${RELEASE}"
 DESKTOP_DBROOT="${WORK}/db/${DESKTOP_PACKAGE}-${DESKTOP_VERSION}-${DESKTOP_RELEASE}"
 mkdir -p "${DBROOT}" "${DESKTOP_DBROOT}"
@@ -412,8 +440,8 @@ Total.js <repository@totaljs.com>
 custom
 
 EOF
-DESKTOP_ARCHCSIZE="$(stat -f%z "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}")"
-DESKTOP_ARCHSHA="$(shasum -a 256 "${OUT}/arch/aarch64/${DESKTOP_ARCHFILE}" | awk '{print $1}')"
+DESKTOP_ARCHCSIZE="$(filesize "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}")"
+DESKTOP_ARCHSHA="$(shasum -a 256 "${OUT}/arch/${ARCH_PRIMARY}/${DESKTOP_ARCHFILE}" | awk '{print $1}')"
 cat > "${DESKTOP_DBROOT}/desc" <<EOF
 %FILENAME%
 ${DESKTOP_ARCHFILE}
@@ -458,11 +486,18 @@ custom
 openbox
 
 EOF
-(cd "${WORK}/db" && tar -czf "${OUT}/arch/aarch64/totaljs-developer.db.tar.gz" \
+(cd "${WORK}/db" && tar -czf "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.tar.gz" \
   "${PACKAGE}-${VERSION}-${RELEASE}" "${DESKTOP_PACKAGE}-${DESKTOP_VERSION}-${DESKTOP_RELEASE}")
-cp "${OUT}/arch/aarch64/totaljs-developer.db.tar.gz" "${OUT}/arch/aarch64/totaljs-developer.db"
-gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/aarch64/totaljs-developer.db.tar.gz.sig" "${OUT}/arch/aarch64/totaljs-developer.db.tar.gz"
-cp "${OUT}/arch/aarch64/totaljs-developer.db.tar.gz.sig" "${OUT}/arch/aarch64/totaljs-developer.db.sig"
+cp "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.tar.gz" "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db"
+gpg --batch --yes --local-user "${KEY_FPR}" --detach-sign --output "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.tar.gz.sig" "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.tar.gz"
+cp "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.tar.gz.sig" "${OUT}/arch/${ARCH_PRIMARY}/totaljs-developer.db.sig"
+
+# The packages and the database are Architecture: any: the other architectures get the same files, signatures included
+for ARCH_DIR in ${ARCH_DIRS}; do
+  [ "${ARCH_DIR}" = "${ARCH_PRIMARY}" ] && continue
+  mkdir -p "${OUT}/arch/${ARCH_DIR}"
+  cp -p "${OUT}/arch/${ARCH_PRIMARY}"/* "${OUT}/arch/${ARCH_DIR}/"
+done
 
 # Image provisioning must never choose an obsolete package left by an earlier
 # repository build. Clean only after every new artifact has been built and
@@ -479,5 +514,6 @@ find "${ASSETS}" -maxdepth 1 -type f \
   -delete
 
 echo "[repo] complete"
-echo "  website: ${OUT}"
+echo "  repository: ${OUT}"
+echo "  address inside the packages: ${BASE_URL}"
 echo "  image assets: ${ASSETS}"

@@ -1,5 +1,7 @@
 # Total.js Developer Distros
 
+<p align="center"><img src="shared/branding/mascot.png" alt="Tux hugging the Total.js logo" width="220"></p>
+
 Official Linux environments for Total.js development: **Ubuntu LTS** and **Arch**, with the same desktop, the same tools and the same first-run experience on both. Everything a developer needs is installed: Node.js, npm, Git, Docker, PostgreSQL, an Nginx proxy, Total.js, the Total.js CLI, Code, Flow, Firefox and SSH.
 
 The desktop belongs to Total.js, not to Ubuntu or Arch. The operating system is only the foundation: the distros are customized only through the shared Total.js layer, never by patching Ubuntu or Arch themselves.
@@ -54,7 +56,8 @@ It validates the JSON files, that the catalog and the recipes agree on the ids, 
 2. **In progress:** the Ubuntu ISO for amd64 in GitHub Actions (`iso/ubuntu/`), which installs over the network and is tested by installing and booting it in QEMU.
 3. The installable ISO for amd64, with a boot test in QEMU, and the same for Arch.
 4. The shared Total.js layer in `shared/`, used by every distro and by the images of TotalVM.
-5. The package repository served from GitHub Pages.
+5. **In progress:** the package repository served from GitHub Pages (`tools/package-repo/`), for Ubuntu 24.04 and 26.04 on arm64 and amd64, and for Arch on aarch64 and x86_64.
+6. The Total.js layer as packages (a server and a desktop meta-package) that the ISOs and the images of TotalVM install.
 
 ## License
 

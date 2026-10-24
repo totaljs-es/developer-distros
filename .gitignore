@@ -15,3 +15,6 @@ tools/image-builder/images/*/assets/repository/
 tools/image-builder/images/*/assets/totaljs-release.*
 *.deb
 *.pkg.tar.zst
+
+# Local builds
+build/
