@@ -241,29 +241,38 @@ def _mix(a, b, t):
 
 
 def ember():
-    """Ubuntu-like: ribbons of warm light on aubergine, and the logo at the start of them."""
+    """Ubuntu-like: ribbons of warm light on aubergine. They come out from behind the logo and open up, like the tail of a comet."""
     rnd = random.Random(31)
+    fx, fy = 1050, 1100          # the logo
+    sx = 1240                    # where the ribbons start: behind the solid part of the logo, so that their tips are not seen in its hole
     ribbons = ''
     palette = [ORANGE, AMBER, MAGENTA, PURPLE, '#c34113', '#f4a261']
+
+    def smooth(t):
+        t = max(0.0, min(1.0, t))
+        return t * t * (3 - 2 * t)
+
     for i in range(11):
-        base = 1500 - i * 90 + rnd.uniform(-30, 30)
-        a1, a2 = rnd.uniform(110, 230), rnd.uniform(40, 90)
+        off = (i - 5) * 92 + rnd.uniform(-22, 22)             # where the ribbon ends up, above or below the axis
+        a1, a2 = rnd.uniform(70, 170), rnd.uniform(25, 70)
         f1, f2 = rnd.uniform(0.0007, 0.0013), rnd.uniform(0.002, 0.004)
         p1, p2, q = rnd.uniform(0, 6.28), rnd.uniform(0, 6.28), rnd.uniform(0, 6.28)
         top, bottom = [], []
-        for x in range(1300, W + 32, 32):
-            fade = min(1.0, (x - 1300) / 900)
-            y = base - (x - 1300) * 0.22 + a1 * math.sin(x * f1 + p1) + a2 * math.sin(x * f2 + p2)
-            th = (30 + 120 * (0.5 + 0.5 * math.sin(x * 0.0011 + q))) * fade
+        for x in range(sx, W + 32, 32):
+            open_ = smooth((x - sx) / 1500)                      # 0 at the logo, 1 when the tail is fully open
+            y = fy + open_ * (off - (x - sx) * 0.10 + a1 * math.sin(x * f1 + p1) + a2 * math.sin(x * f2 + p2))
+            th = (24 + 130 * (0.5 + 0.5 * math.sin(x * 0.0011 + q))) * smooth((x - sx) / 700)
             top.append((x, y))
             bottom.append((x, y + th))
         pts = top + bottom[::-1]
         color = palette[i % len(palette)]
-        ribbons += f'<polygon points="{" ".join("%d,%.1f" % p for p in pts)}" fill="{color}" fill-opacity="{rnd.uniform(0.10, 0.42):.3f}"/>\n'
+        ribbons += f'<polygon points="{" ".join("%d,%.1f" % p for p in pts)}" fill="{color}" fill-opacity="{rnd.uniform(0.12, 0.44):.3f}"/>\n'
         ribbons += f'<polyline points="{" ".join("%d,%.1f" % p for p in top)}" fill="none" stroke="{color}" stroke-opacity="0.55" stroke-width="2.5"/>\n'
     defs = f"""<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0013"/><stop offset="0.55" stop-color="{AUBERGINE}"/><stop offset="1" stop-color="#4a0d3b"/></linearGradient>
-<radialGradient id="warm" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.50"/><stop offset="0.5" stop-color="{ORANGE}" stop-opacity="0.16"/><stop offset="1" stop-color="{ORANGE}" stop-opacity="0"/></radialGradient>"""
-    body = f'<rect width="{W}" height="{H}" fill="url(#bg)"/>\n<circle cx="1050" cy="1100" r="900" fill="url(#warm)"/>\n{ribbons}{logo(1050, 1100, 640)}'
+<radialGradient id="warm" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{AMBER}" stop-opacity="0.50"/><stop offset="0.5" stop-color="{ORANGE}" stop-opacity="0.16"/><stop offset="1" stop-color="{ORANGE}" stop-opacity="0"/></radialGradient>
+<radialGradient id="tail" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{ORANGE}" stop-opacity="0.20"/><stop offset="1" stop-color="{ORANGE}" stop-opacity="0"/></radialGradient>"""
+    body = (f'<rect width="{W}" height="{H}" fill="url(#bg)"/>\n<ellipse cx="2350" cy="{fy - 40}" rx="1500" ry="420" fill="url(#tail)"/>\n'
+            f'<circle cx="{fx}" cy="{fy}" r="900" fill="url(#warm)"/>\n{ribbons}{logo(fx, fy, 640)}')
     return svg(body, defs, with_logo=True)
 
 
