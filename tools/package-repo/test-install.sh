@@ -42,6 +42,8 @@ node -e "require('/usr/local/lib/node_modules/total5/package.json')"
 echo "==> the group and the first person"
 getent group totaljs-developer
 id -nG "${FIRST}" | tr ' ' '\n' | grep -qx totaljs-developer
+test "$(cat /var/lib/totaljs-developer/first-user)" = "${FIRST}"
+test -f /usr/lib/systemd/system/totaljs-developer-first-user.service
 
 echo "==> the tools and the source that the release package wrote"
 for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done

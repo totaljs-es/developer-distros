@@ -7,6 +7,8 @@ on:
   push:
     paths:
       - 'iso/**'
+      - 'packages/**'
+      - 'tools/package-repo/**'
       - '.github/workflows/iso-ubuntu.yml'
 
 jobs:
@@ -38,6 +40,42 @@ jobs:
       - name: Install it and boot the installed system
         run: iso/ubuntu/test-install.sh build/totaljs-developer-ubuntu-server-amd64.iso
 
+      # The server edition for real: the ISO installs the Total.js layer from a repository, which here is built with a throwaway
+      # key and served on this computer (10.0.2.2 is this computer for the guest of QEMU).
+      - name: Build a repository with a throwaway key
+        run: |
+          sudo apt-get install -y libarchive-tools zstd binutils
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          mkdir -m 700 "$GNUPGHOME"
+          gpg --batch --passphrase '' --quick-generate-key 'Throwaway Repo <test@example.com>' ed25519 sign never
+          TOTALJS_REPO_GNUPGHOME="$GNUPGHOME" \
+          TOTALJS_REPO_KEY="$(gpg --list-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')" \
+          REPO_OUT="$PWD/build/site/repo" BASE_URL=http://10.0.2.2:8080/repo \
+            tools/package-repo/build.sh
+          (cd build/site && nohup python3 -m http.server 8080 --bind 127.0.0.1 > "$RUNNER_TEMP/http.log" 2>&1 &)
+          sleep 2
+          curl -fsS http://127.0.0.1:8080/repo/totaljs-developer.gpg -o /dev/null
+
+      - name: Build the ISO that installs the layer
+        env:
+          GRUB_TIMEOUT: '1'
+          EXTRA_KERNEL: console=ttyS0,115200n8
+          REPO_URL: http://10.0.2.2:8080/repo
+          WORK_DIR: build/iso-layer
+        run: iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci-layer build/totaljs-developer-ubuntu-server-layer-amd64.iso
+
+      - name: Install it, boot it and look for the layer
+        env:
+          WORK_DIR: build/iso-layer
+          MARKER_PATTERN: 'TOTALJS-ISO-TEST-OK node=v24\.[0-9]+\.[0-9]+ group=totaljs-developer'
+        run: iso/ubuntu/test-install.sh build/totaljs-developer-ubuntu-server-layer-amd64.iso
+
+      # The seed that people will use asks the questions that the installer asks: it is only built here, an install needs a person
+      - name: Build the ISO of the server edition
+        env:
+          WORK_DIR: build/iso-product
+        run: iso/ubuntu/build-iso.sh iso/ubuntu/seed build/totaljs-developer-ubuntu-server-amd64.iso
+
       - name: What was measured
         if: always()
         run: |
@@ -45,6 +83,7 @@ jobs:
             echo '### Ubuntu ISO (amd64)'
             ls -l build/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
             [ -f build/iso/timings.txt ] && echo "- $(cat build/iso/timings.txt)"
+            [ -f build/iso-layer/timings.txt ] && echo "- with the layer: $(cat build/iso-layer/timings.txt)"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Keep the logs
@@ -57,3 +96,7 @@ jobs:
             build/iso/boot.log
             build/iso/xorriso.log
             build/iso/timings.txt
+            build/iso-layer/install.log
+            build/iso-layer/boot.log
+            build/iso-layer/timings.txt
+            ${{ runner.temp }}/http.log

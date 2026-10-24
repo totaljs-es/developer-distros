@@ -44,6 +44,10 @@ An ISO installs `totaljs-developer-server` or `totaljs-developer-desktop`. The i
 
 `totaljs-developer-release` has Rosetta inside today. It moves to `totalvm-guest` in a version that replaces it, because systems already installed have it.
 
+## The first person of the system
+
+With an ISO the installer does not create the person in the system it installs: it hands the request to cloud-init, which creates them the first time the new system boots. At install time there is nobody to put in the group yet. `totaljs-developer-server` therefore ships `/usr/lib/totaljs-developer/add-first-user` and the unit `totaljs-developer-first-user.service`, which runs after `cloud-final.service`; the script adds the first regular person to `totaljs-developer` once, and the marker `/var/lib/totaljs-developer/first-user` stops it from running again (a person taken out of the group on purpose stays out). The package also runs it when it is installed, for systems that already have people.
+
 ## Things a package must not do
 
 - **Assume a user called `totaljs`.** In an image that user is made by `cloud-init`; with an ISO the installer creates the real one. The packages own a **group** (`totaljs-developer`) and `/www` belongs to it; the postinst adds the first regular user to it and to `docker`.

@@ -12,6 +12,7 @@
 #   WORK_DIR         where the downloads and the working files go (default build/iso)
 #   GRUB_TIMEOUT     seconds before the first boot entry starts (unset: the menu of Ubuntu is kept)
 #   EXTRA_KERNEL     more arguments for the kernel of the installer (the CI test adds the serial console)
+#   REPO_URL         the address of the package repository that the seed installs from (default: GitHub Pages)
 set -euo pipefail
 
 SEED="${1:?usage: build-iso.sh <seed-dir> <output.iso>}"
@@ -59,16 +60,21 @@ if [ ! -f "${WORK}/${ISO_NAME}" ]; then
 fi
 grep -F " *${ISO_NAME}" "${WORK}/SHA256SUMS" | (cd "${WORK}" && sha256_check) || die "the checksum of ${ISO_NAME} does not match"
 
-# 3. The seed, with a random password that nobody knows: the real user is created by the person who installs
+# 3. The seed, with a random password that nobody knows (the real user is created by the person who installs) and the
+# address of the repository. The script that installs the Total.js layer travels with every seed.
 rm -rf "${WORK}/nocloud"
 cp -R "${SEED}" "${WORK}/nocloud"
+cp "$(dirname "$0")/install-layer.sh" "${WORK}/nocloud/install-layer.sh"
 HASH="$(openssl passwd -6 "$(openssl rand -hex 24)")"
-python3 - "${WORK}/nocloud/user-data" "${HASH}" <<'PY'
-import sys
-path, value = sys.argv[1], sys.argv[2]
+python3 - "${WORK}/nocloud/user-data" "${HASH}" "${REPO_URL:-https://totaljs-es.github.io/developer-distros/repo}" <<'PY'
+import re, sys
+path, password, repository = sys.argv[1], sys.argv[2], sys.argv[3]
 text = open(path).read()
-if '__PASSWORD_HASH__' in text:
-    open(path, 'w').write(text.replace('__PASSWORD_HASH__', value))
+text = text.replace('__PASSWORD_HASH__', password).replace('__REPO_URL__', repository)
+left = re.findall(r'__[A-Z_]+__', text)
+if left:
+    sys.exit('the seed still has placeholders: ' + ', '.join(sorted(set(left))))
+open(path, 'w').write(text)
 PY
 
 # 4. The boot menu: take autoinstall and the seed

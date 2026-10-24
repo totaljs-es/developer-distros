@@ -1,0 +1,14 @@
+#cloud-config
+# The seed of the installer of the Total.js Developer Distro, server edition. The person decides the language, the keyboard,
+# the network, the disk and who they are; the rest is decided here. The Total.js layer is downloaded while it installs.
+autoinstall:
+  version: 1
+  interactive-sections:
+    - keyboard
+    - network
+    - storage
+    - identity
+  ssh:
+    install-server: true
+  late-commands:
+    - sh /cdrom/nocloud/install-layer.sh /target __REPO_URL__ totaljs-developer-server

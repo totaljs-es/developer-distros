@@ -1,0 +1,42 @@
+#cloud-config
+# Only for the test of the CI: an unattended install that also installs the Total.js layer, from a repository that the CI
+# serves on the computer that runs QEMU (10.0.2.2 is that computer for the guest). The password is a random one that
+# build-iso.sh writes and nobody knows.
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: totaljs-ci
+    username: ci
+    password: "__PASSWORD_HASH__"
+  ssh:
+    install-server: true
+  storage:
+    layout:
+      name: direct
+  updates: security
+  shutdown: poweroff
+  late-commands:
+    - sh /cdrom/nocloud/install-layer.sh /target __REPO_URL__ totaljs-developer-server
+    # A service that says on the serial console that the installed system booted, and what it has
+    - |
+      cat > /target/usr/local/sbin/totaljs-iso-test <<'SCRIPT'
+      #!/bin/sh
+      NODE="$(/usr/local/bin/node --version 2>&1)"
+      GROUP="$(id -nG ci | tr ' ' '\n' | grep -x totaljs-developer)"
+      echo "TOTALJS-ISO-TEST-OK node=${NODE} group=${GROUP}" > /dev/ttyS0
+      SCRIPT
+      chmod +x /target/usr/local/sbin/totaljs-iso-test
+      cat > /target/etc/systemd/system/totaljs-iso-test.service <<'UNIT'
+      [Unit]
+      Description=Says on the serial console that the installed system booted
+      After=multi-user.target cloud-final.service totaljs-developer-first-user.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/totaljs-iso-test
+      [Install]
+      WantedBy=multi-user.target
+      UNIT
+    - curtin in-target --target=/target -- systemctl enable totaljs-iso-test.service

@@ -1,0 +1,44 @@
+#!/bin/sh
+# install-layer.sh - installs the Total.js layer into the system that the Ubuntu installer has just put in place.
+#
+#   sh /cdrom/nocloud/install-layer.sh <target> <repository-address> [package]
+#
+# It runs in the installer, from the late-commands of the autoinstall seed: <target> is the new system (/target). The ISO
+# is small on purpose, so the packages are downloaded now and this needs a network connection.
+set -eu
+
+TARGET="${1:?usage: install-layer.sh <target> <repository-address> [package]}"
+REPO="${2:?usage: install-layer.sh <target> <repository-address> [package]}"
+PACKAGE="${3:-totaljs-developer-server}"
+KEY=/tmp/totaljs-developer.gpg
+
+fetch() {
+    if command -v curl >/dev/null 2>&1; then curl -fsS --retry 5 --retry-delay 3 -o "$2" "$1"
+    elif command -v wget >/dev/null 2>&1; then wget -q -t 5 -O "$2" "$1"
+    else python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' "$1" "$2"
+    fi
+}
+
+echo "Total.js: downloading from ${REPO}"
+if ! fetch "${REPO}/totaljs-developer.gpg" "${KEY}"; then
+    echo "Total.js: cannot reach ${REPO}." >&2
+    echo "Total.js: this installer downloads the Total.js layer, so it needs a network connection (cable or Wi-Fi). Connect and install again." >&2
+    exit 1
+fi
+
+# The key and the source, as the package totaljs-developer-release writes them later
+install -D -m 0644 "${KEY}" "${TARGET}/usr/share/keyrings/totaljs-developer-archive-keyring.gpg"
+CODENAME="$(. "${TARGET}/etc/os-release" && echo "${VERSION_CODENAME}")"
+mkdir -p "${TARGET}/etc/apt/sources.list.d"
+cat > "${TARGET}/etc/apt/sources.list.d/totaljs-developer.sources" <<EOF
+Types: deb
+URIs: ${REPO}/ubuntu
+Suites: ${CODENAME}
+Components: main
+Signed-By: /usr/share/keyrings/totaljs-developer-archive-keyring.gpg
+EOF
+
+curtin in-target --target="${TARGET}" -- apt-get update
+curtin in-target --target="${TARGET}" -- env DEBIAN_FRONTEND=noninteractive apt-get install -y "${PACKAGE}"
+
+echo "Total.js: ${PACKAGE} installed"

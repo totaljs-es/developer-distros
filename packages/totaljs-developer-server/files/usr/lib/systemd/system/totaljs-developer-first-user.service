@@ -1,0 +1,12 @@
+[Unit]
+Description=Add the first person of the system to the Total.js developer group
+# cloud-init creates the person that the installer asked for
+After=cloud-final.service
+ConditionPathExists=!/var/lib/totaljs-developer/first-user
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/totaljs-developer/add-first-user
+
+[Install]
+WantedBy=multi-user.target

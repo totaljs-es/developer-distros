@@ -11,7 +11,8 @@ ISO="${1:?usage: test-install.sh <image.iso>}"
 WORK="${WORK_DIR:-build/iso}"
 INSTALL_TIMEOUT="${INSTALL_TIMEOUT:-3000}"
 BOOT_TIMEOUT="${BOOT_TIMEOUT:-600}"
-MARKER="TOTALJS-ISO-TEST-OK"
+# What the installed system says on the serial console: a regular expression, so a test can ask for more than "it booted"
+MARKER="${MARKER_PATTERN:-TOTALJS-ISO-TEST-OK}"
 
 log() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -64,7 +65,7 @@ QEMU=$!
 
 FOUND=0
 for _ in $(seq 1 "${BOOT_TIMEOUT}"); do
-    if grep -q "${MARKER}" "${WORK}/boot.log" 2>/dev/null; then FOUND=1; break; fi
+    if grep -q -E "${MARKER}" "${WORK}/boot.log" 2>/dev/null; then FOUND=1; break; fi
     kill -0 "${QEMU}" 2>/dev/null || break
     sleep 1
 done

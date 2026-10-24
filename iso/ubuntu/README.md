@@ -24,8 +24,14 @@ iso/ubuntu/test-install.sh build/test.iso
 
 The workflow `.github/workflows/iso-ubuntu.yml` runs both, and keeps the logs of the installer and of the first boot.
 
+## The server edition
+
+`seed/` is the seed that people use: it keeps the installer's own questions (keyboard, network, disk, who you are) and, when it has installed Ubuntu, `install-layer.sh` downloads the key and the source of the Total.js repository and installs `totaljs-developer-server` into the new system. The address of the repository is `REPO_URL` (the default is GitHub Pages). It needs a network connection: if the repository cannot be reached it says so and stops.
+
+The workflow builds a repository with a throwaway key, serves it on the computer of the runner (`10.0.2.2` for the guest of QEMU) and installs the ISO of `seed-ci-layer/` unattended. The installed system must boot, have Node.js 24 and have its first person in the group `totaljs-developer`. The ISO of `seed/` is only built there: its questions need a person.
+
 ## What is not done yet
 
-- The seed that installs the Total.js layer (desktop, Docker, PostgreSQL, Code, Flow...) and asks the person for the user and the disk.
+- The rest of the layer in the seed: today `totaljs-developer-server` has the runtime, the tools and SSH; the Docker stack, the DNS, Total.js Center and the brand are still to be packages. The desktop edition and its entry in the boot menu.
 - A test of the UEFI boot, and of the desktop edition.
 - Publishing the ISO in a release (the limit of a file in a release is 2 GiB, and the size is measured first).
