@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    if [ -d /run/systemd/system ]; then systemctl stop totaljs-center.service >/dev/null 2>&1 || true; fi
+    systemctl disable totaljs-center.service >/dev/null 2>&1 || true
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,25 @@
+[Unit]
+Description=Total.js Center
+After=network.target
+
+[Service]
+Type=simple
+User=totalcenter
+Group=totalcenter
+WorkingDirectory=/var/lib/totaljs-center
+Environment=NODE_ENV=production
+Environment=NODE_PATH=/usr/local/lib/node_modules
+# as root ("+"): copies the application to the folder of the service
+ExecStartPre=+/usr/lib/totaljs-developer/center-sync
+ExecStart=/usr/local/bin/node index.js
+Restart=on-failure
+RestartSec=3
+# it only reads the state of the services and the names of the folders of /www
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/totaljs-center
+
+[Install]
+WantedBy=multi-user.target

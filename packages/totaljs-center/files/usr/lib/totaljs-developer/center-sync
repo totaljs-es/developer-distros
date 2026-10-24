@@ -1,0 +1,12 @@
+#!/bin/sh
+# Total.js works in the folder it starts in and writes there (tmp, logs, database), so the application that the package
+# installs is copied to the folder of the service. What the service wrote stays; the code is replaced by the one of the package.
+set -e
+
+SRC=/usr/share/totaljs-developer/center
+DST=/var/lib/totaljs-center
+
+install -d -o totalcenter -g totalcenter -m 750 "${DST}"
+rm -rf "${DST}/controllers" "${DST}/public"
+cp -a "${SRC}/." "${DST}/"
+chown -R totalcenter:totalcenter "${DST}"

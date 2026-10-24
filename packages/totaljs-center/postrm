@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    # the application is a copy; what the service wrote is not the person's work
+    rm -rf /var/lib/totaljs-center
+    ;;
+esac
+
+exit 0

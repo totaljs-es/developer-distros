@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Total.js Center</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/center.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+	<div class="brand">
+		<img src="/logo.svg" width="40" height="40" alt="">
+		<div>
+			<h1>Total.js Center</h1>
+			<p id="where">Total.js Developer</p>
+		</div>
+	</div>
+	<span class="pulse" id="pulse" role="status" aria-live="polite">Connecting…</span>
+</header>
+<main id="main">
+	<section class="hero" aria-labelledby="hello">
+		<div>
+			<h2 id="hello">Everything you need, in one place.</h2>
+			<p>Write code, build flows and look at your database in the browser. Every project you create in <code>/www</code> gets its own address.</p>
+		</div>
+		<dl class="facts">
+			<div><dt>Domain</dt><dd id="domain" class="mono">…</dd></div>
+			<div><dt>Address</dt><dd id="address" class="mono">…</dd></div>
+		</dl>
+	</section>
+
+	<section aria-labelledby="apps-title">
+		<h3 id="apps-title">Tools</h3>
+		<div class="tiles" id="services"></div>
+	</section>
+
+	<section aria-labelledby="projects-title">
+		<h3 id="projects-title">Projects</h3>
+		<div class="card" id="projects"></div>
+	</section>
+
+	<div class="two">
+		<section class="card" aria-labelledby="db-title">
+			<h3 id="db-title">PostgreSQL</h3>
+			<p class="note">Any container of your projects reaches it at <code>postgres</code>, through the Docker network <code>proxy</code>. From your code:</p>
+			<pre id="connection" class="mono" tabindex="0"></pre>
+			<button type="button" class="copy" id="copy">Copy</button>
+			<p class="note">The password of pgAdmin is in <code id="passwords"></code>. To change the version or to publish the port to the host, edit <code id="compose"></code>.</p>
+		</section>
+		<section class="card" aria-labelledby="machine-title">
+			<h3 id="machine-title">This computer</h3>
+			<dl class="list" id="machine"></dl>
+			<h4>Services</h4>
+			<div class="chips" id="system"></div>
+		</section>
+	</div>
+</main>
+<footer>Total.js Developer · <a href="https://www.totaljs.com">totaljs.com</a></footer>
+<script src="/center.js"></script>
+</body>
+</html>
