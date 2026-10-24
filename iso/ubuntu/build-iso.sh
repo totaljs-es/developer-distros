@@ -99,6 +99,31 @@ for i, line in enumerate(lines):
         patched += 1
 if patched == 0:
     sys.exit('no "linux /casper/vmlinuz" line in grub.cfg: the menu of this ISO is not the one that was expected')
+# Two ways in, which only differ in the edition that install-layer.sh reads from the command line: the first entry of the menu is
+# copied, and the copy installs the desktop edition. The entries that were already there install the server edition.
+start = next((i for i, line in enumerate(lines) if re.match(r'\s*menuentry\s', line)), None)
+if start is None:
+    sys.exit('no menuentry in grub.cfg: the menu of this ISO is not the one that was expected')
+end, depth = start, 0
+for j in range(start, len(lines)):
+    depth += lines[j].count('{') - lines[j].count('}')
+    if depth == 0 and j > start - 1 and '}' in lines[j]:
+        end = j
+        break
+server = lines[start:end + 1]
+desktop = list(server)
+title = re.match(r"(\s*menuentry\s+)(['\"])(.*?)\2", server[0])
+if title is None:
+    sys.exit('the first menuentry has no title that can be read')
+def retitle(block, label):
+    block[0] = block[0].replace(title.group(0), title.group(1) + "'" + label + "'", 1)
+retitle(server, 'Install Total.js Developer, server edition')
+retitle(desktop, 'Install Total.js Developer, desktop edition')
+for block, edition in ((server, 'server'), (desktop, 'desktop')):
+    for i, line in enumerate(block):
+        if re.match(r'\s*linux\s+/casper/vmlinuz', line):
+            block[i] = line.replace(' ---', ' totaljs.edition=' + edition + ' ---', 1) if ' ---' in line else line + ' totaljs.edition=' + edition
+lines[start:end + 1] = desktop + server
 text = '\n'.join(lines)
 if timeout:
     text, count = re.subn(r'^set timeout=\d+', 'set timeout=' + timeout, text, flags=re.M)

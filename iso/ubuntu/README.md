@@ -63,6 +63,6 @@ The ISO installs the packages of Total.js from the address of the repository of 
 
 ## What is not done yet
 
-- The rest of the layer in the seed: today `totaljs-developer-server` has the runtime, the tools and SSH; the Docker stack, the DNS, Total.js Center and the brand are still to be packages. The desktop edition and its entry in the boot menu.
+- **Two editions in one ISO:** the boot menu has two entries, desktop and server, that differ only in `totaljs.edition=` on the kernel command line. The seed calls `install-layer.sh ... auto`, which reads it from `/proc/cmdline` and installs `totaljs-developer-desktop` or `totaljs-developer-server` (the server one when nothing is said, which is also what the entries of the original menu that are not ours get). The desktop edition downloads more (Xorg, the desktop and Firefox), so it needs a good connection.
 - A test of the UEFI boot, and of the desktop edition.
 - Publishing the ISO in a release (the limit of a file in a release is 2 GiB, and the size is measured first).

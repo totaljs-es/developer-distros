@@ -10,6 +10,13 @@ set -eu
 TARGET="${1:?usage: install-layer.sh <target> <repository-address> [package]}"
 REPO="${2:?usage: install-layer.sh <target> <repository-address> [package]}"
 PACKAGE="${3:-totaljs-developer-server}"
+# "auto": the edition that the person chose in the boot menu, which the installer kept in its command line (the server one without it)
+if [ "${PACKAGE}" = auto ]; then
+    case " $(cat /proc/cmdline) " in
+        *' totaljs.edition=desktop '*) PACKAGE=totaljs-developer-desktop ;;
+        *) PACKAGE=totaljs-developer-server ;;
+    esac
+fi
 KEY=/tmp/totaljs-developer.gpg
 
 fetch() {
