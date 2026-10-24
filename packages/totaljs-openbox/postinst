@@ -15,7 +15,7 @@ for home in /home/*; do
   [ "${owner}" != root ] || continue
   [ ! -e "${home}/.config/openbox" ] || continue
   mkdir -p "${home}/.config"
-  for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm; do
+  for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm gtk-3.0 gtk-4.0; do
     [ ! -e "${home}/.config/${dir}" ] || continue
     cp -a "/etc/skel/.config/${dir}" "${home}/.config/${dir}"
     chown -R "${owner}:$(stat -c %G "${home}")" "${home}/.config/${dir}"

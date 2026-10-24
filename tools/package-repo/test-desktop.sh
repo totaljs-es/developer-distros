@@ -25,7 +25,7 @@ echo "==> the sources and the desktop edition"
 # the output is kept, and the end of it is shown when apt fails: a failed postinst says which package is the one
 install_logged() {
     if ! apt-get install -y "$@" >/tmp/apt.log 2>&1; then
-        grep -n -i -E "^E:|dpkg: error|error processing|subprocess|returned error|failed" /tmp/apt.log | tail -30 >&2 || true
+        grep -n -i -A6 -E "dpkg: error processing|trying to overwrite" /tmp/apt.log | head -60 >&2 || true
         echo "---- the end of the log of apt ----" >&2
         tail -60 /tmp/apt.log >&2
         exit 1
@@ -37,7 +37,7 @@ apt-get update -qq
 install_logged totaljs-developer-desktop
 
 echo "==> what the desktop promises"
-for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/tint2/tint2rc \
+for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/tint2/tint2rc /etc/skel/.config/gtk-3.0/settings.ini \
          /usr/bin/totaljs-open /usr/bin/totaljs-wallpaper /etc/lightdm/lightdm.conf.d/50-totaljs.conf /etc/lightdm/lightdm-gtk-greeter.conf.d/50-totaljs.conf /usr/share/applications/totaljs-center.desktop; do
     test -e "${f}" || { echo "missing ${f}" >&2; exit 1; }
 done
