@@ -41,6 +41,15 @@ git -c user.name="${GIT_AUTHOR_NAME:-Total.js}" -c user.email="${GIT_AUTHOR_EMAI
 
 echo "prepared ${PAGES}: $(git ls-files | wc -l | tr -d ' ') files, $(du -sh . | cut -f1)"
 
+# The prepared branch is also made a branch of this repository (`pages`), so that it can be published with the same tool that publishes `main`
+# (the terminal does not always have the credentials: see the README). It is replaced every time: it is a copy, not a place to work.
+if [ "$(git -C "${ROOT}" branch --show-current)" = pages ]; then
+  echo "this repository is on the branch pages: it was not updated from build/pages. Go back to main (git checkout main) and run this again"
+else
+  git -C "${ROOT}" fetch --quiet --force "${PAGES}" pages:pages
+  echo "the branch pages of this repository is now the prepared one ($(git -C "${ROOT}" rev-parse --short pages))"
+fi
+
 if [ "${1:-}" = "--push" ]; then
   REMOTE="$(git -C "${ROOT}" remote get-url origin)"
   git push --force "${REMOTE}" pages
