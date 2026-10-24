@@ -60,18 +60,18 @@ case "${ALTERNATIVE}" in *'Value: /usr/share/plymouth/themes/totaljs/totaljs.ply
 grep -q 'quiet splash' /etc/default/grub.d/99-totaljs.cfg
 dpkg -s plymouth-label >/dev/null
 
-echo "==> the wallpapers (a package of its own: only the desktop needs them)"
-apt-get install -y totaljs-wallpapers >/dev/null
-test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
-apt-get remove -y totaljs-wallpapers >/dev/null
-test ! -e /usr/share/backgrounds/totaljs
-
 echo "==> the source that the package wrote works by itself"
 # the test source and the one of the package point to the same repository with different keys: apt refuses both at once
 rm /etc/apt/sources.list.d/totaljs-test.list
 apt-get update -qq
 POLICY="$(apt-cache policy totaljs-node)"
 case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'totaljs-node is not available from the source of the package' >&2; exit 1 ;; esac
+
+echo "==> the wallpapers (a package of its own: only the desktop needs them)"
+apt-get install -y totaljs-wallpapers >/dev/null
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
+apt-get remove -y totaljs-wallpapers >/dev/null
+test ! -e /usr/share/backgrounds/totaljs
 
 echo "==> installing it again changes nothing"
 apt-get install -y --reinstall totaljs-node >/dev/null
