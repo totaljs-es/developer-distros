@@ -1,0 +1,16 @@
+Package: totaljs-developer-server
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: metapackages
+Priority: optional
+Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0),
+ ca-certificates, curl, wget, gnupg, git, unzip, zip, zstd, xz-utils,
+ build-essential, pkg-config, python3-minimal,
+ htop, nano, vim, less, tree, jq, tmux, sudo,
+ openssh-server, ufw, fail2ban, software-properties-common
+Homepage: https://www.totaljs.com
+Description: Total.js Developer Distro, server edition
+ The command-line environment for developing with Total.js: Node.js and Total.js,
+ the usual tools, an SSH server, a firewall and fail2ban. This package installs the pieces;
+ each one is a package of its own and can be updated alone.

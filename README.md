@@ -23,6 +23,7 @@ The desktop belongs to Total.js, not to Ubuntu or Arch. The operating system is 
 tools/image-builder/   builds an image from a stock cloud image or rootfs (macOS, Apple Virtualization)
   images/<id>/         the recipe of each distro: image.json, provision/*.sh, cloud-init, assets
 tools/package-repo/    builds and signs the APT and Pacman repository with the Total.js packages
+packages/              the source of the Total.js layer as packages (control, scripts, files), see docs/layer.md
 iso/ubuntu/            the installable ISO for amd64 (in progress), remastered from the official Ubuntu ISO
 manifests/             the catalog that TotalVM reads: index.json and one manifest.json per image
 shared/                the Total.js layer common to every distro (being moved here from the recipes)

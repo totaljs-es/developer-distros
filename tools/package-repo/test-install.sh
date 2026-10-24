@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# test-install.sh - uses the repository the way a system does, inside a clean Ubuntu container (the CI runs it for each series).
+#
+#   docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:24.04 bash /test.sh
+#
+# The repository has to be built with BASE_URL=file:///repo and signed with a throwaway key. It installs the server layer,
+# checks what it promises, removes it and checks that nothing of it stays.
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+# a container has no services to start
+printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d
+chmod +x /usr/sbin/policy-rc.d
+
+CODENAME="$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+echo "==> ${CODENAME}: $(. /etc/os-release && echo "${PRETTY_NAME}")"
+
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends ca-certificates curl gnupg xz-utils >/dev/null
+
+# the first regular person of the system, as the installer would have made it (the image of Ubuntu already has one)
+FIRST="$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')"
+if [ -z "${FIRST}" ]; then useradd -m -u 1000 dev; FIRST=dev; fi
+echo "the first person is ${FIRST}"
+
+install -m 0644 /repo/totaljs-developer.gpg /usr/share/keyrings/totaljs-test.gpg
+echo "deb [signed-by=/usr/share/keyrings/totaljs-test.gpg] file:///repo/ubuntu ${CODENAME} main" > /etc/apt/sources.list.d/totaljs-test.list
+apt-get update -qq
+apt-cache policy totaljs-developer-server | grep -q 'Candidate: 1.0.0-1'
+
+echo "==> installing totaljs-developer-server"
+apt-get install -y totaljs-developer-server
+
+. /usr/share/totaljs-node/versions
+echo "==> the runtime"
+test "$(node --version)" = "${NODE_VERSION}"
+test "$(/usr/bin/node --version)" = "${NODE_VERSION}"
+npm --version
+test "$(npm ls -g --depth=0 --prefix /usr/local 2>/dev/null | grep -c -E 'total5@|total.js@')" = 2
+node -e "require('/usr/local/lib/node_modules/total5/package.json')"
+
+echo "==> the group and the first person"
+getent group totaljs-developer
+id -nG "${FIRST}" | tr ' ' '\n' | grep -qx totaljs-developer
+
+echo "==> the tools and the source that the release package wrote"
+for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done
+grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources
+
+echo "==> installing it again changes nothing"
+apt-get install -y --reinstall totaljs-node >/dev/null
+test "$(node --version)" = "${NODE_VERSION}"
+
+echo "==> removing it"
+apt-get remove -y totaljs-developer-server totaljs-node >/dev/null
+test ! -e /usr/local/bin/node
+test ! -e /usr/bin/node
+test ! -e "/opt/node-${NODE_VERSION}"
+test ! -e /usr/local/lib/node_modules/total5
+
+echo "OK ${CODENAME}"

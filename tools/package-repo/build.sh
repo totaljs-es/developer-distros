@@ -199,6 +199,46 @@ DESKTOP_DEBFILE="${DESKTOP_PACKAGE}_${DESKTOP_VERSION}-${DESKTOP_RELEASE}_all.de
 (cd "${DESKTOP_DEBBUILD}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" debian-binary control.tar.gz data.tar.gz)
 cp "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" "${ASSETS}/${DESKTOP_DEBFILE}"
 
+# The packages of packages/: one directory each, with `control`, the maintainer scripts and `files/` (what it installs).
+# The index entry of each one is its control file plus where the file is, how big it is and its checksum.
+build_package() {
+  local dir="$1" name version arch work deb size sha
+  name="$(awk -F': ' '$1 == "Package" { print $2 }' "${dir}/control")"
+  version="$(awk -F': ' '$1 == "Version" { print $2 }' "${dir}/control")"
+  arch="$(awk -F': ' '$1 == "Architecture" { print $2 }' "${dir}/control")"
+  [ -n "${name}" ] && [ -n "${version}" ] && [ -n "${arch}" ] || { echo "${dir}/control needs Package, Version and Architecture" >&2; exit 1; }
+  [ "$(basename "${dir}")" = "${name}" ] || { echo "${dir} is the package ${name}: the folder must have its name" >&2; exit 1; }
+
+  echo "[repo] building ${name} ${version}"
+  work="${WORK}/pkg-${name}"
+  mkdir -p "${work}/control" "${work}/data"
+  [ ! -d "${dir}/files" ] || cp -R "${dir}/files/." "${work}/data/"
+  cp "${dir}/control" "${work}/control/control"
+  printf 'Installed-Size: %s\n' "$(du -sk "${work}/data" | awk '{print $1}')" >> "${work}/control/control"
+  for script in preinst postinst prerm postrm; do
+    [ ! -f "${dir}/${script}" ] || install -m 0755 "${dir}/${script}" "${work}/control/${script}"
+  done
+  printf '2.0\n' > "${work}/debian-binary"
+  (cd "${work}/control" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../control.tar.gz $(ls))
+  (cd "${work}/data" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../data.tar.gz .)
+
+  deb="${name}_${version}_${arch}.deb"
+  mkdir -p "${OUT}/ubuntu/pool/main/t/${name}"
+  (cd "${work}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${name}/${deb}" debian-binary control.tar.gz data.tar.gz)
+  size="$(filesize "${OUT}/ubuntu/pool/main/t/${name}/${deb}")"
+  sha="$(shasum -a 256 "${OUT}/ubuntu/pool/main/t/${name}/${deb}" | awk '{print $1}')"
+  {
+    cat "${work}/control/control"
+    printf 'Filename: pool/main/t/%s/%s\nSize: %s\nSHA256: %s\n\n' "${name}" "${deb}" "${size}" "${sha}"
+  } >> "${WORK}/Packages.extra"
+}
+
+: > "${WORK}/Packages.extra"
+for PACKAGE_DIR in "${ROOT}"/packages/*/; do
+  [ -f "${PACKAGE_DIR}control" ] || continue
+  build_package "${PACKAGE_DIR%/}"
+done
+
 DESKTOP_DEBSIZE="$(filesize "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}")"
 DESKTOP_DEBSHA="$(shasum -a 256 "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" | awk '{print $1}')"
 
@@ -235,6 +275,8 @@ Description: Total.js Developer desktop integration
  Applies compatible visual and desktop integration updates without replacing user projects.
 
 EOF
+
+cat "${WORK}/Packages.extra" >> "${WORK}/Packages.stanzas"
 
 # One index for every series and architecture: the packages are Architecture: all, so the files are the same
 for SUITE in ${SUITES}; do

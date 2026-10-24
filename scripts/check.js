@@ -72,7 +72,7 @@ for (const id of recipes) {
 }
 
 // 3. No shell script has a syntax error
-for (const file of files.filter(file => file.endsWith('.sh') || /\/(apply-menu-icons|totaljs-appmenu|totaljs-pasystray|90-totaljs-wizard)$/.test(relative(file)))) {
+for (const file of files.filter(file => file.endsWith('.sh') || /\/(apply-menu-icons|totaljs-appmenu|totaljs-pasystray|90-totaljs-wizard|preinst|postinst|prerm|postrm)$/.test(relative(file)))) {
 
 	const first = Fs.readFileSync(file, 'utf8').split('\n')[0];
 

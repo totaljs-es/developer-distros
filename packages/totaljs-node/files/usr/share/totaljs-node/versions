@@ -1,0 +1,7 @@
+# The runtime of the Total.js Developer Distros. A new version of this package changes these lines and nothing else.
+# The checksums are the ones that nodejs.org publishes in https://nodejs.org/dist/<version>/SHASUMS256.txt
+NODE_VERSION=v24.22.1
+NODE_SHA256_linux_x64=6c172a9ab6718f7b801fb5a7bd486af2ee5e32758086a04b84fcce2aa77095e6
+NODE_SHA256_linux_arm64=dbabf7a1cbf947e6059ffad2c27b80041db97dea1e553b62afdee7f13fca336e
+TOTAL5_VERSION=0.0.19
+TOTAL3_VERSION=3.4.13

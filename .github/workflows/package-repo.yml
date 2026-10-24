@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - 'tools/package-repo/**'
+      - 'packages/**'
       - '.github/workflows/package-repo.yml'
 
 jobs:
@@ -32,7 +33,7 @@ jobs:
       - name: Build the repository
         env:
           REPO_OUT: ${{ github.workspace }}/build/site/repo
-          BASE_URL: file://${{ github.workspace }}/build/site/repo
+          BASE_URL: file:///repo
         run: tools/package-repo/build.sh
 
       - name: What was built
@@ -41,6 +42,8 @@ jobs:
       - name: Use it with APT, as a system does
         run: |
           set -x
+          # the packages carry the address file:///repo
+          sudo ln -s "$PWD/build/site/repo" /repo
           REPO="$PWD/build/site/repo"
           CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")"
           sudo install -m 0644 "$REPO/totaljs-developer.gpg" /usr/share/keyrings/totaljs-test.gpg
@@ -60,6 +63,13 @@ jobs:
           # and removes it
           sudo apt-get remove -y totaljs-developer-release
           test ! -e /etc/apt/sources.list.d/totaljs-developer.sources
+
+      # The server layer in a clean Ubuntu of each series: install, what it promises, remove
+      - name: The server layer on Ubuntu 24.04
+        run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:24.04 bash /test.sh
+
+      - name: The server layer on Ubuntu 26.04
+        run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:26.04 bash /test.sh
 
       - name: The other series (resolute) is valid too
         run: |

@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+. /usr/share/totaljs-node/versions
+
+case "$(dpkg --print-architecture)" in
+  amd64) PLATFORM=linux-x64; SHA256="${NODE_SHA256_linux_x64}" ;;
+  arm64) PLATFORM=linux-arm64; SHA256="${NODE_SHA256_linux_arm64}" ;;
+  *) echo "totaljs-node: this architecture is not supported" >&2; exit 1 ;;
+esac
+
+PREFIX="/opt/node-${NODE_VERSION}"
+STATE=/var/lib/totaljs-node
+mkdir -p "${STATE}"
+
+if [ ! -x "${PREFIX}/bin/node" ]; then
+  ARCHIVE="node-${NODE_VERSION}-${PLATFORM}.tar.xz"
+  TMP="$(mktemp -d)"
+  trap 'rm -rf "${TMP}"' EXIT
+  curl -fL --retry 5 --retry-delay 2 -o "${TMP}/${ARCHIVE}" "https://nodejs.org/dist/${NODE_VERSION}/${ARCHIVE}"
+  echo "${SHA256}  ${TMP}/${ARCHIVE}" | sha256sum -c -
+  rm -rf "${PREFIX}" "${PREFIX}.new"
+  mkdir -p "${PREFIX}.new"
+  tar -xJf "${TMP}/${ARCHIVE}" --strip-components=1 -C "${PREFIX}.new"
+  mv "${PREFIX}.new" "${PREFIX}"
+fi
+
+for bin in node npm npx corepack; do
+  ln -sf "${PREFIX}/bin/${bin}" "/usr/local/bin/${bin}"
+done
+# systemd units and other tools use /usr/bin/node
+ln -sf "${PREFIX}/bin/node" /usr/bin/node
+
+# The release that an earlier version of this package installed is removed, and only that one
+if [ -f "${STATE}/prefix" ]; then
+  OLD="$(cat "${STATE}/prefix")"
+  if [ -n "${OLD}" ] && [ "${OLD}" != "${PREFIX}" ]; then rm -rf "${OLD}"; fi
+fi
+printf '%s\n' "${PREFIX}" > "${STATE}/prefix"
+
+# The frameworks are part of this release of the distro, not a moving channel
+PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" install -g --prefix /usr/local --no-fund --no-audit \
+  "total5@${TOTAL5_VERSION}" "total.js@${TOTAL3_VERSION}"
+
+exit 0

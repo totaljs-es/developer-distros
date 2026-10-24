@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge) ;;
+  *) exit 0 ;;
+esac
+
+STATE=/var/lib/totaljs-node
+[ -f "${STATE}/prefix" ] || exit 0
+PREFIX="$(cat "${STATE}/prefix")"
+
+if [ -x "${PREFIX}/bin/npm" ]; then
+  PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" uninstall -g --prefix /usr/local total5 total.js >/dev/null 2>&1 || true
+fi
+
+# Only the links that this package made
+for bin in node npm npx corepack; do
+  if [ "$(readlink "/usr/local/bin/${bin}" 2>/dev/null)" = "${PREFIX}/bin/${bin}" ]; then rm -f "/usr/local/bin/${bin}"; fi
+done
+if [ "$(readlink /usr/bin/node 2>/dev/null)" = "${PREFIX}/bin/node" ]; then rm -f /usr/bin/node; fi
+
+rm -rf "${PREFIX}" "${STATE}"
+exit 0

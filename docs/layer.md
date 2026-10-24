@@ -57,9 +57,13 @@ An ISO installs `totaljs-developer-server` or `totaljs-developer-desktop`. The i
 2. **Node.js:** the pinned tarball of nodejs.org with its SHA-256, one for each architecture, downloaded by the `totaljs-node` package. The repository stays small and the runtime is the same on every system. The version and the checksums live in the package, not in a script of an image.
 3. **The developer user:** the group `totaljs-developer`, not a fixed user. `/www` belongs to the group, and the postinst adds the first regular user (UID 1000 or higher) to it and to `docker`.
 
+## Versions
+
+The versions are in `packages/totaljs-node/files/usr/share/totaljs-node/versions` and nowhere else. Node.js is the newest 24.x LTS (24.22.1, published on 2026-10-20) and not the 24.18.0 of the images of July, which is older than the security releases of October; `total5` is the one that npm publishes as latest (0.0.19) and `total.js` stays at 3.4.13. Changing them is a new version of the package.
+
 ## Order of work
 
-1. The meta-package `totaljs-developer-server` and its pieces, built by `tools/package-repo/build.sh`, tested in the CI on a clean Ubuntu (install, the services start, remove).
+1. **Started:** `packages/totaljs-node` (Node.js 24 LTS, pinned for amd64 and arm64, with `total5` and `total.js`) and the meta-package `totaljs-developer-server` (the group, the tools, SSH, the firewall). `tools/package-repo/build.sh` builds them and the CI installs them in a clean Ubuntu 24.04 and 26.04 and removes them. Still to come, one package each: the Docker stack, the DNS, Total.js Center, the terminal summary and the brand.
 2. The seed of the ISO installs it (menu entry *Server*), and the CI boots the result and checks the services.
 3. The image builder installs it too, and `totalvm-guest` takes what is only for TotalVM.
 4. The desktop edition on the same base.

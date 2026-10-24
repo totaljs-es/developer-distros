@@ -9,6 +9,7 @@ Official Total.js Developer Distros: Linux environments for Total.js development
 ## Layout
 
 - `tools/image-builder/` builds an image: `scripts/build.sh <id>`, a Swift runner in `Sources/` that boots the VM with Apple's Virtualization framework, and one recipe per distro in `images/<id>/` (`image.json`, `provision/*.sh` run in order inside the guest, `cloud-init/`, `assets/`).
+- `packages/<name>/` is the source of one package of the Total.js layer: `control`, the maintainer scripts and `files/` (what it installs). `tools/package-repo/build.sh` builds every one of them into the repository, and `tools/package-repo/test-install.sh` installs them in a clean Ubuntu (the workflow `package-repo` runs it in a container for 24.04 and 26.04). The design is `docs/layer.md`.
 - `tools/package-repo/` builds and signs the APT and Pacman repository (`build.sh`) and prepares the branch `pages` that serves it (`publish-pages.sh`). The key of Total.js signs it on a maintainer's computer and is never in GitHub; the workflow `package-repo` tests the build with a throwaway key. Its scripts assume the layout of this repository.
 - `iso/ubuntu/` builds the installable ISO for amd64 by remastering the official Ubuntu `live-server` ISO (`build-iso.sh`) and tests it by installing and booting it in QEMU (`test-install.sh`); `.github/workflows/iso-ubuntu.yml` runs both. The seed in `iso/ubuntu/seed-ci/` is only for that test.
 - `manifests/` is the catalog: `index.json` and `manifests/<id>/manifest.json`. `size` and `sha256` are filled when an image is published.
