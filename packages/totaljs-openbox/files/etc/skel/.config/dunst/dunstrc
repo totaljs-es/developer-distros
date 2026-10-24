@@ -1,9 +1,9 @@
 [global]
     follow = mouse
     width = 330
-    height = 120
+    height = (0, 120)
     origin = top-right
-    offset = 18x52
+    offset = (18, 52)
     notification_limit = 4
     progress_bar = true
     progress_bar_height = 8

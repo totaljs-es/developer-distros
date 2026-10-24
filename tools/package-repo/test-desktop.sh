@@ -65,10 +65,10 @@ for p in openbox tint2 picom dunst; do
 done
 import -window root /out/desktop.png
 # the launcher and the right-click menu
-alacritty >/tmp/alacritty.log 2>&1 &
-sleep 4
+alacritty -vv >/tmp/alacritty.log 2>&1 &
+sleep 12
 import -window root /out/desktop-terminal.png
-rofi -show drun >/tmp/rofi.log 2>&1 &
+G_MESSAGES_DEBUG=all rofi -show drun -show-icons -v >/tmp/rofi.log 2>&1 &
 sleep 3
 import -window root /out/desktop-launcher.png
 SESSION
