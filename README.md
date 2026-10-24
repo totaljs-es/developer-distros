@@ -26,6 +26,7 @@ tools/package-repo/    builds and signs the APT and Pacman repository with the T
 iso/ubuntu/            the installable ISO for amd64 (in progress), remastered from the official Ubuntu ISO
 manifests/             the catalog that TotalVM reads: index.json and one manifest.json per image
 shared/                the Total.js layer common to every distro (being moved here from the recipes)
+docs/layer.md          the design of the Total.js layer as packages
 scripts/check.js       the checks that run on every change
 ```
 
