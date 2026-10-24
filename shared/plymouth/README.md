@@ -31,6 +31,10 @@ Keep `preview.py` in step with the script when a formula changes.
 
 The workflow `plymouth` installs the theme in an Ubuntu with Plymouth, shows it in a virtual screen and keeps screenshots of the moments of the animation. On a computer with Plymouth, as root: `plymouth-set-default-theme -R totaljs` (Debian) or, in Ubuntu, `Theme=totaljs` in `/etc/plymouth/plymouthd.conf` (that is what the workflow does; installing it into the initramfs of a real Ubuntu is not tested yet: it will be the job of the package `totaljs-brand`), and restart.
 
+## What it needs
+
+`plymouth` and, **for the text** (the name under the ring, the passphrase prompt and the messages), `plymouth-label` and a font such as `fonts-dejavu-core`. Without the label plugin `Image.Text` draws nothing and the splash looks right but has no name: that is how it came out in the first run of the workflow. The package `totaljs-brand` has to depend on them and make the initramfs include them.
+
 ## What is not checked
 
 The script was written without a Plymouth at hand to run it; the workflow is what runs it. The timing assumes that the refresh function is called about 50 times a second, as Plymouth documents.

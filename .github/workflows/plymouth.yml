@@ -19,7 +19,8 @@ jobs:
       - name: Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y plymouth plymouth-x11 xvfb imagemagick x11-utils
+          # plymouth-label draws the text (the name, the passphrase prompt): without it Image.Text draws nothing
+          sudo apt-get install -y plymouth plymouth-x11 plymouth-label fonts-dejavu-core xvfb imagemagick x11-utils
 
       - name: The theme
         run: |
@@ -67,6 +68,11 @@ jobs:
           # once the logo has come together there is more on the screen than the background
           deviation="$(convert shots/at-9s.png -format '%[fx:standard_deviation]' info:)"
           awk -v d="$deviation" 'BEGIN { exit (d > 0.03) ? 0 : 1 }' || { echo "the screen at 9 seconds is empty: the theme did not draw"; exit 1; }
+
+          # the name is under the ring (1920 x 1080): a strip of the screen where there is only text, or nothing
+          name="$(convert shots/at-9s.png -crop 520x70+700+770 +repage -format '%[fx:standard_deviation]' info:)"
+          echo "the strip of the name: deviation $name"
+          awk -v d="$name" 'BEGIN { exit (d > 0.02) ? 0 : 1 }' || { echo "the name Total.js Developer is not drawn: Image.Text needs the package plymouth-label and a font"; exit 1; }
 
       - name: Keep the screenshots and the log
         if: always()
