@@ -113,4 +113,10 @@ xorriso -indev "${WORK}/${ISO_NAME}" -outdev "${OUT}" \
     -map "${WORK}/nocloud" /nocloud \
     >"${WORK}/xorriso.log" 2>&1 || { tail -20 "${WORK}/xorriso.log" >&2; die "xorriso failed"; }
 
+# What makes the ISO big (informational: a failure here never fails the build)
+{
+    echo "# ${ISO_NAME}: $(wc -c < "${OUT}" | tr -d ' ') bytes"
+    xorriso -indev "${OUT}" -lsl /casper/ -dus /pool/ /boot/ /EFI/ /dists/ 2>&1 || true
+} > "${WORK}/contents.txt"
+
 log "done: $(du -h "${OUT}" | cut -f1) $(basename "${OUT}") (from ${ISO_NAME})"

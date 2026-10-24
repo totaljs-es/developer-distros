@@ -84,6 +84,13 @@ jobs:
             ls -l build/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
             [ -f build/iso/timings.txt ] && echo "- $(cat build/iso/timings.txt)"
             [ -f build/iso-layer/timings.txt ] && echo "- with the layer: $(cat build/iso-layer/timings.txt)"
+            if [ -f build/iso-product/contents.txt ]; then
+              echo
+              echo '#### What is inside the ISO'
+              echo '```'
+              cat build/iso-product/contents.txt
+              echo '```'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Keep the logs
@@ -99,4 +106,5 @@ jobs:
             build/iso-layer/install.log
             build/iso-layer/boot.log
             build/iso-layer/timings.txt
+            build/iso-product/contents.txt
             ${{ runner.temp }}/http.log
