@@ -29,7 +29,7 @@ Keep `preview.py` in step with the script when a formula changes.
 
 ## Try it
 
-The workflow `plymouth` installs the theme in an Ubuntu with Plymouth, shows it in a virtual screen and keeps screenshots of the moments of the animation. On a computer with Plymouth, as root: `plymouth-set-default-theme -R totaljs` and restart.
+The workflow `plymouth` installs the theme in an Ubuntu with Plymouth, shows it in a virtual screen and keeps screenshots of the moments of the animation. On a computer with Plymouth, as root: `plymouth-set-default-theme -R totaljs` (Debian) or, in Ubuntu, `Theme=totaljs` in `/etc/plymouth/plymouthd.conf` (that is what the workflow does; installing it into the initramfs of a real Ubuntu is not tested yet: it will be the job of the package `totaljs-brand`), and restart.
 
 ## What is not checked
 

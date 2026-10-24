@@ -23,11 +23,13 @@ jobs:
 
       - name: The theme
         run: |
-          sudo mkdir -p /usr/share/plymouth/themes/totaljs
+          sudo mkdir -p /usr/share/plymouth/themes/totaljs /etc/plymouth
           sudo cp shared/plymouth/totaljs/* /usr/share/plymouth/themes/totaljs/
-          sudo plymouth-set-default-theme totaljs
-          plymouth-set-default-theme --list
-          grep -r Theme /etc/plymouth/plymouthd.conf || true
+          # Ubuntu has no plymouth-set-default-theme: the theme is chosen in the configuration of the daemon
+          printf '[Daemon]\nTheme=totaljs\nShowDelay=0\n' | sudo tee /etc/plymouth/plymouthd.conf
+          ls -l /usr/share/plymouth/themes/totaljs/
+          command -v plymouthd plymouth || true
+          ls /usr/lib/x86_64-linux-gnu/plymouth/ 2>/dev/null | head -30 || true
 
       - name: Show it on a virtual screen
         run: |
