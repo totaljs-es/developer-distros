@@ -40,7 +40,10 @@ jobs:
           export DISPLAY=:99
           sleep 2
           xdpyinfo -display :99 | head -8
-          sudo -E plymouthd --debug --debug-file=/tmp/plymouthd.log --mode=boot --attach-to-session
+          # The runner has a serial console (console=ttyS0) and a kernel command line without "splash": with those Plymouth shows
+          # the text of the details and nothing else. So the command line is the one of a graphical boot, and the serial consoles are ignored.
+          sudo -E plymouthd --debug --debug-file=/tmp/plymouthd.log --mode=boot --attach-to-session \
+            --ignore-serial-consoles --kernel-command-line="quiet splash plymouth.ignore-serial-consoles"
           sleep 1
           sudo -E plymouth --ping && echo "plymouthd answers"
           sudo -E plymouth show-splash
