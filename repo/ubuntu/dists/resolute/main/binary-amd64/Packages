@@ -1,0 +1,100 @@
+Package: totaljs-developer-release
+Version: 1.0.9-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Installed-Size: 20
+Filename: pool/main/t/totaljs-developer-release/totaljs-developer-release_1.0.9-1_all.deb
+Size: 2336
+SHA256: c20b7c3c8b65a532e2441752baf52fde04a0e38f65f761877a7edc96f858ceda
+Section: utils
+Priority: optional
+Homepage: https://totalvm.totaljs.es
+Description: Official Total.js Developer repository configuration
+ Installs the signing key and package source used to update the Total.js Developer layer.
+
+Package: totaljs-desktop
+Version: 1.0.5-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Installed-Size: 12
+Filename: pool/main/t/totaljs-desktop/totaljs-desktop_1.0.5-1_all.deb
+Size: 6694
+SHA256: 8d383b6f33f649aa3e54e7cf0ab020054092c3fff4d2631a8cc49c0b7da74c9f
+Section: utils
+Priority: optional
+Depends: openbox
+Homepage: https://totalvm.totaljs.es
+Description: Total.js Developer desktop integration
+ Applies compatible visual and desktop integration updates without replacing user projects.
+
+Package: totaljs-brand
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: misc
+Priority: optional
+Depends: plymouth, plymouth-label, fonts-dejavu-core
+Homepage: https://www.totaljs.com
+Description: The identity of the Total.js Developer Distros: boot splash
+ The boot splash of the Total.js Developer Distros: the logo comes together and a
+ ring of light follows the progress of the boot. It makes it the theme of Plymouth
+ and asks the kernel for a quiet, graphical boot.
+Installed-Size: 388
+Filename: pool/main/t/totaljs-brand/totaljs-brand_1.0.0-1_all.deb
+Size: 346462
+SHA256: cd64a58afdac729393b0ccb13480a52b10bd754296a09515dfd5e5648e864e20
+
+Package: totaljs-developer-server
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: metapackages
+Priority: optional
+Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0), totaljs-brand (>= 1.0.0),
+ ca-certificates, curl, wget, gnupg, git, unzip, zip, zstd, xz-utils,
+ build-essential, pkg-config, python3-minimal,
+ htop, nano, vim, less, tree, jq, tmux, sudo,
+ openssh-server, ufw, fail2ban, software-properties-common
+Homepage: https://www.totaljs.com
+Description: Total.js Developer Distro, server edition
+ The command-line environment for developing with Total.js: Node.js and Total.js,
+ the usual tools, an SSH server, a firewall and fail2ban. This package installs the pieces;
+ each one is a package of its own and can be updated alone.
+Installed-Size: 8
+Filename: pool/main/t/totaljs-developer-server/totaljs-developer-server_1.0.0-1_all.deb
+Size: 1928
+SHA256: 029e71da4e4d258239a55a90fec50815169cc34e45c1d10d25e66f82c2231a94
+
+Package: totaljs-node
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: web
+Priority: optional
+Depends: ca-certificates, curl, xz-utils
+Homepage: https://www.totaljs.com
+Description: Node.js LTS and Total.js for the Total.js Developer Distros
+ Installs the Node.js LTS release that is pinned in /usr/share/totaljs-node/versions
+ (downloaded from nodejs.org and checked with its SHA-256), links it into
+ /usr/local/bin, and installs total5 and total.js as global npm packages.
+Installed-Size: 4
+Filename: pool/main/t/totaljs-node/totaljs-node_1.0.0-1_all.deb
+Size: 2096
+SHA256: f116afe0740ba5d024c49b8c959e13f175709347a55037569a5b72d737577606
+
+Package: totaljs-wallpapers
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: x11
+Priority: optional
+Homepage: https://www.totaljs.com
+Description: Wallpapers of the Total.js Developer Distros
+ Twelve wallpapers at 3840 x 2160 with the logo of Total.js: six in graphite and
+ the green of the logo, three with colors that remind of Ubuntu and three of Arch.
+ They are installed in /usr/share/backgrounds/totaljs.
+Installed-Size: 16864
+Filename: pool/main/t/totaljs-wallpapers/totaljs-wallpapers_1.0.0-1_all.deb
+Size: 16669270
+SHA256: 315cf56ecfa562e3fd1bd4b723f6702ddcd8af596febc7a95bf6a38730e1bb11
+

@@ -1,0 +1,24 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Origin: Total.js
+Label: Total.js Developer
+Suite: noble
+Codename: noble
+Date: Sat, 24 Oct 2026 19:49:10 UTC
+Architectures: arm64 amd64
+Components: main
+Description: Official Total.js Developer packages
+SHA256:
+ 4e03b33cceebc2b8d93443354a8c109e7323b6808162eda5c31bbbea51d2eef1 4046 main/binary-arm64/Packages
+ 1023073103b03362ccb7aa6076b69dc65cb73bd130edba61a59e65e7f98df0e8 1534 main/binary-arm64/Packages.gz
+ 4e03b33cceebc2b8d93443354a8c109e7323b6808162eda5c31bbbea51d2eef1 4046 main/binary-amd64/Packages
+ 1023073103b03362ccb7aa6076b69dc65cb73bd130edba61a59e65e7f98df0e8 1534 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iJEEARYKADkWIQSVRUaUUjuNGKN299XXIro1yEJ7QAUCat0LthsUgAAAAAAEAA5t
+YW51MiwyLjUrMS4xMiwwLDMACgkQ1yK6NchCe0CqCAEA7pefN/iwAYX+G6hcsAJx
+bGNzsSwC+mC7mHyjaiE2q7QA/2Vnj+N4lEuiORNil8CSbTsUxL/VdvDv2N8qIAVn
+yXkE
+=I4fD
+-----END PGP SIGNATURE-----
