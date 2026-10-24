@@ -73,6 +73,9 @@ sleep 3
 import -window root /out/desktop-launcher.png
 SESSION
 chmod +x /tmp/session.sh
+# what the programs of the session said goes with the screenshots, because a blank window says nothing by itself
+collect_logs() { cp /tmp/openbox.log /tmp/alacritty.log /tmp/rofi.log /out/ 2>/dev/null || true; cp /home/deskuser/.cache/*.log /out/ 2>/dev/null || true; chmod -R a+r /out || true; }
+trap collect_logs EXIT
 su deskuser -c 'dbus-run-session -- xvfb-run -a -s "-screen 0 1920x1080x24" /tmp/session.sh'
 test -s /out/desktop.png
 
