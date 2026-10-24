@@ -9,7 +9,7 @@ set -euo pipefail
 
 ISO="${1:?usage: test-install.sh <image.iso>}"
 WORK="${WORK_DIR:-build/iso}"
-INSTALL_TIMEOUT="${INSTALL_TIMEOUT:-3000}"
+INSTALL_TIMEOUT="${INSTALL_TIMEOUT:-1500}"
 BOOT_TIMEOUT="${BOOT_TIMEOUT:-600}"
 # What the installed system says on the serial console: a regular expression, so a test can ask for more than "it booted"
 MARKER="${MARKER_PATTERN:-TOTALJS-ISO-TEST-OK}"
@@ -42,6 +42,15 @@ run_qemu() {
 # 1. The install: the autoinstall seed ends with a power off, and -no-reboot makes that end QEMU
 log "installing (up to ${INSTALL_TIMEOUT} s)"
 START=$(date +%s)
+# A sign of life every minute: how much the installer has written to the serial console, and the end of it
+(
+    while sleep 60; do
+        printf -- '--- %s s: install.log is %s bytes; its end: %s\n' "$(( $(date +%s) - START ))" \
+            "$(wc -c < "${WORK}/install.log" 2>/dev/null | tr -d ' ')" \
+            "$(tail -c 400 "${WORK}/install.log" 2>/dev/null | tr -cd '[:print:]' | tail -c 200)"
+    done
+) &
+PROGRESS=$!
 set +e
 timeout "${INSTALL_TIMEOUT}" qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
     -drive "file=${DISK},if=virtio,format=qcow2" -cdrom "${ISO}" -boot d \
@@ -49,10 +58,11 @@ timeout "${INSTALL_TIMEOUT}" qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 
     -serial "file:${WORK}/install.log"
 STATUS=$?
 set -e
+kill "${PROGRESS}" 2>/dev/null || true
 INSTALL_SECONDS=$(( $(date +%s) - START ))
 
 if [ "${STATUS}" -ne 0 ]; then
-    echo "--- the end of the install log ---"; tail -40 "${WORK}/install.log" || true
+    echo "--- the end of the install log (the printable part) ---"; tail -c 12000 "${WORK}/install.log" | tr -cd '[:print:]\n' | tail -80 || true
     die "the install did not finish (status ${STATUS}) after ${INSTALL_SECONDS} s"
 fi
 log "installed in ${INSTALL_SECONDS} s"
