@@ -4,8 +4,8 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Installed-Size: 20
 Filename: pool/main/t/totaljs-developer-release/totaljs-developer-release_1.0.9-1_all.deb
-Size: 2336
-SHA256: c20b7c3c8b65a532e2441752baf52fde04a0e38f65f761877a7edc96f858ceda
+Size: 2334
+SHA256: 220c609f0bebc61bc30002ae7d6f166b217b9d441080d4aceee86d78fc93d569
 Section: utils
 Priority: optional
 Homepage: https://totalvm.totaljs.es
@@ -18,8 +18,8 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Installed-Size: 12
 Filename: pool/main/t/totaljs-desktop/totaljs-desktop_1.0.5-1_all.deb
-Size: 6694
-SHA256: 8d383b6f33f649aa3e54e7cf0ab020054092c3fff4d2631a8cc49c0b7da74c9f
+Size: 6690
+SHA256: db82f8ad05aaeb5516827f557262fae0cee4c4db34027d98f41cadc56221b64a
 Section: utils
 Priority: optional
 Depends: openbox
@@ -41,8 +41,27 @@ Description: The identity of the Total.js Developer Distros: boot splash
  and asks the kernel for a quiet, graphical boot.
 Installed-Size: 388
 Filename: pool/main/t/totaljs-brand/totaljs-brand_1.0.0-1_all.deb
-Size: 346462
-SHA256: cd64a58afdac729393b0ccb13480a52b10bd754296a09515dfd5e5648e864e20
+Size: 346464
+SHA256: 9c58667aa43a486040c4b50c2ac26bb159cdf1eca29e5e2749c43a08063d15c3
+
+Package: totaljs-center
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: web
+Priority: optional
+Depends: totaljs-node (>= 1.0.0), totaljs-docker-stack (>= 1.0.0), totaljs-dns (>= 1.0.0), adduser
+Homepage: https://www.totaljs.com
+Description: Total.js Center, the front door of the Total.js Developer Distros
+ A small Total.js 5 application on port 8010 that the reverse proxy shows at
+ http://totaljs.developer: the address of the computer, the state of the
+ services (Code, Flow, PostgreSQL and pgAdmin), the projects of /www with their
+ addresses, and how to connect to the database. It runs as its own user without
+ any special group and only reads the state of the services.
+Installed-Size: 60
+Filename: pool/main/t/totaljs-center/totaljs-center_1.0.0-1_all.deb
+Size: 13626
+SHA256: e0168e8ca2f0eedcf25941c3cfc81b951bf0e63bed6948a9f5089449a5bf99f3
 
 Package: totaljs-developer-server
 Version: 1.0.0-1
@@ -50,7 +69,7 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Section: metapackages
 Priority: optional
-Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0), totaljs-brand (>= 1.0.0),
+Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0), totaljs-brand (>= 1.0.0), totaljs-docker-stack (>= 1.0.0), totaljs-dns (>= 1.0.0), totaljs-center (>= 1.0.0), totaljs-fetch (>= 1.0.0),
  ca-certificates, curl, wget, gnupg, git, unzip, zip, zstd, xz-utils,
  build-essential, pkg-config, python3-minimal,
  htop, nano, vim, less, tree, jq, tmux, sudo,
@@ -62,8 +81,85 @@ Description: Total.js Developer Distro, server edition
  each one is a package of its own and can be updated alone.
 Installed-Size: 8
 Filename: pool/main/t/totaljs-developer-server/totaljs-developer-server_1.0.0-1_all.deb
-Size: 1928
-SHA256: 029e71da4e4d258239a55a90fec50815169cc34e45c1d10d25e66f82c2231a94
+Size: 2054
+SHA256: b22d8c6391c584f8c77d75045a8ca98223affcb3e6fd5aef049bf4e9a7d10388
+
+Package: totaljs-dns
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: net
+Priority: optional
+Depends: dnsmasq-base, systemd-resolved
+Homepage: https://www.totaljs.com
+Description: The local domain of the Total.js Developer Distros
+ Makes totaljs.developer and every name under it (code.totaljs.developer,
+ pgadmin.totaljs.developer, the address of each project...) point to this
+ computer, so that the reverse proxy of the services can tell them apart. A small
+ dnsmasq answers only that domain, on its own loopback address (127.0.0.100),
+ and systemd-resolved sends to it the names of the domain and nothing else, so the
+ rest of the DNS of the system is not touched.
+Installed-Size: 12
+Filename: pool/main/t/totaljs-dns/totaljs-dns_1.0.0-1_all.deb
+Size: 2044
+SHA256: deeb52e2c44916ed885cc53008b007954ee7fc477a3edaa3883404f90b3d6679
+
+Package: totaljs-docker-source
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: ca-certificates
+Homepage: https://docs.docker.com/engine/install/ubuntu/
+Description: The repository of Docker, for the Total.js Developer Distros
+ The signing key and the source of apt of the repository of Docker (download.docker.com),
+ where Docker Engine and its Compose plugin come from. The key is the official one of Docker
+ (fingerprint 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88). The source is written for
+ the series of the system, like the one of the repository of Total.js.
+Installed-Size: 8
+Filename: pool/main/t/totaljs-docker-source/totaljs-docker-source_1.0.0-1_all.deb
+Size: 4224
+SHA256: 5bde3d0e87ea547073dc5d3f827f64e3c67d16f85e94cbe59ee690e05b7984ea
+
+Package: totaljs-docker-stack
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: totaljs-docker-source (>= 1.0.0), docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin
+Homepage: https://www.totaljs.com
+Description: Docker and the services of the Total.js Developer Distros
+ Docker Engine with its Compose plugin, and the services that a Total.js developer
+ uses, as editable Compose files in /www: a reverse proxy (nginx-proxy), Total.js Code,
+ Total.js Flow, and PostgreSQL with pgAdmin. Each one is a systemd service
+ (totaljs-proxy, totaljs-code, totaljs-flow, totaljs-postgres) that starts at boot
+ and downloads its images the first time it starts, not while the package is installed.
+ The files are copied to /www only if they are not there, so what the person edits is
+ never overwritten by an update.
+Installed-Size: 44
+Filename: pool/main/t/totaljs-docker-stack/totaljs-docker-stack_1.0.0-1_all.deb
+Size: 4534
+SHA256: fd25d0a8f9811ee71307cb7514cec9907e60ae99ec38d398d56cc4cd0133f5f7
+
+Package: totaljs-fetch
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: utils
+Priority: optional
+Depends: iproute2, procps
+Homepage: https://www.totaljs.com
+Description: The Total.js summary of the system for the terminal
+ The command totalfetch shows the mark of Total.js in green next to the system,
+ the kernel, the memory, the disk and the address of the computer, and greets
+ with it once in every interactive terminal. To turn the greeting off for a
+ person, create the file ~/.config/totalfetch/off.
+Installed-Size: 4
+Filename: pool/main/t/totaljs-fetch/totaljs-fetch_1.0.0-1_all.deb
+Size: 2458
+SHA256: 042049e9fe2e47e05862b61ce933b2555ac0aadbe70564b9460a486d9b8d0735
 
 Package: totaljs-node
 Version: 1.0.0-1
@@ -79,8 +175,8 @@ Description: Node.js LTS and Total.js for the Total.js Developer Distros
  /usr/local/bin, and installs total5 and total.js as global npm packages.
 Installed-Size: 4
 Filename: pool/main/t/totaljs-node/totaljs-node_1.0.0-1_all.deb
-Size: 2096
-SHA256: f116afe0740ba5d024c49b8c959e13f175709347a55037569a5b72d737577606
+Size: 2100
+SHA256: cbecdbcc89edb0eb1590e8d850f0f1019370b732e1ba2c026cf53d57f732069d
 
 Package: totaljs-wallpapers
 Version: 1.0.0-1
@@ -95,6 +191,6 @@ Description: Wallpapers of the Total.js Developer Distros
  They are installed in /usr/share/backgrounds/totaljs.
 Installed-Size: 16864
 Filename: pool/main/t/totaljs-wallpapers/totaljs-wallpapers_1.0.0-1_all.deb
-Size: 16669270
-SHA256: 315cf56ecfa562e3fd1bd4b723f6702ddcd8af596febc7a95bf6a38730e1bb11
+Size: 16669260
+SHA256: f585fd7bfc33b84cbb47ed0b6ff141f85fbad3cc7e255b7f51461e4604d62d5d
 
