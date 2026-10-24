@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# TotalFetch: the summary of the system, with the mark of Total.js in green. It calls no npm and no network, so it can greet in every terminal.
+
+G=$'\033[38;2;102;182;57m'
+GB=$'\033[1m\033[38;2;102;182;57m'
+R=$'\033[0m'
+
+logo=(
+"              ++              "
+"          ++++++++++          "
+"       ***+++++++++++++       "
+"    ******++++++++++++++++    "
+"  *********+++++++++++++++++  "
+"  **********       +++++++++  "
+"  ***********       ++++++++  "
+"  ************      ++++++++  "
+"  ***********       ++++++++  "
+"  **********      ++++++++++  "
+"  *********+++++++++++++++++  "
+"    ******++++++++++++++++    "
+"       ***+++++++++++++       "
+"          ++++++++++          "
+"              ++              "
+)
+
+user="${USER:-$(id -un 2>/dev/null)}"
+host="$(hostname 2>/dev/null)"
+title="${user}@${host}"
+os="$(. /etc/os-release 2>/dev/null; echo "${PRETTY_NAME:-Linux}")"
+kernel="$(uname -r 2>/dev/null)"
+up="$(uptime -p 2>/dev/null | sed 's/^up //')"; [ -z "${up}" ] && up="-"
+shell_n="$(basename "${SHELL:-bash}")"
+cpu="$(awk -F: '/model name/{print $2; exit}' /proc/cpuinfo 2>/dev/null | sed 's/^ *//')"
+[ -z "${cpu}" ] && cpu="$(uname -m 2>/dev/null)"
+cores="$(nproc 2>/dev/null)"
+mem="$(free -m 2>/dev/null | awk '/Mem:/{printf "%d / %d MiB", $3, $2}')"
+disk="$(df -h --output=used,size / 2>/dev/null | awk 'NR==2{print $1" / "$2}')"
+domain="$(cat /etc/totaljs-developer/domain 2>/dev/null || echo totaljs.developer)"
+# the address of the default route is the one that other computers reach (the one of Docker's bridge is not)
+ip="$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')"
+[ -z "${ip}" ] && ip="$(hostname -I 2>/dev/null | awk '{print $1}')"
+[ -z "${ip}" ] && ip="-"
+
+pair() { printf '%s%s%s%s:%s %s' "${GB}" "$1" "${R}" "${G}" "${R}" "$2"; }
+
+dots=""
+for c in 0 1 2 3 4 5 6 7; do dots+=$'\033'"[4${c}m   "; done
+dots+="${R}"
+
+info=()
+info+=( "${GB}${title}${R}" )
+info+=( "${G}$(printf '%*s' "${#title}" '' | tr ' ' '-')${R}" )
+info+=( "$(pair 'os'      "${os}")" )
+info+=( "$(pair 'host'    'Total.js Developer')" )
+info+=( "$(pair 'kernel'  "${kernel}")" )
+info+=( "$(pair 'uptime'  "${up}")" )
+info+=( "$(pair 'shell'   "${shell_n}")" )
+command -v openbox >/dev/null 2>&1 && info+=( "$(pair 'wm' 'Openbox')" )
+info+=( "$(pair 'cpu'     "${cpu} (${cores})")" )
+info+=( "$(pair 'memory'  "${mem}")" )
+info+=( "$(pair 'disk'    "${disk}")" )
+info+=( "$(pair 'ip'      "${ip}")" )
+info+=( "$(pair 'domain'  "${domain}")" )
+info+=( "" )
+info+=( "${dots}" )
+
+rows=${#logo[@]}
+[ ${#info[@]} -gt ${rows} ] && rows=${#info[@]}
+echo
+i=0
+while [ ${i} -lt ${rows} ]; do
+    l="${logo[i]:-}"
+    if [ -n "${l}" ]; then
+        printf '%s%s%s' "${G}" "${l}" "${R}"
+        pad=$(( 30 - ${#l} + 4 ))
+    else
+        pad=$(( 30 + 4 ))
+    fi
+    printf '%*s' "${pad}" ''
+    printf '%s\n' "${info[i]:-}"
+    i=$(( i + 1 ))
+done
+echo

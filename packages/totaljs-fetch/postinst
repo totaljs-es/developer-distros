@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# The greeting goes in /etc/bash.bashrc, which is read by every interactive shell (/etc/profile.d is read only by login shells).
+# It is between two marks, so that the package can take it out again and an update does not repeat it.
+if ! grep -q '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc 2>/dev/null; then
+  cat >> /etc/bash.bashrc <<'EOF'
+
+# >>> totaljs-fetch >>>
+# The Total.js summary of the system, once in every interactive terminal. To turn it off: touch ~/.config/totalfetch/off
+if [ -n "$PS1" ] && [ -z "${TOTALFETCH_SHOWN:-}" ] && [ -t 1 ] && [ ! -e "$HOME/.config/totalfetch/off" ]; then
+    export TOTALFETCH_SHOWN=1
+    totalfetch
+fi
+# <<< totaljs-fetch <<<
+EOF
+fi
+
+exit 0

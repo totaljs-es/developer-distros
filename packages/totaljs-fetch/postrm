@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    if [ -f /etc/bash.bashrc ]; then
+      sed '/^# >>> totaljs-fetch >>>$/,/^# <<< totaljs-fetch <<<$/d' /etc/bash.bashrc > /etc/bash.bashrc.totaljs-new
+      cat /etc/bash.bashrc.totaljs-new > /etc/bash.bashrc
+      rm -f /etc/bash.bashrc.totaljs-new
+    fi
+    ;;
+esac
+
+exit 0

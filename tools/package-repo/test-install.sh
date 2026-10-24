@@ -117,6 +117,10 @@ curl -fsS http://127.0.0.1:8010/logo.svg | grep -q '<svg'
 curl -fsS http://127.0.0.1:8010/api/status/ | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8")); if (d.domain !== "totaljs.developer" || d.services.length !== 3 || !d.machine.kernel) process.exit(1)'
 kill "${CENTER_PID}" 2>/dev/null || true
 
+echo "==> the summary of the terminal"
+totalfetch | grep -q 'Total.js Developer'
+test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1
+
 echo "==> the source that the package wrote works by itself"
 apt-get update -qq
 POLICY="$(apt-cache policy totaljs-node)"
@@ -129,11 +133,12 @@ apt-get remove -y totaljs-wallpapers >/dev/null
 test ! -e /usr/share/backgrounds/totaljs
 
 echo "==> installing it again changes nothing"
-apt-get install -y --reinstall totaljs-node >/dev/null
+apt-get install -y --reinstall totaljs-node totaljs-fetch >/dev/null
+test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1   # the greeting is not repeated
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"
@@ -143,6 +148,8 @@ test ! -e /usr/lib/systemd/system/totaljs-proxy.service
 test ! -e /usr/lib/systemd/system/totaljs-dns.service
 test ! -e /usr/lib/systemd/system/totaljs-center.service
 test ! -e /var/lib/totaljs-center
+test ! -e /usr/bin/totalfetch
+if grep -q 'totaljs-fetch' /etc/bash.bashrc; then echo 'bash.bashrc still has the greeting' >&2; exit 1; fi
 test ! -e /etc/systemd/resolved.conf.d/totaljs-developer.conf
 test ! -e /etc/apt/sources.list.d/docker.sources
 test -f /www/proxy/docker-compose.yml   # /www is where the person works: it stays

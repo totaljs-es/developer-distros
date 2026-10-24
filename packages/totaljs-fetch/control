@@ -1,0 +1,13 @@
+Package: totaljs-fetch
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: utils
+Priority: optional
+Depends: iproute2, procps
+Homepage: https://www.totaljs.com
+Description: The Total.js summary of the system for the terminal
+ The command totalfetch shows the mark of Total.js in green next to the system,
+ the kernel, the memory, the disk and the address of the computer, and greets
+ with it once in every interactive terminal. To turn the greeting off for a
+ person, create the file ~/.config/totalfetch/off.
