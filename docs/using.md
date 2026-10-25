@@ -81,6 +81,18 @@ npm ls -g --depth=0
 
 The panel on the top has the menu, Total.js Center, the terminal, the files and the browser, the list of windows, the tray (network and volume) and the clock.
 
+The **widget** on the wallpaper is Conky. It starts with the session with the profile of the system (processor, memory, disk and network). To change it, use *Preferences → Desktop widget* in the menu of the desktop, or the command:
+
+```bash
+totaljs-conky system      # processor, memory and disk as rings, the network and the processes
+totaljs-conky services    # Docker, the proxy, Code, Flow, PostgreSQL, Total.js Center and SSH
+totaljs-conky compact     # a small card with the essentials, at the top right
+totaljs-conky clock       # a large clock on the wallpaper, with no card
+totaljs-conky hidden      # no widget
+```
+
+The one that you choose is kept for the next sessions. The profiles are in `~/.config/conky`: edit them or add your own, with the name `<profile>.conf`.
+
 Wallpapers: there are twelve and a different one is chosen on each start. `totaljs-wallpaper pin` keeps the current one, `totaljs-wallpaper shuffle` goes back to
 a random one and `totaljs-wallpaper signature` uses the one with Tux. The look of windows and applications is changed with *Preferences → Appearance*
 (in the menu of the desktop).

@@ -18,6 +18,7 @@ totaljs-developer-server      meta-package: the server edition
 
 totaljs-developer-desktop     meta-package: the server edition plus
   totaljs-openbox             Openbox with the theme of Total.js, Tint2, Rofi, Alacritty, PCManFM, LightDM, the menu and the shortcuts
+  totaljs-conky               the widget on the wallpaper, with four profiles (system, services, compact and clock)
   totaljs-wallpapers          the twelve wallpapers
   totaljs-mozilla-source      the repository of Mozilla, where Firefox comes from (Ubuntu offers only a snap)
 ```
@@ -43,6 +44,8 @@ Docker and Firefox come from their own repositories, which `apt` has to know bef
   domain, and nothing else, to it. The rest of the DNS of the system is not touched.
 - **totaljs-center.** A Total.js 5 application that runs as its own user, in no group, with a hardened unit. It reads the state of the services through systemd, so it needs
   no access to Docker.
+- **totaljs-conky.** The profiles are in `/etc/skel/.config/conky` (copied to each person, who can edit them) and say where the window is and how big; what is drawn (rings, bars, cards)
+  is the Lua and Cairo script `/usr/share/totaljs-conky/totaljs.lua`. The network interface is the one of the default route, and the state of the services comes from systemd, so it needs no access to Docker.
 - **totaljs-openbox.** The configuration of each person is copied from `/etc/skel` when the person is created, and to the people that already exist only if they have none.
   The compositor is `picom`: GLX on a real computer and xrender in a virtual machine.
 

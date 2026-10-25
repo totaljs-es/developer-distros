@@ -12,7 +12,7 @@ on a computer or in a virtual machine, with a desktop or only the command line.
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy so that every project has its own address: `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
 - **Total.js Center**, the front door at `http://totaljs.developer`: the state of the services, your projects and how to connect to the database.
-- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager and twelve wallpapers.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager, a widget on the wallpaper (Conky) and twelve wallpapers.
 
 ## Install
 

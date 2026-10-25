@@ -11,6 +11,8 @@ if ! pgrep -u "$(id -u)" -x picom >/dev/null; then
   sleep 0.5
 fi
 totaljs-wallpaper &
+# the widget on the wallpaper (the profile that the person chose; the package totaljs-conky provides it)
+command -v totaljs-conky >/dev/null && totaljs-conky restore &
 # the panel is started again if it ends (a panel that is gone leaves the session without a way to reach anything), and how it ended is kept
 pgrep -u "$(id -u)" -x tint2 >/dev/null || (
   mkdir -p "$HOME/.cache"

@@ -1,0 +1,13 @@
+Package: totaljs-conky
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: x11
+Priority: optional
+Depends: conky-all, systemd
+Homepage: https://www.totaljs.com
+Description: The desktop widget of Total.js Developer
+ A Conky widget on the wallpaper, drawn with Cairo, with four profiles: the system (processor, memory and disk as
+ rings, the network and the processes), the services (Docker, the proxy, Code, Flow, PostgreSQL, Total.js Center and
+ SSH), a compact card and a clock. The command totaljs-conky changes the profile or hides it, and the session
+ starts the one that the person chose.

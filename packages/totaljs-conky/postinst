@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# The people that already exist get the profiles when they have none (the new ones get them from /etc/skel). What a person has is never replaced.
+for home in /home/*; do
+  [ -d "${home}" ] || continue
+  owner="$(stat -c %U "${home}")"
+  [ "${owner}" != root ] || continue
+  [ ! -e "${home}/.config/conky" ] || continue
+  mkdir -p "${home}/.config"
+  cp -a /etc/skel/.config/conky "${home}/.config/conky"
+  chown -R "${owner}:$(stat -c %G "${home}")" "${home}/.config/conky"
+done
+
+exit 0

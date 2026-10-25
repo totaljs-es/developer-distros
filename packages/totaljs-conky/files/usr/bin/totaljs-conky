@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# totaljs-conky [system|services|compact|clock|hidden|restore]: shows a profile of the widget on the wallpaper, or hides it. "restore" starts the one that the
+# person chose last (the system one the first time), once the session is ready: it is what the session runs.
+set -euo pipefail
+
+PROFILE="${1:-system}"
+STATE_DIR="${HOME}/.config/totaljs"
+STATE="${STATE_DIR}/conky-profile"
+mkdir -p "${STATE_DIR}"
+
+if [ "${PROFILE}" = restore ]; then
+    PROFILE="$(cat "${STATE}" 2>/dev/null || echo system)"
+    # Openbox starts the autostart before the root window is ready: Conky exits at once when it is not
+    for _ in $(seq 1 20); do
+        pgrep -u "$(id -u)" -x openbox >/dev/null 2>&1 && xset q >/dev/null 2>&1 && break
+        sleep 1
+    done
+fi
+
+if [ "${PROFILE}" = hidden ]; then
+    echo hidden > "${STATE}"
+    pkill -u "$(id -u)" -x conky 2>/dev/null || true
+    exit 0
+fi
+case "${PROFILE}" in system|services|compact|clock) ;; *) PROFILE=system ;; esac
+echo "${PROFILE}" > "${STATE}"
+
+CONFIG="${HOME}/.config/conky/${PROFILE}.conf"
+[ -f "${CONFIG}" ] || CONFIG="/etc/skel/.config/conky/${PROFILE}.conf"
+
+pkill -u "$(id -u)" -x conky 2>/dev/null || true
+nohup conky -c "${CONFIG}" >/dev/null 2>&1 &
