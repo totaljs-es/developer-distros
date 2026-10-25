@@ -5,7 +5,7 @@ Maintainer: Total.js <repository@totaljs.com>
 Installed-Size: 20
 Filename: pool/main/t/totaljs-developer-release/totaljs-developer-release_1.0.9-1_all.deb
 Size: 2326
-SHA256: 06eb0626feb725931fd78966831c6f4cfb036d9f4c753ac5de904b13242d9823
+SHA256: 844a7cf2bcfdf37c06712b1f057b056899ff617b71ce169f5e91fee3737ea294
 Section: utils
 Priority: optional
 Homepage: https://totalvm.totaljs.es
@@ -18,8 +18,8 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Installed-Size: 12
 Filename: pool/main/t/totaljs-desktop/totaljs-desktop_1.0.5-1_all.deb
-Size: 7702
-SHA256: 865e2e98c26ae6b6affe8138324633e37c4a4313b4da45d346604f55dbcf98b7
+Size: 7704
+SHA256: 6575b2045bd9025127b548698cb9d483b2c27129fbdac0d2d0e63ae2b58b3ee5
 Section: utils
 Priority: optional
 Depends: openbox
@@ -42,7 +42,7 @@ Description: The identity of the Total.js Developer Distros: boot splash
 Installed-Size: 388
 Filename: pool/main/t/totaljs-brand/totaljs-brand_1.0.0-1_all.deb
 Size: 346444
-SHA256: c62e46257714c8025422efe049aca81208e573ba7196acaf82a3a361d64ba92f
+SHA256: 1121df1668def7f01f50dc31f75c0a3d5b38ea47bc9ff9112e25ec43ca8b3b6e
 
 Package: totaljs-center
 Version: 1.0.0-1
@@ -61,7 +61,7 @@ Description: Total.js Center, the front door of the Total.js Developer Distros
 Installed-Size: 44
 Filename: pool/main/t/totaljs-center/totaljs-center_1.0.0-1_all.deb
 Size: 12704
-SHA256: 1f82563e3df0fcff4fdeb3edbb18a93ed340fc17699ed63f29812efe2bb936d8
+SHA256: b92603a87d99d9d6051d10f465866642ce77210e5e6ac72fd81fc3f4a9ffa610
 
 Package: totaljs-chrome-source
 Version: 1.0.0-1
@@ -79,7 +79,7 @@ Description: The repository of Google for Chrome, for the Total.js Developer Dis
 Installed-Size: 24
 Filename: pool/main/t/totaljs-chrome-source/totaljs-chrome-source_1.0.0-1_all.deb
 Size: 16362
-SHA256: 074da67578181e1ddecab5ecb021ae33bae3d9cbf55445a341f011a793409575
+SHA256: 1f16daf47b325d5f4c7155d6c8d41e15bfd64c8f6717385942ff121dab052184
 
 Package: totaljs-conky
 Version: 1.0.0-1
@@ -96,8 +96,8 @@ Description: The desktop widget of Total.js Developer
  starts the one that the person chose.
 Installed-Size: 32
 Filename: pool/main/t/totaljs-conky/totaljs-conky_1.0.0-1_all.deb
-Size: 6368
-SHA256: b4e9e2975c686a75bf063641aa0a6b89999da3ade7d2988df754583b9b6a8991
+Size: 6370
+SHA256: 08e905598aa93239fe9c9530c3b6f615695b66f8be499bd25764eb0ea8f6a093
 
 Package: totaljs-developer-desktop
 Version: 1.0.0-1
@@ -105,7 +105,7 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Section: metapackages
 Priority: optional
-Depends: totaljs-developer-server (= 1.0.0-1), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, google-chrome-stable
+Depends: totaljs-developer-server (>= 1.0.0), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, google-chrome-stable
 Homepage: https://www.totaljs.com
 Description: Total.js Developer Distro, desktop edition
  The server edition plus the Openbox desktop: the theme, the panel, the launcher, the terminal, the files,
@@ -114,8 +114,8 @@ Description: Total.js Developer Distro, desktop edition
  totaljs-mozilla-source and totaljs-chrome-source first, update the lists of apt, and then this one.
 Installed-Size: 0
 Filename: pool/main/t/totaljs-developer-desktop/totaljs-developer-desktop_1.0.0-1_all.deb
-Size: 848
-SHA256: 6ea49ae8344ac02560a77e0c931b4f0e7d06f6cde13c078067b558ba2c24fc9c
+Size: 842
+SHA256: b8ae2ba2cad0eb456b75c815dc35b845818d2683f57fd6c77f304607242a16ed
 
 Package: totaljs-developer-server
 Version: 1.0.0-1
@@ -137,7 +137,7 @@ Description: Total.js Developer Distro, server edition
 Installed-Size: 12
 Filename: pool/main/t/totaljs-developer-server/totaljs-developer-server_1.0.0-1_all.deb
 Size: 2800
-SHA256: 4f07c2b919c88202e6eaf589644d4fd4812ac551003ac45c9c97e708294f6d54
+SHA256: e0faf4f2e85a3d644ffed816ef811e30031772829331e8f075396474ebfb1504
 
 Package: totaljs-dns
 Version: 1.0.0-1
@@ -157,7 +157,7 @@ Description: The local domain of the Total.js Developer Distros
 Installed-Size: 12
 Filename: pool/main/t/totaljs-dns/totaljs-dns_1.0.0-1_all.deb
 Size: 2130
-SHA256: 5d4ce5860e08d6fbffc22872aa2a97018b3b532b2d66a67b7d7fd4d8e0e13c45
+SHA256: b040934fc093661365fd0a275881c7166c6edf8c73dffdb10130ad73cec2feda
 
 Package: totaljs-docker-source
 Version: 1.0.0-1
@@ -174,8 +174,8 @@ Description: The repository of Docker, for the Total.js Developer Distros
  the series of the system, like the one of the repository of Total.js.
 Installed-Size: 8
 Filename: pool/main/t/totaljs-docker-source/totaljs-docker-source_1.0.0-1_all.deb
-Size: 4220
-SHA256: ea50cdb0d2cf212b3b3a9754a6b5799d3e2ab4600582c4bd515b66d7570969ca
+Size: 4218
+SHA256: 5a4b1c5a0c1479be40007a42d4ca9cf8c3e52fea04bdbe6133e5d38ccff6d145
 
 Package: totaljs-docker-stack
 Version: 1.0.0-1
@@ -195,8 +195,8 @@ Description: Docker and the services of the Total.js Developer Distros
  never overwritten by an update.
 Installed-Size: 44
 Filename: pool/main/t/totaljs-docker-stack/totaljs-docker-stack_1.0.0-1_all.deb
-Size: 4812
-SHA256: f9862c50282bf4c5d0bf9a3df14c13dd68bf6c97e0f2b1df7d6223b760bab632
+Size: 4810
+SHA256: 210111ee54f22e4a48380e75d3d09ad4e029e2a287b610ab14650152016d2419
 
 Package: totaljs-fetch
 Version: 1.0.0-1
@@ -213,8 +213,8 @@ Description: The Total.js summary of the system for the terminal
  person, create the file ~/.config/totalfetch/off.
 Installed-Size: 4
 Filename: pool/main/t/totaljs-fetch/totaljs-fetch_1.0.0-1_all.deb
-Size: 2450
-SHA256: 377864ad5df5bf7e2f2fc814fd039d266b25ab445f8267e782e244546d3853b5
+Size: 2448
+SHA256: 1ef15682b31b11bd5dd5a6780f42c0fc1516e601b157d8a49a51282b325eb0fb
 
 Package: totaljs-fnm
 Version: 1.0.0-1
@@ -231,8 +231,8 @@ Description: fnm, the manager of versions of Node.js, for the Total.js Developer
  .nvmrc or an engines field in package.json changes the version by itself when you enter it.
 Installed-Size: 4
 Filename: pool/main/t/totaljs-fnm/totaljs-fnm_1.0.0-1_all.deb
-Size: 2588
-SHA256: de7538cd6f4435a3ebe2c1533aa7efd41f22fa519bb831a5c202c85126d8fb32
+Size: 2590
+SHA256: 1a7f92a46382e3712f0399aeb721e44a283e652788ed4c93f4fd7f805bfb5372
 
 Package: totaljs-https
 Version: 1.0.0-1
@@ -251,8 +251,8 @@ Description: Trusted HTTPS for totaljs.developer
  The command totaljs-https shows the state and renews the certificate.
 Installed-Size: 16
 Filename: pool/main/t/totaljs-https/totaljs-https_1.0.0-1_all.deb
-Size: 3806
-SHA256: 38171890ee5127141f03888f4cb1cadb0d6ed639cfdd5a3b02aafd4168139608
+Size: 3804
+SHA256: 15b5fd8a32e3dead40136d480d5888a5d458e368aa925fab9e92059fbd5eff87
 
 Package: totaljs-mozilla-source
 Version: 1.0.0-1
@@ -270,7 +270,7 @@ Description: The repository of Mozilla, for the Total.js Developer Distros
 Installed-Size: 12
 Filename: pool/main/t/totaljs-mozilla-source/totaljs-mozilla-source_1.0.0-1_all.deb
 Size: 2440
-SHA256: f51b5e311c123c479d9d2e86a8464013b5561c006ebca7951f83e4f23d5de7a7
+SHA256: 8c0dfd85101bc806f6adca74343828b7f3f5f8dda3e20624749e797cd90b4ea4
 
 Package: totaljs-node
 Version: 1.0.0-1
@@ -287,7 +287,7 @@ Description: Node.js LTS and Total.js for the Total.js Developer Distros
 Installed-Size: 4
 Filename: pool/main/t/totaljs-node/totaljs-node_1.0.0-1_all.deb
 Size: 2242
-SHA256: 797b9ceba79cf1c29a8a3dabe5300cd4f2a1895341041f3931bcf6cfb0057fab
+SHA256: 06b65e0280eaa6806a119cd74ebbd303b5bc1ef260afa0f0c4711c15bc88233d
 
 Package: totaljs-openbox
 Version: 1.0.0-1
@@ -308,8 +308,8 @@ Description: The Openbox desktop of the Total.js Developer Distros
  the first time that a person is already there, copy it by hand (the package says how in its postinst).
 Installed-Size: 244
 Filename: pool/main/t/totaljs-openbox/totaljs-openbox_1.0.0-1_all.deb
-Size: 22566
-SHA256: 4270550b903dff745e62c4d167c94cd33d2afc0da8c23b159a9e8786c107fcd0
+Size: 22568
+SHA256: 297f1c375b208d2816416bf6c50ff33e0bef64b7c42dc93c3a0e2e487abc7be9
 
 Package: totaljs-services
 Version: 1.0.0-1
@@ -329,8 +329,8 @@ Description: Optional services for Total.js developers: Redis, Mailpit, MongoDB
  by name (redis, mailpit, mongodb) through the network proxy.
 Installed-Size: 24
 Filename: pool/main/t/totaljs-services/totaljs-services_1.0.0-1_all.deb
-Size: 3294
-SHA256: 145d0fefa293bad4204e51a1f18d3f50823f5f7ca695167e23d07cceb5f8a625
+Size: 3292
+SHA256: 06ff039ed468553ab621b85aec02ed2e067eea738fcc01e3dc340138a7d1189e
 
 Package: totaljs-wallpapers
 Version: 1.0.0-1
@@ -346,5 +346,5 @@ Description: Wallpapers of the Total.js Developer Distros
 Installed-Size: 16864
 Filename: pool/main/t/totaljs-wallpapers/totaljs-wallpapers_1.0.0-1_all.deb
 Size: 16669200
-SHA256: 95a654f376413e2925ffab650978bdcd0783e6fa0f159d57f42592c2e819e91c
+SHA256: ae569e62fb29252284fc0b80c40c0cf265f907531ffad897fe58eff27ae7e62a
 
