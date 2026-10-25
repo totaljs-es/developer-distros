@@ -10,7 +10,11 @@ if [ -n "${fpr}" ] && [ "${fpr}" != BC528686B50D79E339D3721CEB3E94ADBE1229CF ]; 
   exit 1
 fi
 
-install -m 0644 /usr/share/totaljs-developer/vscode.sources /etc/apt/sources.list.d/vscode.sources
+# The file is not called vscode.sources on purpose: the package code owns that name and its scripts remove it (when an installation of code fails, for one),
+# which would leave this system with no source. With any file that already maps to the repository, code does not write its own.
+# an earlier build wrote the file with the name that code owns
+grep -qs 'packages.microsoft.com.asc' /etc/apt/sources.list.d/vscode.sources && rm -f /etc/apt/sources.list.d/vscode.sources || true
+install -m 0644 /usr/share/totaljs-developer/totaljs-vscode.sources /etc/apt/sources.list.d/totaljs-vscode.sources
 
 # The package code adds its own source and key when it is installed: with ours already there, the two would disagree about the key
 if [ -e /usr/share/debconf/confmodule ]; then
