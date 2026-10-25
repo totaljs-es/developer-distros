@@ -1,66 +1,62 @@
-# Total.js Developer Distros
+# Total.js Developer
 
 <p align="center"><img src="shared/branding/mascot.png" alt="Tux hugging the Total.js logo" width="220"></p>
 
-Official Linux environments for Total.js development: **Ubuntu LTS** and **Arch**, with the same desktop, the same tools and the same first-run experience on both. Everything a developer needs is installed: Node.js, npm, Git, Docker, PostgreSQL, an Nginx proxy, Total.js, the Total.js CLI, Code, Flow, Firefox and SSH.
+A complete environment for developing with [Total.js](https://www.totaljs.com), ready to use as soon as it is installed. It runs on **Ubuntu 26.04 LTS**
+on a computer or in a virtual machine, with a desktop or only the command line.
 
-The desktop belongs to Total.js, not to Ubuntu or Arch. The operating system is only the foundation: the distros are customized only through the shared Total.js layer, never by patching Ubuntu or Arch themselves.
+## What you get
 
-> **Status: work in progress, private.** The recipes below build the images for [TotalVM](https://totalvm.totaljs.es) on a Mac with Apple Silicon (arm64). The installable ISOs for amd64 and the GitHub Actions builds are the next step and do not exist yet. The repository will be made public when the first ISO is built.
+- **Node.js** (LTS) with **Total.js 5** and Total.js 3, and `npm`.
+- **Code**, the editor of Total.js in the browser, and **Flow**, to program with diagrams.
+- **PostgreSQL** with **pgAdmin**, and a reverse proxy so that every project has its own address: `my-project.totaljs.developer`.
+- **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
+- **Total.js Center**, the front door at `http://totaljs.developer`: the state of the services, your projects and how to connect to the database.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager and twelve wallpapers.
 
-## The distros
+## Install
 
-| Id | What it is |
-|---|---|
-| `developer-ubuntu` | Desktop (Openbox) on Ubuntu LTS |
-| `developer-ubuntu-server` | Headless server edition on Ubuntu LTS |
-| `developer-arch` | Desktop (Openbox) on Arch |
-| `developer-arch-server` | Headless server edition on Arch |
+You need the official ISO of Ubuntu Server 26.04 LTS and the small seed of the edition that you want, connected together when the computer starts.
+The installer asks you the usual questions and installs everything else by itself. It needs a network connection, and how long it takes depends on it.
 
-## What is in this repository
+**[How to install](docs/install.md)** · **[How to use it](docs/using.md)**
+
+| Edition | Seed |
+| --- | --- |
+| Desktop | `totaljs-developer-desktop-seed.iso` |
+| Server | `totaljs-developer-server-seed.iso` |
+
+The seeds are in the [releases](../../releases) of this repository.
+
+## Already have Ubuntu 26.04?
+
+Total.js Developer is a set of packages in a signed repository. On an installed Ubuntu 26.04 you can add it without a seed:
+
+```bash
+curl -fsSL https://totaljs-es.github.io/developer-distros/repo/totaljs-developer.gpg | sudo tee /usr/share/keyrings/totaljs-developer-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/totaljs-developer-archive-keyring.gpg] https://totaljs-es.github.io/developer-distros/repo/ubuntu resolute main" | sudo tee /etc/apt/sources.list.d/totaljs-developer.list
+sudo apt update
+sudo apt install totaljs-developer-release totaljs-docker-source   # add totaljs-mozilla-source for the desktop edition
+sudo rm /etc/apt/sources.list.d/totaljs-developer.list              # the package has written the same source by itself
+sudo apt update
+sudo apt install totaljs-developer-server                          # or totaljs-developer-desktop
+```
+
+## In this repository
 
 ```text
-tools/image-builder/   builds an image from a stock cloud image or rootfs (macOS, Apple Virtualization)
-  images/<id>/         the recipe of each distro: image.json, provision/*.sh, cloud-init, assets
-tools/package-repo/    builds and signs the APT and Pacman repository with the Total.js packages
-packages/              the source of the Total.js layer as packages (control, scripts, files), see docs/layer.md
-iso/ubuntu/            the installable ISO for amd64 (in progress), remastered from the official Ubuntu ISO
-manifests/             the catalog that TotalVM reads: index.json and one manifest.json per image
-shared/                the Total.js layer common to every distro (being moved here from the recipes)
-docs/layer.md          the design of the Total.js layer as packages
+packages/              the source of the packages (control, scripts, files)
+tools/package-repo/    builds and signs the APT and Pacman repository, and tests it in a clean Ubuntu
+iso/ubuntu/            the seed images, and the tests that install and boot the system in QEMU
+shared/                the artwork: wallpapers, boot splash and logos
+docs/                  the documentation
+tools/image-builder/   the images for TotalVM (macOS with Apple Silicon)
 scripts/check.js       the checks that run on every change
 ```
 
-`tools/image-builder/README.md` explains how an image is built today, and `tools/package-repo/README.md` how the package repository is made and signed.
+`docs/layer.md` explains how the packages are organised. `docs/legal.md` explains what is and is not published, and why.
 
-## Build an image (today)
+## Trademarks
 
-On macOS 14 or newer with Apple Silicon, Xcode, `qemu-img`, `jq` and `gpg`:
-
-```bash
-cd tools/image-builder
-scripts/build.sh developer-ubuntu
-```
-
-The first run downloads the base image into `build/cache/`. The result is a sparse RAW disk in an Apple Archive and a filled manifest in `dist/`.
-
-## Checks
-
-```bash
-node scripts/check.js
-```
-
-It validates the JSON files, that the catalog and the recipes agree on the ids, and the syntax of every shell script. It needs Node.js 20 or newer and nothing else.
-
-## Roadmap
-
-1. **Now:** the recipes and the catalog are in this repository, with checks in GitHub Actions.
-2. **In progress:** the Ubuntu ISO for amd64 in GitHub Actions (`iso/ubuntu/`), which installs over the network and is tested by installing and booting it in QEMU.
-3. The installable ISO for amd64, with a boot test in QEMU, and the same for Arch.
-4. The shared Total.js layer in `shared/`, used by every distro and by the images of TotalVM.
-5. **In progress:** the package repository served from GitHub Pages (`tools/package-repo/`), for Ubuntu 26.04 on arm64 and amd64, and for Arch on aarch64 and x86_64.
-6. The Total.js layer as packages (a server and a desktop meta-package) that the ISOs and the images of TotalVM install.
-
-## License
-
-To be decided before the repository is made public (the code, and the wallpapers, sounds and logos that are in `assets/`).
+Total.js Developer is made for Ubuntu and is not an official Ubuntu release, and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
+Arch Linux and the Arch logo are trademarks of their owners.

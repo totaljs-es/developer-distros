@@ -7,7 +7,7 @@
       <item label="Flow"><action name="Execute"><command>totaljs-open http://flow.totaljs.developer</command></action></item>
       <item label="pgAdmin"><action name="Execute"><command>totaljs-open http://pgadmin.totaljs.developer</command></action></item>
     </menu>
-    <item label="Projects" icon="/usr/share/totaljs-developer/icons/projects.svg"><action name="Execute"><command>pcmanfm /www</command></action></item>
+    <item label="Projects" icon="/usr/share/totaljs-developer/icons/projects.svg"><action name="Execute"><command>pcmanfm /www/www</command></action></item>
     <item label="Terminal" icon="/usr/share/totaljs-developer/icons/terminal.svg"><action name="Execute"><command>alacritty</command></action></item>
     <item label="Web Browser" icon="/usr/share/totaljs-developer/icons/browser.svg"><action name="Execute"><command>totaljs-open http://totaljs.developer</command></action></item>
     <separator />

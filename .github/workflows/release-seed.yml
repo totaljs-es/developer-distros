@@ -1,0 +1,115 @@
+name: release-seed
+
+# Publishes what people download to install Total.js Developer: the two seed images (desktop and server), a few kilobytes each, with their
+# checksums and a signed attestation of where they came from. The ISO of Ubuntu is NOT published here: the release says where to get the
+# official one, with its checksum (docs/legal.md explains why).
+# Push a tag `v*` to publish. By hand (Run workflow) it builds the same and keeps the files as an artifact of the run, to try them.
+#
+# The seeds install the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the release:
+# the workflow checks it and stops if it does not.
+on:
+  workflow_dispatch:
+    inputs:
+      repository_url:
+        description: Address of the repository of packages that the seeds install from
+        default: https://totaljs-es.github.io/developer-distros/repo
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  seed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      REPO_URL: ${{ inputs.repository_url || 'https://totaljs-es.github.io/developer-distros/repo' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso gnupg
+
+      - name: The repository of packages answers
+        run: |
+          for path in totaljs-developer.gpg ubuntu/dists/resolute/InRelease; do
+            curl -fsSI "${REPO_URL}/${path}" >/dev/null || { echo "::error::${REPO_URL}/${path} does not answer: publish the repository first (tools/package-repo/publish-pages.sh)"; exit 1; }
+            echo "ok: ${path}"
+          done
+
+      - name: Build the seed images
+        run: |
+          mkdir -p dist
+          iso/ubuntu/build-seed.sh desktop dist/totaljs-developer-desktop-seed.iso
+          iso/ubuntu/build-seed.sh server dist/totaljs-developer-server-seed.iso
+          # a seed has to be what the installer expects: the label CIDATA and its two files
+          for seed in dist/*.iso; do
+            xorriso -indev "${seed}" -pvd_info 2>/dev/null | grep -q CIDATA || { echo "${seed} has not the label CIDATA"; exit 1; }
+            xorriso -indev "${seed}" -find / -type f 2>/dev/null | sort | tr '\n' ' '; echo
+          done
+          (cd dist && sha256sum *.iso > SHA256SUMS && cat SHA256SUMS)
+
+      - name: The official ISO of Ubuntu Server, for the notes of the release
+        run: |
+          BASE=https://releases.ubuntu.com/26.04
+          curl -fsSL -o SHA256SUMS.ubuntu "${BASE}/SHA256SUMS"
+          LINE="$(grep -E ' \*ubuntu-26\.04(\.[0-9]+)?-live-server-amd64\.iso$' SHA256SUMS.ubuntu | sort -k2 -V | tail -1)"
+          [ -n "${LINE}" ] || { echo "the ISO of Ubuntu Server is not in the list of ${BASE}"; exit 1; }
+          echo "UBUNTU_ISO=$(echo "${LINE}" | sed -E 's/^[0-9a-f]{64} \*//')" >> "${GITHUB_ENV}"
+          echo "UBUNTU_SHA256=$(echo "${LINE}" | cut -d' ' -f1)" >> "${GITHUB_ENV}"
+          echo "${LINE}"
+
+      - name: Attest where they came from
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/*.iso
+
+      - name: Keep them as an artifact of the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-developer-seeds
+          path: dist/
+          retention-days: 14
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<NOTES
+          ## Total.js Developer ${GITHUB_REF_NAME#v}
+
+          A developer environment for Total.js on Ubuntu 26.04 LTS: Node.js, Total.js, Docker, PostgreSQL, Code, Flow, Total.js Center and, in the desktop edition, an Openbox desktop with Firefox.
+
+          ### Install
+
+          You need two things, side by side, on a USB stick or as two drives of a virtual machine:
+
+          1. The **official ISO of Ubuntu Server 26.04 LTS**, unmodified: <https://releases.ubuntu.com/26.04/>
+             \`${UBUNTU_ISO}\`, SHA-256 \`${UBUNTU_SHA256}\`
+          2. The **seed** of the edition that you want, from this release:
+             - \`totaljs-developer-desktop-seed.iso\`: with the desktop
+             - \`totaljs-developer-server-seed.iso\`: without it
+
+          Start the computer with the Ubuntu ISO and the seed connected. The installer finds the seed, asks you to confirm that you want to use it, asks the usual questions (language, keyboard, network, disk and who you are) and downloads Total.js Developer from ${REPO_URL}, so it needs a network connection while it installs.
+
+          ### Check the seeds
+
+          \`\`\`bash
+          sha256sum -c SHA256SUMS
+          gh attestation verify totaljs-developer-desktop-seed.iso --repo ${GITHUB_REPOSITORY}
+          \`\`\`
+
+          Total.js Developer is made for Ubuntu and is not an official Ubuntu release.
+          NOTES
+          sed -i 's/^          //' notes.md
+          flags=""
+          case "${GITHUB_REF_NAME}" in *-rc*|*-beta*|*-alpha*) flags="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" dist/*.iso dist/SHA256SUMS \
+            --title "Total.js Developer ${GITHUB_REF_NAME#v}" --notes-file notes.md ${flags}

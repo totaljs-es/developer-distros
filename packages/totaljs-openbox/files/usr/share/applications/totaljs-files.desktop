@@ -2,7 +2,7 @@
 Type=Application
 Name=Files
 Comment=The files and the projects
-Exec=pcmanfm /www
+Exec=pcmanfm /www/www
 Icon=/usr/share/totaljs-developer/icons/projects.svg
 Terminal=false
 NoDisplay=true

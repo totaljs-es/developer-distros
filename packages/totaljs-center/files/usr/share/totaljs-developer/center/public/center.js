@@ -48,9 +48,8 @@ function render(d) {
 		projects.append(list);
 	} else {
 		projects.append(el('p', { className: 'empty' }, [
-			'Your projects will appear here. Create a folder like ', el('code', { textContent: '/www/my-project' }),
-			' with a ', el('code', { textContent: 'docker-compose.yml' }), ' whose service has ',
-			el('code', { textContent: 'VIRTUAL_HOST=my-project.' + d.domain }), '.'
+			'Your projects will appear here. Create one in Code and it gets its own address: ',
+			el('code', { textContent: 'my-project.' + d.domain }), '.'
 		]));
 	}
 

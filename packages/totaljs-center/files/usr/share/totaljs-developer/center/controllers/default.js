@@ -9,8 +9,8 @@ const SERVICES = [
 	{ id: 'pgadmin', unit: 'totaljs-postgres', name: 'pgAdmin', about: 'The database, in the browser' }
 ];
 const SYSTEM = ['docker', 'totaljs-proxy', 'totaljs-postgres', 'totaljs-dns'];
-// folders of /www that are the services themselves, not projects
-const RESERVED = ['proxy', 'code', 'flow', 'services', 'center'];
+// the projects of Code are the folders of /www/www
+const PROJECTS = '/www/www';
 
 var cache = null;
 var cached = 0;
@@ -40,9 +40,9 @@ async function address() {
 function projects() {
 	var items = [];
 	try {
-		var names = Fs.readdirSync('/www', { withFileTypes: true });
+		var names = Fs.readdirSync(PROJECTS, { withFileTypes: true });
 		for (var item of names) {
-			if (item.isDirectory() && !item.name.startsWith('.') && RESERVED.indexOf(item.name) === -1 && /^[a-z0-9][a-z0-9-]*$/.test(item.name))
+			if (item.isDirectory() && !item.name.startsWith('.') && /^[a-z0-9][a-z0-9-]*$/.test(item.name))
 				items.push(item.name);
 		}
 	} catch (e) {}

@@ -14,7 +14,7 @@ ExecStartPre=+/usr/lib/totaljs-developer/center-sync
 ExecStart=/usr/local/bin/node index.js
 Restart=on-failure
 RestartSec=3
-# it only reads the state of the services and the names of the folders of /www
+# it only reads the state of the services and the names of the folders of /www/www
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes

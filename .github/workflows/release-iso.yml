@@ -1,8 +1,8 @@
 name: release-iso
 
-# Builds the ISO that people use (the server edition of the Total.js Developer Distro for amd64), with its checksums and a signed
-# attestation of where it came from, and publishes it in a release of GitHub when a tag `iso-v*` is pushed.
-# By hand (Run workflow) it builds the same and keeps the ISO as an artifact of the run, without publishing: to try it.
+# Builds the remastered ISO (the official installer of Ubuntu Server with our seed in it) and keeps it as an artifact of the run, to try it.
+# It is NEVER published in a release: a modified installer image that carries the marks of Ubuntu is not something we may redistribute
+# (docs/legal.md). What people download is the official ISO of Ubuntu and the small seed image of release-seed.yml.
 #
 # The ISO installs the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the
 # ISO is published: an ISO whose repository does not exist cannot install anything. The workflow checks it and stops if it does not.
@@ -16,9 +16,6 @@ on:
         description: Stop if that address does not answer (leave it on for a release)
         type: boolean
         default: true
-  push:
-    tags:
-      - 'iso-v*'
 
 permissions:
   contents: write
@@ -74,32 +71,3 @@ jobs:
           name: totaljs-developer-server-amd64
           path: dist/
           retention-days: 14
-
-      - name: Publish the release
-        if: startsWith(github.ref, 'refs/tags/iso-v')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          BASE="$(grep -m1 '^# ubuntu-' build/iso/contents.txt | sed 's/^# ubuntu-//; s/-live-server.*//')"
-          SIZE="$(ls -l dist/totaljs-developer-server-amd64.iso | awk '{ printf "%.0f", $5 / 1048576 }')"
-          cat > notes.md <<NOTES
-          ## Total.js Developer Distro, server edition (amd64)
-
-          The installer of Ubuntu Server ${BASE}, remastered to install the Total.js layer (Node.js, Total.js and the tools of a developer) over the network. The installer asks the usual questions: language, keyboard, network, disk and who you are.
-
-          - **It needs a network connection** (cable or Wi-Fi) while it installs: it downloads the packages from ${REPO_URL}.
-          - Size: ${SIZE} MiB.
-          - Based on Ubuntu, not an official Ubuntu release.
-
-          ### Check the download
-
-          \`\`\`bash
-          sha256sum -c SHA256SUMS
-          gh attestation verify totaljs-developer-server-amd64.iso --repo ${GITHUB_REPOSITORY}
-          \`\`\`
-          NOTES
-          sed -i 's/^          //' notes.md
-          flags=""
-          case "${GITHUB_REF_NAME}" in *-rc*|*-beta*|*-alpha*) flags="--prerelease" ;; esac
-          gh release create "${GITHUB_REF_NAME}" dist/totaljs-developer-server-amd64.iso dist/SHA256SUMS \
-            --title "Total.js Developer Distro, server edition (${GITHUB_REF_NAME#iso-v})" --notes-file notes.md ${flags}

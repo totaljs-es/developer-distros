@@ -83,6 +83,18 @@ jobs:
           WORK_DIR: build/iso-product
         run: iso/ubuntu/build-iso.sh iso/ubuntu/seed build/totaljs-developer-ubuntu-server-amd64.iso
 
+      # What people use: the seed images. They have to build, have the label CIDATA and the two files that the installer reads
+      - name: Build the seed images
+        run: |
+          iso/ubuntu/build-seed.sh desktop build/totaljs-developer-desktop-seed.iso
+          iso/ubuntu/build-seed.sh server build/totaljs-developer-server-seed.iso
+          for seed in build/totaljs-developer-*-seed.iso; do
+            xorriso -indev "${seed}" -pvd_info 2>/dev/null | grep -q CIDATA || { echo "${seed} has not the label CIDATA"; exit 1; }
+            FILES="$(xorriso -indev "${seed}" -find / -type f 2>/dev/null | tr '\n' ' ')"
+            case "${FILES}" in *user-data*meta-data*|*meta-data*user-data*) ;; *) echo "${seed} has ${FILES}"; exit 1 ;; esac
+            echo "${seed}: ${FILES}"
+          done
+
       - name: What was measured
         if: always()
         run: |

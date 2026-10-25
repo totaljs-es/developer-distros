@@ -1,68 +1,53 @@
-# Ubuntu ISO (amd64)
+# The installer (Ubuntu 26.04, amd64)
 
-The installable ISO of the Total.js Developer Distro on Ubuntu, for computers with an amd64 processor. It is built in GitHub Actions from the newest Ubuntu LTS and it installs over the network: the ISO is small and the Total.js packages are downloaded while it installs.
+People install Total.js Developer with the **official ISO of Ubuntu Server, unmodified**, and a **seed image** next to it. The seed is ours, a few kilobytes,
+and has nothing of Ubuntu inside: that is what is published in a release (`docs/legal.md` explains why the ISO of Ubuntu is not modified and republished).
 
-## How it is made
+## The seed image
 
-`build-iso.sh` does not build a system: it remasters the official `live-server` ISO of Ubuntu.
+`build-seed.sh <desktop|server> <output.iso>` makes it:
+
+- an ISO with the volume label `CIDATA` and two files, `user-data` and `meta-data`. The installer of Ubuntu reads an autoinstall configuration from such a device;
+  without `autoinstall` on the kernel command line it asks the person to confirm it first.
+- the template is `seed-image/user-data.in`. It keeps the questions of the installer for the person (keyboard, network, disk and who they are) and, when Ubuntu is installed, runs
+  `install-layer.sh`, which travels **inside** the `user-data` (the seed is the only thing that is read from the device).
+- `install-layer.sh` writes the key and the source of the repository of packages into the new system, installs `totaljs-developer-release` and the sources of Docker (and of Mozilla,
+  for the desktop), updates the lists and installs `totaljs-developer-server` or `totaljs-developer-desktop`.
+- `REPO_URL` changes the repository that the seed installs from (the default is the one of GitHub Pages).
+
+The workflow `.github/workflows/release-seed.yml` builds both seeds when a tag `v*` is pushed, checks that the repository of packages answers, and publishes the seeds with their `SHA256SUMS`,
+an attestation of where they were built and the notes of the release (which say where to get the official ISO and its checksum).
+
+## The tests
+
+`build-iso.sh` remasters the official `live-server` ISO of Ubuntu with a seed in it and a boot menu that uses it. **That ISO is for the tests and for whoever builds it for themselves: it is never published.**
 
 1. It downloads `SHA256SUMS` of the series (`UBUNTU_RELEASE`, 26.04 by default) and checks its signature with the signing keys of Ubuntu.
 2. It takes the newest `live-server-amd64` ISO of that list and checks its checksum.
-3. It adds an autoinstall seed (`user-data` and `meta-data`, as `/nocloud`) and changes the boot menu so the installer uses it.
+3. It adds an autoinstall seed (`/nocloud`) and changes the boot menu (two entries: desktop and server, which differ in `totaljs.edition=` on the kernel command line).
 4. It writes the new ISO with `xorriso`, keeping the way the original boots (BIOS and UEFI).
 
-## What the test proves
-
-`test-install.sh` installs the ISO unattended in QEMU, powers off, boots the installed system and waits for a marker on the serial console. `seed-ci/` is that test seed, only for the CI: it installs the stock server with a random password that nobody knows. The seed of the real distro is not here yet.
-
-Run it on Linux with `xorriso`, `qemu-system-x86`, `qemu-utils` and `gnupg`:
+`test-install.sh` installs such an ISO unattended in QEMU, powers off, boots the installed system and waits for a marker on the serial console. Run it on Linux with `xorriso`,
+`qemu-system-x86`, `qemu-utils` and `gnupg`:
 
 ```bash
 iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci build/test.iso
 iso/ubuntu/test-install.sh build/test.iso
 ```
 
-The workflow `.github/workflows/iso-ubuntu.yml` runs both, and keeps the logs of the installer and of the first boot.
+The seeds of the tests are `seed-ci/` (stock server, random password) and `seed-ci-layer/` (also installs the Total.js layer, from a repository with a throwaway key that the
+workflow serves on the computer of the runner, `10.0.2.2` for the guest of QEMU). The installed system must boot, have Node.js 24 and its first person in the group `totaljs-developer`.
+`seed/` is the seed of the remastered ISO that builds by hand. The workflow `.github/workflows/iso-ubuntu.yml` runs all this and keeps the logs of the installer and of the first boot;
+`.github/workflows/release-iso.yml` builds the remastered ISO by hand and keeps it as an artifact of the run, to try it.
 
-## The size
+## The size of the remastered ISO
 
-The official ISO of Ubuntu Server 26.04.1 is 2927296512 bytes (2792 MiB), and a file of a GitHub release can have 2 GiB at most. What is inside, measured in the CI:
-
-| | Size |
-|---|---|
-| `casper/` (the installer and the system that it installs) | about 1560 MiB, of which `ubuntu-server-minimal.squashfs` is 1273 MiB |
-| `pool/` and `dists/` (packages to install without a network) | about 1230 MiB (what is left of the ISO) |
-
-This distro installs over the network, so `build-iso.sh` can take the packages out of the ISO (`SLIM`):
-
-- `SLIM=pool` (the default) takes out `pool/`, about 1.2 GiB, and keeps `dists/`. The ISO is then about 1.6 GiB.
-- `SLIM=all` takes out `pool/` and `dists/`. **It does not work**: the installer stopped in `apt-get update` of the new system (`returned non-zero exit status 100`). The CD is a source of apt of the installer, and a source without its `Release` file fails, so `dists/` has to stay.
-- `SLIM=0` leaves the ISO as Ubuntu made it (2.7 GiB).
-
-The workflow builds one ISO without slimming (the control) and one with `SLIM=pool` that it installs and boots. Measured in the CI:
+The official ISO of Ubuntu Server 26.04.1 is 2792 MiB. `build-iso.sh` can take the packages out of it, because this installer downloads them (`SLIM`):
 
 | | Size | Install | First boot |
 |---|---|---|---|
-| Original of Ubuntu (`SLIM=0`, control) | 2792 MiB | 395 s | 15 s |
-| `SLIM=pool` | **1578 MiB** | 425 s | 16 s |
-| `SLIM=all` | 1578 MiB | fails in `apt-get update` | |
+| Original (`SLIM=0`, control) | 2792 MiB | 395 s | 15 s |
+| `SLIM=pool` (the default: takes out `pool/`, keeps `dists/`) | 1578 MiB | 425 s | 16 s |
+| `SLIM=all` (takes out `pool/` and `dists/`) | 1578 MiB | fails in `apt-get update` | |
 
-The ISO of `SLIM=pool` installs the Total.js layer unattended, boots, and has Node.js 24 and its first person in the group `totaljs-developer`. It is 470 MiB under the limit of 2 GiB of a file of a release.
-
-## The server edition
-
-`seed/` is the seed that people use: it keeps the installer's own questions (keyboard, network, disk, who you are) and, when it has installed Ubuntu, `install-layer.sh` downloads the key and the source of the Total.js repository and installs `totaljs-developer-server` into the new system. The address of the repository is `REPO_URL` (the default is GitHub Pages). It needs a network connection: if the repository cannot be reached it says so and stops.
-
-The workflow builds a repository with a throwaway key, serves it on the computer of the runner (`10.0.2.2` for the guest of QEMU) and installs the ISO of `seed-ci-layer/` unattended. The installed system must boot, have Node.js 24 and have its first person in the group `totaljs-developer`. The ISO of `seed/` is only built there: its questions need a person.
-
-## Publishing it
-
-The workflow `release-iso` builds the ISO of the server edition (the seed of `seed/`, slimmed), its `SHA256SUMS` and an attestation of where it came from, and publishes them in a release of GitHub when a tag `iso-v*` is pushed (`iso-v26.04.1`; `-rc`, `-beta` or `-alpha` in the tag make it a prerelease). By hand (*Run workflow*) it builds the same and keeps the ISO as an artifact of the run for 14 days, without publishing it: that is how to get an ISO to try.
-
-The ISO installs the packages of Total.js from the address of the repository of packages, so **that repository has to be published first** (`tools/package-repo/publish-pages.sh`). The workflow checks that the address answers and stops if it does not, because an ISO with no repository installs Ubuntu and then fails.
-
-## What is not done yet
-
-- **Two editions in one ISO:** the boot menu has two entries, desktop and server, that differ only in `totaljs.edition=` on the kernel command line. The seed calls `install-layer.sh ... auto`, which reads it from `/proc/cmdline` and installs `totaljs-developer-desktop` or `totaljs-developer-server` (the server one when nothing is said, which is also what the entries of the original menu that are not ours get). The desktop edition downloads more (Xorg, the desktop and Firefox), so it needs a good connection.
-- A test of the UEFI boot, and of the desktop edition.
-- Publishing the ISO in a release (the limit of a file in a release is 2 GiB, and the size is measured first).
+`SLIM=all` does not work: the CD is a source of apt of the installer, and a source without its `Release` makes `apt-get update` of the new system fail.

@@ -1,0 +1,20 @@
+#cloud-config
+# The seed of the installer of Total.js Developer, edition __EDITION__. It travels in a small image next to the official ISO of Ubuntu Server
+# (a second device with the volume label CIDATA). The person decides the language, the keyboard, the network, the disk and who they are; the
+# rest is decided here, and the Total.js layer is downloaded from the repository of packages while it installs.
+autoinstall:
+  version: 1
+  interactive-sections:
+    - keyboard
+    - network
+    - storage
+    - identity
+  ssh:
+    install-server: true
+  late-commands:
+    # the script that installs the layer travels inside this file: the seed is the only thing that is read from this device
+    - |
+      cat > /tmp/totaljs-install-layer.sh <<'TOTALJS_INSTALL_LAYER'
+__INSTALL_LAYER__
+      TOTALJS_INSTALL_LAYER
+    - sh /tmp/totaljs-install-layer.sh /target __REPO_URL__ __PACKAGE__
