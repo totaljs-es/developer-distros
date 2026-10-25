@@ -11,6 +11,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SITE="${REPO_OUT:-${ROOT}/build/site/repo}"
 KEY_FPR="${TOTALJS_REPO_KEY:-95454694523B8D18A376F7D5D722BA35C8427B40}"
+# the same place of the key as tools/package-repo/build.sh
+GNUPGHOME="${TOTALJS_REPO_GNUPGHOME:-${HOME}/.config/totaljs/repository-signing}"
+[ -d "${GNUPGHOME}" ] || { echo "Signing key home not found: ${GNUPGHOME}" >&2; exit 1; }
+export GNUPGHOME
 SRC="${1:?the artifact of the workflow arch-repo: a .zip or a folder}"
 DEST="${SITE}/arch/x86_64"
 

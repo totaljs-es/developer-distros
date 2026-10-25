@@ -6,13 +6,13 @@
 #   KEY_FILE=public-key.gpg arch/build.sh                 # the repository in build/arch/x86_64, not signed
 #   KEY_FILE=... SIGN_KEY=<fingerprint> arch/build.sh     # the packages and the database signed with that key
 #
-# KEY_FILE is the public key that the package totaljs-developer-release installs. BASE_URL is where the repository is published.
+# KEY_FILE is the public key that the package totaljs-developer-release installs. BASE_URL is the address of repo/ where it is published (the servers are BASE_URL/arch/$arch).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${ARCH_OUT:-${ROOT}/build/arch/x86_64}"
 WORK="${ROOT}/build/arch-work"
-BASE_URL="${BASE_URL:-https://totaljs-es.github.io/developer-distros}"
+BASE_URL="${BASE_URL:-https://totaljs-es.github.io/developer-distros/repo}"
 KEY_FILE="${KEY_FILE:?KEY_FILE is the public key of the repository}"
 SIGN_KEY="${SIGN_KEY:-}"
 
