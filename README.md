@@ -1,62 +1,94 @@
-# Total.js Developer
+<p align="center"><img src="shared/branding/mascot.png" alt="Tux hugging the Total.js logo" width="180"></p>
 
-<p align="center"><img src="shared/branding/mascot.png" alt="Tux hugging the Total.js logo" width="220"></p>
+<h1 align="center">Total.js Developer</h1>
 
-A complete environment for developing with [Total.js](https://www.totaljs.com), ready to use as soon as it is installed. It runs on **Ubuntu 26.04 LTS**
-in a virtual machine (the usual way) or on a computer, with a desktop or only the command line.
+<p align="center"><b>A complete development environment for <a href="https://www.totaljs.com">Total.js</a>, installed in minutes.</b><br>An Ubuntu remix for virtual machines and computers, with a desktop or only the command line.</p>
+
+<p align="center">
+  <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml/badge.svg" alt="check"></a>
+  <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/package-repo.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/package-repo.yml/badge.svg" alt="package-repo"></a>
+  <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/iso-ubuntu.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/iso-ubuntu.yml/badge.svg" alt="iso-ubuntu"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
+</p>
+
+<p align="center"><img src="docs/images/launcher.jpg" alt="The desktop of Total.js Developer: the widget, a terminal and the launcher" width="860"></p>
 
 ## What you get
 
 - **Node.js** (LTS) with **Total.js 5** and **Total.js 4**, and `npm`.
-- **Code**, the editor of Total.js in the browser, and **Flow**, to program with diagrams.
-- **PostgreSQL** with **pgAdmin**, and a reverse proxy so that every project has its own address: `my-project.totaljs.developer`.
+- **Code**, the Total.js editor in the browser, and **Flow**, to program with diagrams.
+- **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
 - **Total.js Center**, the front door at `http://totaljs.developer`: the state of the services, your projects and how to connect to the database.
-- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager, a widget on the wallpaper (Conky) and twelve wallpapers.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager, a widget on the wallpaper and twelve wallpapers.
 
 ## Install
 
 Download **one ISO**, start a machine with it, choose the desktop or the server edition in the menu, and answer the usual questions of the installer. The rest
-installs by itself. It needs an internet connection, in a virtual machine and on a computer, and how long it takes depends on it.
+installs by itself. It needs an internet connection, in a virtual machine and on a computer.
 
-**[How to install](docs/install.md)** · **[How to use it](docs/using.md)**
+1. Download `totaljs-developer-amd64.iso` and `SHA256SUMS` from the [releases](../../releases).
+2. Attach the ISO to an amd64 virtual machine (4 GB of memory, 30 GB of disk), or write it to a USB stick.
+3. Start it, choose **desktop edition** or **server edition**, and install.
 
-The ISO is in the [releases](../../releases) of this repository: `totaljs-developer-amd64.iso`. If you prefer the official ISO of Ubuntu, unmodified, the same releases have a
-small seed for each edition to put next to it; `docs/install.md` explains it.
+**[Installation guide](docs/install.md)**. If you prefer the official ISO of Ubuntu Server, unmodified, the same release has a small seed image for each edition to
+put next to it.
 
-## Already have Ubuntu 26.04?
+## Your first minutes
 
-Total.js Developer is a set of packages in a signed repository. On an installed Ubuntu 26.04 you can add it without a seed:
+| Open | What it is |
+| --- | --- |
+| `http://totaljs.developer` | Total.js Center |
+| `http://code.totaljs.developer` | Code |
+| `http://flow.totaljs.developer` | Flow |
+| `http://pgadmin.totaljs.developer` | pgAdmin |
 
-```bash
-curl -fsSL https://totaljs-es.github.io/developer-distros/repo/totaljs-developer.gpg | sudo tee /usr/share/keyrings/totaljs-developer-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/totaljs-developer-archive-keyring.gpg] https://totaljs-es.github.io/developer-distros/repo/ubuntu resolute main" | sudo tee /etc/apt/sources.list.d/totaljs-developer.list
-sudo apt update
-sudo apt install totaljs-developer-release totaljs-docker-source   # add totaljs-mozilla-source for the desktop edition
-sudo rm /etc/apt/sources.list.d/totaljs-developer.list              # the package has written the same source by itself
-sudo apt update
-sudo apt install totaljs-developer-server                          # or totaljs-developer-desktop
-```
+The names are answered by the machine itself: there is nothing to configure. The first time, the services download their images, and Total.js Center shows when each one is ready.
+**[How to use it](docs/using.md)**.
+
+<p align="center"><img src="docs/images/terminal.jpg" alt="A terminal with the summary of Total.js Developer" width="420"> <img src="docs/images/desktop.jpg" alt="The widget on the wallpaper" width="420"></p>
+
+## How it is built
+
+Total.js Developer does not fork or patch Ubuntu. It is a **set of packages** in a signed APT repository, installed on top of Ubuntu Server 26.04 LTS, and
+everything else comes from the archive of Ubuntu.
+
+- **Packages:** `totaljs-developer-server` and `totaljs-developer-desktop` are meta-packages; each piece (Node.js, the services, the DNS, Center, the desktop, the widget...) is a package of its own.
+  The repository is built and signed from this repository and served at <https://totaljs-es.github.io/developer-distros/>.
+- **The installer:** the ISO is the official installer of Ubuntu Server with an autoinstall seed and a boot menu added. The packages of Ubuntu are downloaded from Ubuntu, and ours from the repository above.
+- **Tested:** each change installs the packages in a clean Ubuntu 26.04, starts the desktop session in a virtual screen, and the installer is run in QEMU and the installed system booted.
+- **Already have Ubuntu 26.04?** Add the repository and install the packages: the commands are on its [front page](https://totaljs-es.github.io/developer-distros/), and [`docs/layer.md`](docs/layer.md) explains them.
+
+## Documentation
+
+| | |
+| --- | --- |
+| [Installation guide](docs/install.md) | Download, prepare a virtual machine or a computer, install |
+| [How to use it](docs/using.md) | Addresses, projects, database, services, desktop shortcuts |
+| [The packages](docs/layer.md) | What each package does and the rules they follow |
+| [Legal notes](docs/legal.md) | Licenses, marks, and what is and is not distributed |
+| [The installer](iso/ubuntu/README.md) | The ISO, the seed images and how they are tested |
 
 ## In this repository
 
 ```text
-packages/              the source of the packages (control, scripts, files)
-tools/package-repo/    builds and signs the APT and Pacman repository, and tests it in a clean Ubuntu
-iso/ubuntu/            the seed images, and the tests that install and boot the system in QEMU
+packages/              the source of the packages
+tools/package-repo/    builds and signs the repository, and tests it in a clean Ubuntu
+iso/ubuntu/            the ISO and the seed images, and the tests that install and boot the system
+iso/own/               a live image of our own, from the packages of Ubuntu
 shared/                the artwork: wallpapers, boot splash and logos
 docs/                  the documentation
 tools/image-builder/   the images for TotalVM (macOS with Apple Silicon)
-scripts/check.js       the checks that run on every change
 ```
 
-`docs/layer.md` explains how the packages are organised. `docs/legal.md` explains what is and is not published, and why.
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md). To report a vulnerability, follow [SECURITY.md](SECURITY.md).
 
 ## License
 
-The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under
-[CC BY-SA 4.0](LICENSE-ARTWORK). The logo and the mascot of Total.js are not covered by either: they are marks. The software that the packages install
-(Node.js, Docker, PostgreSQL, Firefox, Ubuntu...) keeps its own licenses.
+The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under [CC BY-SA 4.0](LICENSE-ARTWORK). The logo and the mascot of Total.js are
+not covered by either: they are marks. The software that the packages install (Node.js, Docker, PostgreSQL, Firefox, Ubuntu...) keeps its own licenses.
 
 ## Trademarks
 
