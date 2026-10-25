@@ -11,7 +11,15 @@ if ! pgrep -u "$(id -u)" -x picom >/dev/null; then
   ) &
 fi
 totaljs-wallpaper &
-pgrep -u "$(id -u)" -x tint2 >/dev/null || tint2 -c "$HOME/.config/tint2/tint2rc" &
+# the panel is started again if it ends (a panel that is gone leaves the session without a way to reach anything), and how it ended is kept
+pgrep -u "$(id -u)" -x tint2 >/dev/null || (
+  mkdir -p "$HOME/.cache"
+  while true; do
+    tint2 -c "$HOME/.config/tint2/tint2rc"
+    echo "$(date +%T) tint2 ended with status $?" >> "$HOME/.cache/tint2-exits.log"
+    sleep 2
+  done
+) &
 nm-applet &
 pasystray &
 # Openbox has no agent of Polkit of its own, and the tools of the desktop that need a password ask for it through one

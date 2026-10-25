@@ -60,7 +60,9 @@ mkdir -p "${XDG_RUNTIME_DIR}"; chmod 700 "${XDG_RUNTIME_DIR}"
 export LIBGL_ALWAYS_SOFTWARE=1
 openbox-session >/tmp/openbox.log 2>&1 &
 sleep 14
+# each process gets up to 30 seconds: the session starts them all at once, and a panel that is started again counts too
 for p in openbox tint2 picom dunst; do
+    for _ in $(seq 1 30); do pgrep -x "${p}" >/dev/null && break; sleep 1; done
     pgrep -x "${p}" >/dev/null || { echo "${p} is not running" >&2; cat /tmp/openbox.log >&2; tail -n +1 "${HOME}"/.cache/*.log >&2 2>/dev/null || true; exit 1; }
 done
 import -window root /out/desktop.png
