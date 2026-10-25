@@ -1,6 +1,6 @@
 # The installer (Ubuntu 26.04, amd64)
 
-People install Total.js Developer with the **official ISO of Ubuntu Server, unmodified**, and a **seed image** next to it. The seed is ours, a few kilobytes,
+People install Total.js Developer with the **official ISO of Ubuntu Server, unmodified**, and a **seed image** next to it. The seed is ours, a few hundred kilobytes,
 and has nothing of Ubuntu inside: that is what is published in a release (`docs/legal.md` explains why the ISO of Ubuntu is not modified and republished).
 
 ## The seed image

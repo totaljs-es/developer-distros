@@ -24,7 +24,7 @@
 
 ## Install
 
-Start a machine with the **official ISO of Ubuntu Server 26.04 LTS** and one **seed** (a small image, a few kilobytes) next to it, answer the usual questions of the installer, and the rest
+Start a machine with the **official ISO of Ubuntu Server 26.04 LTS** and one **seed** (a small image, a few hundred kilobytes) next to it, answer the usual questions of the installer, and the rest
 installs by itself. It needs an internet connection, in a virtual machine and on a computer.
 
 1. Download the [official ISO of Ubuntu Server](https://releases.ubuntu.com/26.04/) (amd64, Intel and AMD) or the [one for arm64](https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/) (ARM, such as UTM or Parallels on a Mac with Apple Silicon).

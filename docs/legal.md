@@ -18,7 +18,7 @@ read it again before each release.
 | What we publish | Status |
 | --- | --- |
 | The APT and Pacman repository, the `.deb` packages, the scripts, the wallpapers and the boot splash | **Ours**, with no material of Canonical. They may say that they are made for Ubuntu 26.04 LTS. |
-| The seed images (`totaljs-developer-desktop-seed.iso` and `totaljs-developer-server-seed.iso`) | **Ours**: a few kilobytes with an autoinstall configuration. Nothing of Canonical is inside. |
+| The seed images (`totaljs-developer-desktop-seed.iso` and `totaljs-developer-server-seed.iso`) | **Ours**: a few hundred kilobytes with an autoinstall configuration. Nothing of Canonical is inside. |
 | The official ISO of Ubuntu Server | **Not ours and not modified.** People may download it from Ubuntu together with a seed. |
 | **The ISO of Total.js Developer** (`totaljs-developer-amd64.iso`): the installer of Ubuntu Server with our seed and a boot menu added | **Distributed as an Ubuntu remix**, called "Total.js Developer, an Ubuntu remix" and not "Ubuntu". It is a modified installer image that carries the marks of Ubuntu: **Canonical was asked for approval on 2026-10-25** (the form of <https://ubuntu.com/legal/terms-and-policies/contact-us>). If it asks for a licence agreement, conditions or another form, this page and `iso/own/README.md` say what was decided. |
 

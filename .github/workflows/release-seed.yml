@@ -1,6 +1,6 @@
 name: release-seed
 
-# Publishes what people download to install Total.js Developer: the two seed images (desktop and server), a few kilobytes each, with their
+# Publishes what people download to install Total.js Developer: the two seed images (desktop and server), a few hundred kilobytes each, with their
 # checksums and a signed attestation of where they came from. The ISO of Ubuntu is NOT published here: the release says where to get the
 # official one, with its checksum (docs/legal.md explains why).
 # The release of a version (the tag `v*`) is published by release-iso.yml, with the ISO of Total.js Developer and these same seeds: while Canonical has not answered
@@ -89,7 +89,7 @@ jobs:
           cat > notes.md <<NOTES
           ## Total.js Developer: seeds for the official ISO of Ubuntu Server
 
-          Install **Total.js Developer** on Ubuntu 26.04 LTS with the **official, unmodified ISO of Ubuntu Server** and one of these seeds: a small image (a few kilobytes) that tells the installer of Ubuntu what to do and downloads Total.js Developer from ${REPO_URL}.
+          Install **Total.js Developer** on Ubuntu 26.04 LTS with the **official, unmodified ISO of Ubuntu Server** and one of these seeds: a small image (a few hundred kilobytes) that tells the installer of Ubuntu what to do and downloads Total.js Developer from ${REPO_URL}.
 
           | Seed | For |
           | --- | --- |

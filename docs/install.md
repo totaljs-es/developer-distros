@@ -1,7 +1,7 @@
 # Install Total.js Developer
 
 Total.js Developer is **Ubuntu Server 26.04 LTS with a development environment for Total.js** that is installed together with it. You start a machine with the **official ISO of Ubuntu Server**
-and one **seed**: a small image (a few kilobytes) that tells the installer of Ubuntu to install Total.js Developer, with the desktop or only the command line. The installer asks you the usual questions.
+and one **seed**: a small image (a few hundred kilobytes) that tells the installer of Ubuntu to install Total.js Developer, with the desktop or only the command line. The installer asks you the usual questions.
 
 It is made to run in a **virtual machine**, which is the easiest way to have it, and it also installs on a real computer in the same way.
 
