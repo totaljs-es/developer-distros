@@ -66,7 +66,8 @@ The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not
 ## 3. Install
 
 1. Start the machine from the ISO. The menu has two entries: **Install Total.js Developer, desktop edition** (the first one) and **server edition** (command line only).
-2. Choose one. The installer starts.
+2. Choose one. The installer starts. It is the installer of Ubuntu Server, in text mode: simple, and the same one that millions of servers use. You move with the arrow keys, `Tab` and `Enter`. When it
+   finishes and the system restarts, the desktop edition starts with the desktop of Total.js.
 3. Answer the questions: language, keyboard, network, disk and who you are (your name, the name of the machine, your user and your password).
 4. Wait. The installer puts the system on the disk and then downloads and installs Total.js Developer. When it finishes it asks you to restart:
    disconnect the ISO (take out the stick, or eject the virtual drive) and press Enter.
