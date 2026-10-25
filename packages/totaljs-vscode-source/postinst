@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# The key is the official one: its fingerprint is checked here too, so that a changed file cannot be used by mistake
+fpr="$(gpg --show-keys --with-colons /usr/share/keyrings/packages.microsoft.com.asc 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }')"
+if [ -n "${fpr}" ] && [ "${fpr}" != BC528686B50D79E339D3721CEB3E94ADBE1229CF ]; then
+  echo "totaljs-vscode-source: the key of Microsoft has an unexpected fingerprint (${fpr})" >&2
+  exit 1
+fi
+
+install -m 0644 /usr/share/totaljs-developer/vscode.sources /etc/apt/sources.list.d/vscode.sources
+
+# The package code adds its own source and key when it is installed: with ours already there, the two would disagree about the key
+if [ -e /usr/share/debconf/confmodule ]; then
+  . /usr/share/debconf/confmodule
+  db_set code/add-microsoft-repo false 2>/dev/null || { echo 'code code/add-microsoft-repo boolean false' | debconf-set-selections 2>/dev/null || true; }
+fi
+
+exit 0

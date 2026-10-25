@@ -24,12 +24,14 @@ totaljs-developer-desktop     meta-package: the server edition plus
   totaljs-conky               the widget on the wallpaper, with four profiles (system, services, compact and clock)
   totaljs-wallpapers          the twelve wallpapers
   totaljs-mozilla-source      the repository of Mozilla, where Firefox comes from (Ubuntu offers only a snap)
+  totaljs-vscode-source       the repository of Microsoft, where Visual Studio Code comes from
+  totaljs-chrome-source       the repository of Google, where Google Chrome comes from
 ```
 
 The meta-packages have only `Depends`: each piece is a package of its own and can be updated alone. To install, add the sources first and then the layer:
 
 ```bash
-sudo apt install totaljs-developer-release totaljs-docker-source   # and totaljs-mozilla-source for the desktop edition
+sudo apt install totaljs-developer-release totaljs-docker-source   # and totaljs-mozilla-source, totaljs-vscode-source and totaljs-chrome-source for the desktop edition
 sudo apt update
 sudo apt install totaljs-developer-server                          # or totaljs-developer-desktop
 ```

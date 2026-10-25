@@ -20,7 +20,7 @@
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
 - **Total.js Center**, the front door at `http://totaljs.developer`: the state of the services, your projects and how to connect to the database.
-- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, a terminal, a file manager, a widget on the wallpaper and twelve wallpapers.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Google Chrome, Visual Studio Code, a terminal, a file manager, a widget on the wallpaper and twelve wallpapers.
 
 ## Install
 
@@ -88,7 +88,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md). To report a vulnerability, follow [SECU
 ## License
 
 The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under [CC BY-SA 4.0](LICENSE-ARTWORK). The logo and the mascot of Total.js are
-not covered by either: they are marks. The software that the packages install (Node.js, Docker, PostgreSQL, Firefox, Ubuntu...) keeps its own licenses.
+not covered by either: they are marks. The software that the packages install (Node.js, Docker, PostgreSQL, Firefox, Chrome, Visual Studio Code, Ubuntu...) keeps its own licenses.
 
 ## Trademarks
 

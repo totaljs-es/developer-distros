@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+# The key is the official one: its fingerprint is checked here too, so that a changed file cannot be used by mistake
+fpr="$(gpg --show-keys --with-colons /usr/share/keyrings/dl.google.com.asc 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }')"
+if [ -n "${fpr}" ] && [ "${fpr}" != EB4C1BFD4F042F6DDDCCEC917721F63BD38B4796 ]; then
+  echo "totaljs-chrome-source: the key of Google has an unexpected fingerprint (${fpr})" >&2
+  exit 1
+fi
+
+install -m 0644 /usr/share/totaljs-developer/google-chrome.sources /etc/apt/sources.list.d/google-chrome.sources
+
+# The package google-chrome-stable adds its own source and key the first time, unless this file says that it already did
+if [ ! -e /etc/default/google-chrome ]; then
+  printf '# The source of apt is made by totaljs-chrome-source: google-chrome-stable does not have to add its own\nrepo_add_once="true"\nrepo_reenable_on_distupgrade="false"\n' > /etc/default/google-chrome
+fi
+
+exit 0

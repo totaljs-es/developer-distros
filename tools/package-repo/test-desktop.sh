@@ -31,7 +31,7 @@ install_logged() {
         exit 1
     fi
 }
-install_logged totaljs-developer-release totaljs-docker-source totaljs-mozilla-source
+install_logged totaljs-developer-release totaljs-docker-source totaljs-mozilla-source totaljs-vscode-source totaljs-chrome-source
 rm /etc/apt/sources.list.d/totaljs-test.list   # the release package wrote the same source with its own key
 apt-get update -qq
 # the real installer creates the person BEFORE this layer is installed: their home exists, and the packages have to leave ~/.config theirs
@@ -52,6 +52,15 @@ test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
 command -v firefox >/dev/null
 POLICY="$(apt-cache policy firefox)"
 case "${POLICY}" in *packages.mozilla.org*) ;; *) echo "${POLICY}" >&2; echo 'firefox does not come from Mozilla' >&2; exit 1 ;; esac
+
+command -v code >/dev/null
+command -v google-chrome-stable >/dev/null
+for pkg in code google-chrome-stable; do
+    case "$(apt-cache policy "${pkg}")" in *packages.microsoft.com*|*dl.google.com*) ;; *) echo "${pkg} does not come from its own repository" >&2; exit 1 ;; esac
+done
+# the packages add their own source when they are installed: the one of ours has to be the only one
+test "$(ls /etc/apt/sources.list.d | grep -c -i -E 'vscode|microsoft')" = 1
+test "$(ls /etc/apt/sources.list.d | grep -c -i google)" = 1
 
 echo "==> the launchers that do nothing here are hidden, and the scripts of the panel work"
 test -f /home/earlyuser/.local/share/applications/pcmanfm-desktop-pref.desktop

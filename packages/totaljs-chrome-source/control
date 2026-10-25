@@ -1,0 +1,13 @@
+Package: totaljs-chrome-source
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: ca-certificates
+Homepage: https://www.google.com/linuxrepositories/
+Description: The repository of Google for Chrome, for the Total.js Developer Distros
+ The signing key and the source of apt of the repository of Google Chrome (dl.google.com), where the
+ package google-chrome-stable comes from. Chrome is not in Ubuntu and is not copied into the repository
+ of Total.js: it is downloaded from Google, and updated by apt. The key is the official one of Google
+ (fingerprint EB4C 1BFD 4F04 2F6D DDCC EC91 7721 F63B D38B 4796).
