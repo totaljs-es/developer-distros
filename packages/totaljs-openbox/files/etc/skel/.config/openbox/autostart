@@ -1,7 +1,11 @@
 # The session of Total.js Developer. Each line is one thing that starts with Openbox.
 xsetroot -cursor_name left_ptr &
 # the compositor: GLX where there is 3D, and xrender where there is not
-pgrep -u "$(id -u)" -x picom >/dev/null || { picom --config "$HOME/.config/picom/picom.conf" --daemon || picom --backend xrender --no-vsync --daemon; } &
+pgrep -u "$(id -u)" -x picom >/dev/null || (
+  picom --config "$HOME/.config/picom/picom.conf" --daemon
+  sleep 2
+  pgrep -u "$(id -u)" -x picom >/dev/null || picom --config "$HOME/.config/picom/picom.conf" --backend xrender --no-vsync --daemon
+) &
 totaljs-wallpaper &
 pgrep -u "$(id -u)" -x tint2 >/dev/null || tint2 -c "$HOME/.config/tint2/tint2rc" &
 nm-applet &

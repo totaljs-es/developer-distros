@@ -68,7 +68,12 @@ import -window root /out/desktop.png
 alacritty -vv >/tmp/alacritty.log 2>&1 &
 sleep 12
 import -window root /out/desktop-terminal.png
-G_MESSAGES_DEBUG=all rofi -show drun -show-icons -v >/tmp/rofi.log 2>&1 &
+# the same screen without the compositor: a window that is blank only with it is a problem of the compositor in a virtual screen
+pgrep -x picom >/dev/null && echo "picom is running" || echo "picom is NOT running"
+pkill -x picom || true
+sleep 3
+import -window root /out/desktop-terminal-without-picom.png
+G_MESSAGES_DEBUG=all rofi -show drun -show-icons >/tmp/rofi.log 2>&1 &
 sleep 3
 import -window root /out/desktop-launcher.png
 SESSION
