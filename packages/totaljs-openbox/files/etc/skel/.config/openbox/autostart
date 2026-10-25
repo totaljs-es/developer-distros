@@ -1,14 +1,14 @@
 # The session of Total.js Developer. Each line is one thing that starts with Openbox.
 xsetroot -cursor_name left_ptr &
 # the compositor: GLX on a real computer, xrender in a virtual machine or a container (without a real GPU, a GL window such as the
-# terminal stays see-through under a GLX compositor, and xrender needs no 3D)
+# terminal stays see-through under a GLX compositor, and xrender needs no 3D). It starts BEFORE the panel and the session waits for it:
+# the panel restarts itself when a compositor appears, and in that moment it could end (see tint2-exits.log)
 if ! pgrep -u "$(id -u)" -x picom >/dev/null; then
   if systemd-detect-virt --quiet 2>/dev/null; then BACKEND="--backend xrender --no-vsync"; else BACKEND="--backend glx"; fi
-  (
-    picom --config "$HOME/.config/picom/picom.conf" $BACKEND --daemon
-    sleep 2
-    pgrep -u "$(id -u)" -x picom >/dev/null || picom --config "$HOME/.config/picom/picom.conf" --backend xrender --no-vsync --daemon
-  ) &
+  picom --config "$HOME/.config/picom/picom.conf" $BACKEND --daemon
+  for _ in 1 2 3 4 5 6; do pgrep -u "$(id -u)" -x picom >/dev/null && break; sleep 0.5; done
+  pgrep -u "$(id -u)" -x picom >/dev/null || picom --config "$HOME/.config/picom/picom.conf" --backend xrender --no-vsync --daemon
+  sleep 0.5
 fi
 totaljs-wallpaper &
 # the panel is started again if it ends (a panel that is gone leaves the session without a way to reach anything), and how it ended is kept
