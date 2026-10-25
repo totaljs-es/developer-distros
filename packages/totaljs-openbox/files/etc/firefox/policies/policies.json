@@ -1,6 +1,13 @@
 {
   "policies": {
     "DontCheckDefaultBrowser": true,
+    "HttpAllowlist": [
+      "http://totaljs.developer",
+      "http://code.totaljs.developer",
+      "http://flow.totaljs.developer",
+      "http://pgadmin.totaljs.developer",
+      "http://127.0.0.1:8010"
+    ],
     "Homepage": {
       "URL": "http://totaljs.developer",
       "Locked": false,

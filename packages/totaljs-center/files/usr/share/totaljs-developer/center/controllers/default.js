@@ -16,7 +16,8 @@ var cache = null;
 var cached = 0;
 
 function run(cmd, args) {
-	return new Promise(resolve => execFile(cmd, args, { timeout: 2500 }, (err, out) => resolve(err ? '' : String(out).trim())));
+	// what the command printed is used even when it ends with an error: `systemctl is-active` says "inactive" or "failed" with an exit code that is not 0
+	return new Promise(resolve => execFile(cmd, args, { timeout: 2500 }, (err, out) => resolve(out ? String(out).trim() : '')));
 }
 
 function read(path, fallback) {
