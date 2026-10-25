@@ -24,7 +24,7 @@ EDITION="${EDITION:-server}"
 [ "$(id -u)" = 0 ] || { echo "run this as root" >&2; exit 1; }
 [ "$(uname -m)" = aarch64 ] || { echo "this builds on an ARM machine (aarch64)" >&2; exit 1; }
 
-cleanup() { umount -R "${RFS}/proc" "${RFS}/sys" "${RFS}/dev" 2>/dev/null || true; }
+cleanup() { umount -R "${RFS}" 2>/dev/null || true; }
 trap cleanup EXIT
 in_rfs() { chroot "${RFS}" /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin "$@"; }
 
@@ -38,6 +38,8 @@ if [ ! -f "${BUILD}/rootfs.tar.gz" ]; then
     [ "$(md5sum "${BUILD}/rootfs.tar.gz" | awk '{print $1}')" = "$(curl -fsSL "${ROOTFS_URL}.md5" | awk '{print $1}')" ] || { echo "the root filesystem is damaged (md5)" >&2; exit 1; }
 fi
 bsdtar -xpf "${BUILD}/rootfs.tar.gz" -C "${RFS}"
+# pacman checks the free space of the mount point of its cache: the folder of the system has to be one (arch-chroot does the same)
+mount --bind "${RFS}" "${RFS}"
 mount -t proc proc "${RFS}/proc"; mount --rbind /sys "${RFS}/sys"; mount --rbind /dev "${RFS}/dev"
 rm -f "${RFS}/etc/resolv.conf"; cp -L /etc/resolv.conf "${RFS}/etc/resolv.conf"
 
