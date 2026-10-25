@@ -1,0 +1,24 @@
+# Mailpit catches the emails that your projects send while you develop (nothing leaves the machine).
+# SMTP for the projects: mailpit:1025 (no user, no password, no TLS). The inbox: http://mailpit.totaljs.developer
+services:
+  mailpit:
+    container_name: mailpit
+    image: axllent/mailpit:latest
+    restart: always
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: '1'
+      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
+      VIRTUAL_HOST: mailpit.totaljs.developer
+      VIRTUAL_PORT: '8025'
+    volumes:
+      - data:/data
+    networks:
+      - default
+
+volumes:
+  data:
+
+networks:
+  default:
+    name: proxy
+    external: true

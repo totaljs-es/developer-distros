@@ -1,0 +1,16 @@
+Package: totaljs-services
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: totaljs-docker-stack (>= 1.0.0)
+Homepage: https://www.totaljs.com
+Description: Optional services for Total.js developers: Redis, Mailpit, MongoDB
+ A small catalog of services that run as Docker containers on the network of the
+ Total.js Developer Distros, and are off until the person turns them on with the
+ command totaljs-service (list, enable, disable, status). Each one is a Compose
+ file in /www/services/<name> that the person can edit, and a systemd service
+ (totaljs-service@<name>) that starts at boot and tries again until the images
+ are downloaded. None of them is published on the host: the projects reach them
+ by name (redis, mailpit, mongodb) through the network proxy.

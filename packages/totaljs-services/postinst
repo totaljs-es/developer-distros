@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+[ "$1" = configure ] || exit 0
+# /www/services must exist and belong to the developers (the same as the rest of /www)
+if getent group totaljs-developer >/dev/null; then
+  mkdir -p /www/services
+  chgrp totaljs-developer /www/services 2>/dev/null || true
+  chmod 2775 /www/services 2>/dev/null || true
+fi
+systemctl daemon-reload >/dev/null 2>&1 || true
+exit 0

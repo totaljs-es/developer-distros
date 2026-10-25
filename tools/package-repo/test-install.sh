@@ -94,6 +94,12 @@ grep -q -E '^PGADMIN_PASSWORD=[0-9a-f]{24}$' /www/services/postgres/.env
 test "$(stat -c %G /www)" = totaljs-developer
 for unit in totaljs-proxy totaljs-code totaljs-flow totaljs-postgres; do test -f "/usr/lib/systemd/system/${unit}.service"; done
 # what the person edits is not overwritten, and what is missing comes back
+test -x /usr/bin/totaljs-service
+totaljs-service list | grep -q '^redis .*off'
+for svc in redis mailpit mongodb; do
+    docker compose -f "/usr/share/totaljs-developer/catalog/${svc}/docker-compose.yml" config -q
+done
+if totaljs-service enable nothing 2>/dev/null; then echo 'an unknown service was accepted' >&2; exit 1; fi
 echo '# edited' >> /www/proxy/docker-compose.yml
 rm /www/flow/docker-compose.yml
 /usr/lib/totaljs-developer/seed-www
@@ -155,7 +161,7 @@ test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1   # the greet
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-fnm totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-fnm totaljs-services totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/fnm
 test ! -e /usr/local/bin/pnpm
 if grep -q 'totaljs-fnm' /etc/bash.bashrc; then echo 'bash.bashrc still has fnm' >&2; exit 1; fi
@@ -178,5 +184,8 @@ test ! -e /etc/default/grub.d/99-totaljs.cfg
 REMAINING="$(update-alternatives --query default.plymouth 2>/dev/null || true)"
 case "${REMAINING}" in *'themes/totaljs/totaljs.plymouth'*) echo 'the alternative of the theme is still there' >&2; exit 1 ;; esac
 if grep -q '^Theme=totaljs$' /etc/plymouth/plymouthd.conf; then echo 'plymouthd.conf still names the theme' >&2; exit 1; fi
+
+test ! -e /usr/bin/totaljs-service
+test ! -e /usr/lib/systemd/system/totaljs-service@.service
 
 echo "OK ${CODENAME}"

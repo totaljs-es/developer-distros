@@ -53,6 +53,20 @@ sudo systemctl restart totaljs-code
 
 The Compose files are in `/www`. What you edit there stays: an update of the packages never overwrites the files that you changed.
 
+### More services
+
+Redis, Mailpit and MongoDB are there when you need them, off until you turn them on:
+
+```bash
+totaljs-service list
+totaljs-service enable redis      # also: mailpit, mongodb
+totaljs-service disable redis     # the data stays in its Docker volume
+```
+
+The projects reach them by name through the network `proxy`: `redis:6379`, `mongodb://mongodb:27017`, and for email SMTP `mailpit:1025` (no user, no password).
+The emails that your projects send arrive in the inbox of Mailpit, at `http://mailpit.totaljs.developer`, and never leave the machine.
+Each one has its Compose file in `/www/services/NAME`, to edit.
+
 ## Node.js and Total.js
 
 Node.js (LTS) is installed for the whole system, with `total4` and `total5` as global packages and `npm`:

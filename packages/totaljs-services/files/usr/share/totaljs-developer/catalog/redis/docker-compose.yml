@@ -1,0 +1,19 @@
+# Redis. Not published on the host: the containers of the network `proxy` reach it as redis:6379
+services:
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    restart: always
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes:
+      - data:/data
+    networks:
+      - default
+
+volumes:
+  data:
+
+networks:
+  default:
+    name: proxy
+    external: true

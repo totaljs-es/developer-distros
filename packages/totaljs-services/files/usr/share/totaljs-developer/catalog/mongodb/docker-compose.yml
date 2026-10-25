@@ -1,0 +1,18 @@
+# MongoDB. Not published on the host: the containers of the network `proxy` reach it as mongodb://mongodb:27017
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:8
+    restart: always
+    volumes:
+      - data:/data/db
+    networks:
+      - default
+
+volumes:
+  data:
+
+networks:
+  default:
+    name: proxy
+    external: true
