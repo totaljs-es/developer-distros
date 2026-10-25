@@ -19,6 +19,17 @@ if [ "${PACKAGE}" = auto ]; then
 fi
 KEY=/tmp/totaljs-developer.gpg
 
+# The guided layout of the Ubuntu installer with LVM gives the system only half of the disk and leaves the rest free. Docker, the images
+# and the projects need that space, so the root volume takes it all (online, nothing is lost; if it is not LVM or there is no space left, nothing happens).
+ROOT_SOURCE="$(findmnt -no SOURCE "${TARGET}" 2>/dev/null || true)"
+case "${ROOT_SOURCE}" in
+    /dev/mapper/*|/dev/*/*)
+        if command -v lvextend >/dev/null 2>&1 && lvextend -r -l +100%FREE "${ROOT_SOURCE}" >/dev/null 2>&1; then
+            echo "Total.js: the root volume now uses the whole disk"
+        fi
+        ;;
+esac
+
 fetch() {
     if command -v curl >/dev/null 2>&1; then curl -fsS --retry 5 --retry-delay 3 -o "$2" "$1"
     elif command -v wget >/dev/null 2>&1; then wget -q -t 5 -O "$2" "$1"
