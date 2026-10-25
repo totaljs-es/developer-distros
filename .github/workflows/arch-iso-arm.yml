@@ -34,6 +34,9 @@ jobs:
           path: build/arch-iso-arm/out/*.iso
           retention-days: 7
 
+      - name: The boot catalog of the ISO
+        run: xorriso -indev "$(ls build/arch-iso-arm/out/*.iso | head -n 1)" -report_el_torito plain 2>&1 | head -30
+
       - name: Boot it in QEMU (UEFI)
         run: |
           ISO="$(ls build/arch-iso-arm/out/*.iso | head -n 1)"

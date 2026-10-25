@@ -146,6 +146,8 @@ echo "==> the ISO"
 xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -joliet -joliet-long -rational-rock \
     -volid "${LABEL}" -appid "Total.js Developer installation medium" -publisher "Total.js <https://www.totaljs.com>" \
     -append_partition 2 0xef "${EFIIMG}" -appended_part_as_gpt \
-    -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -isohybrid-gpt-basdat \
+    -e --interval:appended_partition_2:all:: -no-emul-boot -isohybrid-gpt-basdat \
     -output "${OUT}/totaljs-developer-arch-${VERSION}-aarch64.iso" "${ISO}"
+# the boot catalog: the firmware needs an entry for EFI (platform 0xEF); if it were only a BIOS one, the firmware would not find a file system in the CD
+xorriso -indev "${OUT}/totaljs-developer-arch-${VERSION}-aarch64.iso" -report_el_torito plain 2>&1 | sed -n "1,25p"
 ls -la "${OUT}"
