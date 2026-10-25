@@ -77,6 +77,22 @@ jobs:
           MARKER_PATTERN: 'TOTALJS-ISO-TEST-OK node=v24\.[0-9]+\.[0-9]+ group=totaljs-developer'
         run: iso/ubuntu/test-install.sh build/layer-pool-amd64.iso
 
+      # The way that people install, which is the one that is published: the OFFICIAL ISO of Ubuntu, as it was downloaded and checked (the ISO
+      # remastered above is only for the tests), and a seed image next to it. Only the command line differs: the menu of the ISO does not
+      # have `autoinstall`, so the person confirms it with "yes"; here it is on the command line.
+      - name: Install the official ISO with a seed image
+        id: install_official
+        continue-on-error: true
+        env:
+          REPO_URL: http://10.0.2.2:8080/repo
+          WORK_DIR: build/iso-official
+          MARKER_PATTERN: 'TOTALJS-ISO-TEST-OK node=v24\.[0-9]+\.[0-9]+ group=totaljs-developer'
+        run: |
+          OFFICIAL="$(ls build/iso-layer-pool/ubuntu-*-live-server-amd64.iso | head -1)"
+          echo "official ISO: ${OFFICIAL}"
+          iso/ubuntu/build-seed.sh ci build/ci-seed.iso
+          SEED_ISO=build/ci-seed.iso iso/ubuntu/test-install.sh "${OFFICIAL}"
+
       # The seed that people will use asks the questions that the installer asks: it is only built here, an install needs a person
       - name: Build the ISO of the server edition
         env:
@@ -117,7 +133,9 @@ jobs:
       - name: The slimmed ISO installs
         run: |
           echo "SLIM=pool: ${{ steps.install_pool.outcome }}"
+          echo "official ISO with a seed image: ${{ steps.install_official.outcome }}"
           [ "${{ steps.install_pool.outcome }}" = success ]
+          [ "${{ steps.install_official.outcome }}" = success ]
 
       - name: Keep the logs
         if: always()
@@ -133,5 +151,8 @@ jobs:
             build/iso-layer-pool/boot.log
             build/iso-layer-pool/timings.txt
             build/iso-layer-pool/contents.txt
+            build/iso-official/install.log
+            build/iso-official/boot.log
+            build/iso-official/timings.txt
             build/iso-product/contents.txt
             ${{ runner.temp }}/http.log

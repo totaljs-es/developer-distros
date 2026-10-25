@@ -1,0 +1,52 @@
+#cloud-config
+# Only for the test of the CI, as a seed image (a device with the label CIDATA) next to the OFFICIAL ISO of Ubuntu, unmodified: an unattended install that also installs the Total.js layer, from a repository that the CI
+# serves on the computer that runs QEMU (10.0.2.2 is that computer for the guest). The password is a random one that
+# build-iso.sh writes and nobody knows.
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: totaljs-ci
+    username: ci
+    password: "__PASSWORD_HASH__"
+  ssh:
+    install-server: true
+  storage:
+    layout:
+      name: direct
+  updates: security
+  shutdown: poweroff
+  # When the install fails, say on the console what the target had in apt: the failure of `apt-get update` cannot be understood without it
+  error-commands:
+    - 'echo "=== the sources of apt of the target" > /dev/ttyS0; cat /target/etc/apt/sources.list /target/etc/apt/sources.list.d/* > /dev/ttyS0 2>&1'
+    - 'echo "=== the CD" > /dev/ttyS0; ls -la /cdrom /cdrom/dists /target/cdrom > /dev/ttyS0 2>&1'
+    - 'echo "=== apt-get update in the target" > /dev/ttyS0; chroot /target apt-get update > /dev/ttyS0 2>&1; echo "=== end" > /dev/ttyS0'
+  late-commands:
+    # the script that installs the layer travels inside this file, as in the seed that people use
+    - |
+      cat > /tmp/totaljs-install-layer.sh <<'TOTALJS_INSTALL_LAYER'
+__INSTALL_LAYER__
+      TOTALJS_INSTALL_LAYER
+    - sh /tmp/totaljs-install-layer.sh /target __REPO_URL__ __PACKAGE__
+    # A service that says on the serial console that the installed system booted, and what it has
+    - |
+      cat > /target/usr/local/sbin/totaljs-iso-test <<'SCRIPT'
+      #!/bin/sh
+      NODE="$(/usr/local/bin/node --version 2>&1)"
+      GROUP="$(id -nG ci | tr ' ' '\n' | grep -x totaljs-developer)"
+      echo "TOTALJS-ISO-TEST-OK node=${NODE} group=${GROUP}" > /dev/ttyS0
+      SCRIPT
+      chmod +x /target/usr/local/sbin/totaljs-iso-test
+      cat > /target/etc/systemd/system/totaljs-iso-test.service <<'UNIT'
+      [Unit]
+      Description=Says on the serial console that the installed system booted
+      After=multi-user.target cloud-final.service totaljs-developer-first-user.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/totaljs-iso-test
+      [Install]
+      WantedBy=multi-user.target
+      UNIT
+    - curtin in-target --target=/target -- systemctl enable totaljs-iso-test.service

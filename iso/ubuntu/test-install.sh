@@ -2,6 +2,7 @@
 # test-install.sh - installs an ISO unattended in QEMU, then boots the installed system and waits for its marker.
 #
 #   iso/ubuntu/test-install.sh <image.iso>
+#   SEED_ISO=<seed.iso> iso/ubuntu/test-install.sh <official-ubuntu.iso>   # the way people install: the official ISO and a seed image
 #
 # It needs qemu-system-x86_64 and qemu-img. With /dev/kvm it takes minutes; without it QEMU emulates the CPU and it takes
 # much longer. The logs of the serial console stay in WORK_DIR (install.log and boot.log).
@@ -43,10 +44,24 @@ run_qemu() {
 log "installing (up to ${INSTALL_TIMEOUT} s)"
 START=$(date +%s)
 set +e
-qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
-    -drive "file=${DISK},if=virtio,format=qcow2" -cdrom "${ISO}" -boot d \
-    -nic user,model=virtio-net-pci -display none -no-reboot \
-    -serial "file:${WORK}/install.log" &
+if [ -n "${SEED_ISO:-}" ]; then
+    # The official ISO as it is, and a seed image (label CIDATA) as a second drive: what people do. The kernel is started from the files of the
+    # ISO so that the command line can have `autoinstall` and the console (the menu of the ISO has neither; the person confirms the autoinstall).
+    [ -f "${SEED_ISO}" ] || die "${SEED_ISO} does not exist"
+    xorriso -osirrox on -indev "${ISO}" -extract /casper/vmlinuz "${WORK}/vmlinuz" -extract /casper/initrd "${WORK}/initrd" >/dev/null 2>&1 \
+        || die "could not read the kernel and the initrd from ${ISO}"
+    qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
+        -drive "file=${DISK},if=virtio,format=qcow2" \
+        -drive "file=${ISO},media=cdrom,if=ide,index=2,readonly=on" -drive "file=${SEED_ISO},media=cdrom,if=ide,index=3,readonly=on" \
+        -kernel "${WORK}/vmlinuz" -initrd "${WORK}/initrd" -append "autoinstall console=ttyS0,115200n8 ---" \
+        -nic user,model=virtio-net-pci -display none -no-reboot \
+        -serial "file:${WORK}/install.log" &
+else
+    qemu-system-x86_64 -accel "${ACCEL}" -cpu max -smp 4 -m 4096 \
+        -drive "file=${DISK},if=virtio,format=qcow2" -cdrom "${ISO}" -boot d \
+        -nic user,model=virtio-net-pci -display none -no-reboot \
+        -serial "file:${WORK}/install.log" &
+fi
 QEMU=$!
 
 # The installer powers the machine off when it is done. When it fails it stays on an error screen and never ends, so the test

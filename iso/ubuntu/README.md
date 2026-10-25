@@ -35,6 +35,10 @@ iso/ubuntu/build-iso.sh iso/ubuntu/seed-ci build/test.iso
 iso/ubuntu/test-install.sh build/test.iso
 ```
 
+**The way that people install is tested too**: `build-seed.sh ci` makes a seed image for the tests (unattended, with a marker for the console), and `SEED_ISO=<seed.iso> test-install.sh <official.iso>`
+installs with the **official ISO as it was downloaded and checked** plus that seed as a second drive, and boots the result. The only difference with a person is the command line: QEMU starts the kernel
+from the files of the ISO with `autoinstall`, while a person confirms the autoinstall with "yes" (the menu of the ISO does not have the parameter).
+
 The seeds of the tests are `seed-ci/` (stock server, random password) and `seed-ci-layer/` (also installs the Total.js layer, from a repository with a throwaway key that the
 workflow serves on the computer of the runner, `10.0.2.2` for the guest of QEMU). The installed system must boot, have Node.js 24 and its first person in the group `totaljs-developer`.
 `seed/` is the seed of the remastered ISO that builds by hand. The workflow `.github/workflows/iso-ubuntu.yml` runs all this and keeps the logs of the installer and of the first boot;
