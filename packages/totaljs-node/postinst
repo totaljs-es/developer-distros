@@ -40,6 +40,9 @@ if [ -f "${STATE}/prefix" ]; then
 fi
 printf '%s\n' "${PREFIX}" > "${STATE}/prefix"
 
+# pnpm and yarn work without installing them: corepack makes the commands, and the first use downloads the manager of the project (offline, only the commands are made)
+"${PREFIX}/bin/corepack" enable --install-directory /usr/local/bin >/dev/null 2>&1 || true
+
 # The frameworks are part of this release of the distro, not a moving channel
 PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" install -g --prefix /usr/local --no-fund --no-audit \
   "total4@${TOTAL4_VERSION}" "total5@${TOTAL5_VERSION}"

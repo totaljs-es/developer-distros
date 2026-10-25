@@ -60,7 +60,27 @@ Node.js (LTS) is installed for the whole system, with `total4` and `total5` as g
 ```bash
 node --version
 npm ls -g --depth=0
+total5 --help          # the commands of Total.js 5 (also flow5), and total4 for Total.js 4
 ```
+
+### Another version of Node.js
+
+The one of the system is the default. **fnm** installs and changes versions for your user:
+
+```bash
+fnm install 22         # download Node.js 22
+fnm use 22             # use it in this terminal
+fnm default 22         # make it the one of every new terminal
+fnm ls                 # the ones that you have
+```
+
+A folder with a `.node-version`, an `.nvmrc` or an `engines.node` in its `package.json` changes the version by itself when you enter it (`fnm install` in that folder gets it).
+`pnpm` and `yarn` work too (they are downloaded the first time that you use them).
+
+### The tools of the terminal
+
+`psql` and `sqlite3`, the GitHub CLI (`gh`), `rg` (ripgrep), `fd`, `fzf`, `bat`, `http` (HTTPie), `jq`, `nvim`, `tmux`, `htop` and `git-lfs`. The limit of the files that a watcher can follow is raised
+(524288), so a development server with reload does not stop with `ENOSPC`. To use `psql` against the database of the system, see *The database*.
 
 ## The desktop edition
 

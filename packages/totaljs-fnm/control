@@ -1,0 +1,13 @@
+Package: totaljs-fnm
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: devel
+Priority: optional
+Depends: ca-certificates, curl, unzip, totaljs-node (>= 1.0.0)
+Homepage: https://github.com/Schniz/fnm
+Description: fnm, the manager of versions of Node.js, for the Total.js Developer Distros
+ Installs fnm (Fast Node Manager) from the pinned release in /usr/share/totaljs-fnm/versions, checked with its
+ SHA-256, and puts it in every interactive terminal. The Node.js of the system stays the default; with fnm each
+ person installs and uses the other ones (fnm install 22, fnm use 22), and a folder with a .node-version, an
+ .nvmrc or an engines field in package.json changes the version by itself when you enter it.

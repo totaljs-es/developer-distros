@@ -59,6 +59,17 @@ echo "==> the tools and the source that the release package wrote"
 for tool in git curl jq tmux ufw fail2ban-client sshd; do command -v "${tool}" >/dev/null || [ -x "/usr/sbin/${tool}" ] || { echo "missing ${tool}" >&2; exit 1; }; done
 grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources || { cat /etc/apt/sources.list.d/totaljs-developer.sources >&2; exit 1; }
 
+echo "==> the tools of a developer, the manager of versions of Node.js, the limits of the watchers"
+for tool in psql sqlite3 gh rg fd bat fzf http nvim git-lfs fnm pnpm yarn; do command -v "${tool}" >/dev/null || { echo "missing ${tool}" >&2; exit 1; }; done
+fnm --version | grep -q '^fnm 1\.'
+grep -q 'totaljs-fnm' /etc/bash.bashrc
+test "$(grep -c '^# >>> totaljs-fnm >>>$' /etc/bash.bashrc)" = 1
+grep -q '^fs.inotify.max_user_watches = 524288$' /etc/sysctl.d/90-totaljs-developer.conf
+# fnm installs another Node.js (it is the same program that a person runs), and the one of the system is still the default
+FNM_DIR=/tmp/fnm-test fnm install 22 >/dev/null
+test "$(FNM_DIR=/tmp/fnm-test fnm exec --using=22 node --version | cut -d. -f1)" = v22
+test "$(node --version)" = "${NODE_VERSION}"
+
 echo "==> the brand: the theme of the splash, and the settings of the boot"
 test -f /usr/share/plymouth/themes/totaljs/totaljs.script
 test -f /usr/share/plymouth/themes/totaljs/logo.png
@@ -144,7 +155,10 @@ test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1   # the greet
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-fnm totaljs-brand totaljs-node >/dev/null
+test ! -e /usr/local/bin/fnm
+test ! -e /usr/local/bin/pnpm
+if grep -q 'totaljs-fnm' /etc/bash.bashrc; then echo 'bash.bashrc still has fnm' >&2; exit 1; fi
 test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"

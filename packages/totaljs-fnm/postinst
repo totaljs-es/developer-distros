@@ -1,0 +1,52 @@
+#!/bin/sh
+set -e
+
+[ "$1" = configure ] || exit 0
+
+. /usr/share/totaljs-fnm/versions
+
+case "$(dpkg --print-architecture)" in
+  amd64) ASSET=fnm-linux.zip; SHA256="${FNM_SHA256_linux_x64}" ;;
+  arm64) ASSET=fnm-arm64.zip; SHA256="${FNM_SHA256_linux_arm64}" ;;
+  *) echo "totaljs-fnm: this architecture is not supported" >&2; exit 1 ;;
+esac
+
+PREFIX="/opt/fnm-${FNM_VERSION}"
+STATE=/var/lib/totaljs-fnm
+mkdir -p "${STATE}"
+
+if [ ! -x "${PREFIX}/fnm" ]; then
+  TMP="$(mktemp -d)"
+  trap 'rm -rf "${TMP}"' EXIT
+  curl -fL --retry 5 --retry-delay 2 -o "${TMP}/${ASSET}" "https://github.com/Schniz/fnm/releases/download/${FNM_VERSION}/${ASSET}"
+  echo "${SHA256}  ${TMP}/${ASSET}" | sha256sum -c -
+  rm -rf "${PREFIX}" "${PREFIX}.new"
+  mkdir -p "${PREFIX}.new"
+  unzip -q -o "${TMP}/${ASSET}" -d "${PREFIX}.new"
+  chmod 0755 "${PREFIX}.new/fnm"
+  mv "${PREFIX}.new" "${PREFIX}"
+fi
+ln -sf "${PREFIX}/fnm" /usr/local/bin/fnm
+
+# The release that an earlier version of this package installed is removed, and only that one
+if [ -f "${STATE}/prefix" ]; then
+  OLD="$(cat "${STATE}/prefix")"
+  if [ -n "${OLD}" ] && [ "${OLD}" != "${PREFIX}" ]; then rm -rf "${OLD}"; fi
+fi
+printf '%s\n' "${PREFIX}" > "${STATE}/prefix"
+
+# fnm goes in /etc/bash.bashrc, which is read by every interactive shell (/etc/profile.d is read only by login shells). It is between two marks, so that the package
+# can take it out again and an update does not repeat it. The Node.js of the system stays the default until the person chooses another one (fnm default 22).
+if ! grep -q '^# >>> totaljs-fnm >>>$' /etc/bash.bashrc 2>/dev/null; then
+  cat >> /etc/bash.bashrc <<'EOF'
+
+# >>> totaljs-fnm >>>
+# fnm, the manager of versions of Node.js: fnm install 22, fnm use 22. A folder with a .node-version, an .nvmrc or an engines field changes the version by itself.
+if command -v fnm >/dev/null 2>&1 && [ -n "$PS1" ]; then
+    eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell bash)"
+fi
+# <<< totaljs-fnm <<<
+EOF
+fi
+
+exit 0

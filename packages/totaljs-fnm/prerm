@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge) ;;
+  *) exit 0 ;;
+esac
+
+STATE=/var/lib/totaljs-fnm
+if [ -f "${STATE}/prefix" ]; then
+  PREFIX="$(cat "${STATE}/prefix")"
+  if [ "$(readlink /usr/local/bin/fnm 2>/dev/null)" = "${PREFIX}/fnm" ]; then rm -f /usr/local/bin/fnm; fi
+  rm -rf "${PREFIX}" "${STATE}"
+fi
+# the line of /etc/bash.bashrc
+if [ -f /etc/bash.bashrc ]; then
+  sed '/^# >>> totaljs-fnm >>>$/,/^# <<< totaljs-fnm <<</d' /etc/bash.bashrc > /etc/bash.bashrc.totaljs-new
+  cat /etc/bash.bashrc.totaljs-new > /etc/bash.bashrc
+  rm -f /etc/bash.bashrc.totaljs-new
+fi
+exit 0

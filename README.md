@@ -15,7 +15,7 @@
 
 ## What you get
 
-- **Node.js** (LTS) with **Total.js 5** and **Total.js 4**, and `npm`.
+- **Node.js** (LTS) with **Total.js 5** and **Total.js 4**, `npm`, `pnpm` and `yarn`, and **fnm** to change the version of Node.js per project.
 - **Code**, the Total.js editor in the browser, and **Flow**, to program with diagrams.
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.

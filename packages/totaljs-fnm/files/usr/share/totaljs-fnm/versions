@@ -1,0 +1,5 @@
+# fnm, the manager of versions of Node.js. A new version of this package changes these lines and nothing else.
+# The checksums are the ones that GitHub publishes for the assets of the release https://github.com/Schniz/fnm/releases/tag/v1.39.0
+FNM_VERSION=v1.39.0
+FNM_SHA256_linux_x64=7807664f39d39fc518da1c35ba0181e4b3267603c4b1dedeb4b5fc6ae440a224
+FNM_SHA256_linux_arm64=4eaff58b2c5bf30d0934027572dd0b5bbb60d2a1af309230b53662d4b1d45599

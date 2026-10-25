@@ -2,7 +2,11 @@
 set -e
 
 case "$1" in
-  remove|purge) systemctl disable totaljs-developer-first-user.service >/dev/null 2>&1 || true ;;
+  remove|purge)
+    systemctl disable totaljs-developer-first-user.service >/dev/null 2>&1 || true
+    # the links to the tools that have another name in Ubuntu: only the ones that this package made
+    [ "$(readlink /usr/local/bin/fd 2>/dev/null)" = /usr/bin/fdfind ] && rm -f /usr/local/bin/fd
+    [ "$(readlink /usr/local/bin/bat 2>/dev/null)" = /usr/bin/batcat ] && rm -f /usr/local/bin/bat ;;
 esac
 
 exit 0

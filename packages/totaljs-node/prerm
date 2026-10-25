@@ -14,6 +14,11 @@ if [ -x "${PREFIX}/bin/npm" ]; then
   PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" uninstall -g --prefix /usr/local total4 total5 >/dev/null 2>&1 || true
 fi
 
+# the commands of corepack
+for bin in pnpm pnpx yarn yarnpkg; do
+  case "$(readlink -f "/usr/local/bin/${bin}" 2>/dev/null)" in "${PREFIX}"/*) rm -f "/usr/local/bin/${bin}" ;; esac
+done
+
 # Only the links that this package made
 for bin in node npm npx corepack; do
   if [ "$(readlink "/usr/local/bin/${bin}" 2>/dev/null)" = "${PREFIX}/bin/${bin}" ]; then rm -f "/usr/local/bin/${bin}"; fi
