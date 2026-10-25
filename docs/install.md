@@ -45,6 +45,9 @@ Create a machine with these settings, in the program that you use (VirtualBox, V
 | Network | NAT or bridge, with internet |
 | Optical drive | the ISO |
 
+**UTM on a Mac with Apple Silicon:** when you create the machine (*Virtualize → Linux*), turn on **Use Apple Virtualization** in the advanced options. With it the boot shows the animation of
+Total.js. With the default engine of UTM (QEMU) the system installs and works the same, but the screen of the virtual machine stays off until the login appears, and the animation is not seen.
+
 With QEMU it is:
 
 ```bash
