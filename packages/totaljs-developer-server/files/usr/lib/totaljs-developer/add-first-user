@@ -17,6 +17,9 @@ FIRST="$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')"
 
 usermod -aG totaljs-developer "${FIRST}"
 # the person works with Docker: the group `docker` can start containers (and so it is as powerful as root; that is what a developer machine is)
-if getent group docker >/dev/null; then usermod -aG docker "${FIRST}"; fi
+# In Ubuntu the package of Docker makes the group `docker` before this runs; in Arch it is made at the end of the transaction (sysusers), after the scripts of the packages:
+# it is made here if it is not there, and the later one finds it.
+getent group docker >/dev/null || groupadd --system docker
+usermod -aG docker "${FIRST}"
 mkdir -p "$(dirname "${MARKER}")"
 printf '%s\n' "${FIRST}" > "${MARKER}"
