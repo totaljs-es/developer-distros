@@ -3,6 +3,7 @@ const Os = require('os');
 const { execFile } = require('child_process');
 
 const DOMAIN_FILE = '/etc/totaljs-developer/domain';
+const CERT_FILE = '/www/proxy/data/certs/totaljs.developer.crt';
 const SERVICES = [
 	{ id: 'code', unit: 'totaljs-code', name: 'Code', about: 'The editor in the browser' },
 	{ id: 'flow', unit: 'totaljs-flow', name: 'Flow', about: 'Visual programming' },
@@ -53,13 +54,15 @@ function projects() {
 async function gather() {
 
 	var domain = read(DOMAIN_FILE, 'totaljs.developer');
+	// https when totaljs-https has made the certificate that the proxy uses
+	var scheme = Fs.existsSync(CERT_FILE) ? 'https://' : 'http://';
 	var release = read('/etc/os-release', '').match(/^PRETTY_NAME="?([^"\n]+)"?/m);
 	var cpus = Os.cpus();
 	var disk = (await run('df', ['-h', '--output=used,size,pcent', '/'])).split('\n').pop().trim().split(/\s+/);
 
 	var services = [];
 	for (var item of SERVICES)
-		services.push({ id: item.id, name: item.name, about: item.about, url: 'http://' + item.id + '.' + domain, state: await state(item.unit) });
+		services.push({ id: item.id, name: item.name, about: item.about, url: scheme + item.id + '.' + domain, state: await state(item.unit) });
 
 	var system = [];
 	for (var unit of SYSTEM)
@@ -68,10 +71,10 @@ async function gather() {
 	return {
 		domain: domain,
 		address: await address(),
-		center: 'http://' + domain,
+		center: scheme + domain,
 		services: services,
 		system: system,
-		projects: projects().map(name => ({ name: name, url: 'http://' + name + '.' + domain })),
+		projects: projects().map(name => ({ name: name, url: scheme + name + '.' + domain })),
 		machine: {
 			name: Os.hostname(),
 			system: release ? release[1] : 'Linux',

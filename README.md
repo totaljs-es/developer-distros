@@ -19,7 +19,7 @@
 - **Code**, the Total.js editor in the browser, and **Flow**, to program with diagrams.
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
-- **Total.js Center**, the front door at `http://totaljs.developer`: the state of the services, your projects and how to connect to the database.
+- **Total.js Center**, the front door at `https://totaljs.developer`: the state of the services, your projects and how to connect to the database.
 - In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Google Chrome, a terminal, a file manager, a widget on the wallpaper and twelve wallpapers.
 
 ## Install
@@ -38,10 +38,10 @@ put next to it.
 
 | Open | What it is |
 | --- | --- |
-| `http://totaljs.developer` | Total.js Center |
-| `http://code.totaljs.developer` | Code |
-| `http://flow.totaljs.developer` | Flow |
-| `http://pgadmin.totaljs.developer` | pgAdmin |
+| `https://totaljs.developer` | Total.js Center |
+| `https://code.totaljs.developer` | Code |
+| `https://flow.totaljs.developer` | Flow |
+| `https://pgadmin.totaljs.developer` | pgAdmin |
 
 The names are answered by the machine itself: there is nothing to configure. The first time, the services download their images, and Total.js Center shows when each one is ready.
 **[How to use it](docs/using.md)**.

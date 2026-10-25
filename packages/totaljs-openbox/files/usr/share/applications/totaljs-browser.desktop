@@ -2,7 +2,7 @@
 Type=Application
 Name=Browser
 Comment=Firefox
-Exec=totaljs-open http://totaljs.developer
+Exec=totaljs-open https://totaljs.developer
 Icon=/usr/share/totaljs-developer/icons/browser.svg
 Terminal=false
 NoDisplay=true

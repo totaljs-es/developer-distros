@@ -3,5 +3,8 @@ set -euo pipefail
 url="${1:?Usage: totaljs-open URL}"
 mkdir -p "${HOME}/.cache"
 # Total.js Center is served by the reverse proxy at its own name; while the proxy has not started (its images are still being downloaded) it is opened at its own port
-if [ "${url}" = "http://totaljs.developer" ] && ! curl -fsS -m2 -o /dev/null "${url}" 2>/dev/null; then url="http://127.0.0.1:8010"; fi
+# (https first; plain http while the certificate is not there yet; the port of Center while the proxy has not started)
+if [ "${url}" = "https://totaljs.developer" ] && ! curl -fsS -m2 -o /dev/null "${url}" 2>/dev/null; then
+    if curl -fsS -m2 -o /dev/null "http://totaljs.developer" 2>/dev/null; then url="http://totaljs.developer"; else url="http://127.0.0.1:8010"; fi
+fi
 nohup gio open "${url}" >"${HOME}/.cache/totaljs-browser.log" 2>&1 &

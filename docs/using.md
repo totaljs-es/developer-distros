@@ -6,11 +6,11 @@ Everything is reached by name. The names are answered by the computer itself, so
 
 | Address | What it is |
 | --- | --- |
-| `http://totaljs.developer` | **Total.js Center**: the state of the services, your projects and how to connect to the database |
-| `http://code.totaljs.developer` | **Code**: the editor and the manager of your projects, in the browser |
-| `http://flow.totaljs.developer` | **Flow**: programming with diagrams |
-| `http://pgadmin.totaljs.developer` | **pgAdmin**: the database, in the browser |
-| `http://<project>.totaljs.developer` | each project that you create in Code |
+| `https://totaljs.developer` | **Total.js Center**: the state of the services, your projects and how to connect to the database |
+| `https://code.totaljs.developer` | **Code**: the editor and the manager of your projects, in the browser |
+| `https://flow.totaljs.developer` | **Flow**: programming with diagrams |
+| `https://pgadmin.totaljs.developer` | **pgAdmin**: the database, in the browser |
+| `https://<project>.totaljs.developer` | each project that you create in Code |
 
 The first time the system starts, Code, Flow, PostgreSQL and pgAdmin download their images, which needs internet: if it is not there yet, each service tries again every 20 seconds until it works, so nothing has to be started by hand. Total.js Center shows the state of each service, and while the proxy has not started the Center button opens it at `http://127.0.0.1:8010`.
 
@@ -29,9 +29,9 @@ sudo usermod -aG totaljs-developer,docker other-user
 
 ### HTTPS
 
-Every address also works with `https://` and no warning: `https://totaljs.developer`, `https://code.totaljs.developer`, and the ones of your projects.
+Every address opens with `https://` and no warning: Center, Code, Flow, pgAdmin and the ones of your projects. The buttons, the menu and the links of Total.js Center already use it.
 The authority that signs the certificate is made on your machine, and the system, Node.js and Firefox trust it, so `curl`, `git` and your own code can call `https://something.totaljs.developer` without changes.
-Plain `http://` keeps working.
+Plain `http://` keeps working too, and is what the address uses until the certificate is there (the first minutes of a new system).
 
 ```bash
 totaljs-https status      # the certificate and when it ends
@@ -78,7 +78,7 @@ totaljs-service disable redis     # the data stays in its Docker volume
 ```
 
 The projects reach them by name through the network `proxy`: `redis:6379`, `mongodb://mongodb:27017`, and for email SMTP `mailpit:1025` (no user, no password).
-The emails that your projects send arrive in the inbox of Mailpit, at `http://mailpit.totaljs.developer`, and never leave the machine.
+The emails that your projects send arrive in the inbox of Mailpit, at `https://mailpit.totaljs.developer`, and never leave the machine.
 Each one has its Compose file in `/www/services/NAME`, to edit.
 
 ## Node.js and Total.js

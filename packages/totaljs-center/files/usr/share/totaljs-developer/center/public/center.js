@@ -35,7 +35,7 @@ function render(d) {
 			el('strong', { textContent: s.name }),
 			el('span', { textContent: s.about }),
 			state(s.state),
-			el('span', { className: 'url mono', textContent: s.url.replace('http://', '') })
+			el('span', { className: 'url mono', textContent: s.url.replace(/^https?:\/\//, '') })
 		]));
 	}
 

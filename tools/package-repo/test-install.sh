@@ -151,7 +151,7 @@ case "${PAGE}" in *'<title>Total.js Center</title>'*) ;; *) echo 'the page of Ce
 LOGO="$(curl -fsS http://127.0.0.1:8010/logo.svg)"
 case "${LOGO}" in *'<svg'*) ;; *) echo 'the logo of Center is wrong' >&2; exit 1 ;; esac
 STATUS="$(curl -fsS http://127.0.0.1:8010/api/status/)"
-printf '%s' "${STATUS}" | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8")); if (d.domain !== "totaljs.developer" || d.services.length !== 3 || !d.machine.kernel) process.exit(1)'
+printf '%s' "${STATUS}" | node -e 'const d=JSON.parse(require("fs").readFileSync(0,"utf8")); if (d.domain !== "totaljs.developer" || d.services.length !== 3 || !d.machine.kernel) process.exit(1); if (require("fs").existsSync("/www/proxy/data/certs/totaljs.developer.crt") && (d.center !== "https://totaljs.developer" || !d.services.every(x => x.url.startsWith("https://")))) process.exit(1)'
 kill "${CENTER_PID}" 2>/dev/null || true
 
 echo "==> the summary of the terminal"

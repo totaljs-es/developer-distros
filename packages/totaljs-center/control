@@ -8,7 +8,7 @@ Depends: totaljs-node (>= 1.0.0), totaljs-docker-stack (>= 1.0.0), totaljs-dns (
 Homepage: https://www.totaljs.com
 Description: Total.js Center, the front door of the Total.js Developer Distros
  A small Total.js 5 application on port 8010 that the reverse proxy shows at
- http://totaljs.developer: the address of the computer, the state of the
+ https://totaljs.developer: the address of the computer, the state of the
  services (Code, Flow, PostgreSQL and pgAdmin), the projects of /www with their
  addresses, and how to connect to the database. It runs as its own user without
  any special group and only reads the state of the services.

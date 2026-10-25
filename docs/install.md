@@ -78,7 +78,7 @@ The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not
 
 ## After the first start
 
-- **Server edition:** log in on the console or with SSH (`ssh your-user@address`). Open `http://totaljs.developer` from any computer that can
+- **Server edition:** log in on the console or with SSH (`ssh your-user@address`). Open `https://totaljs.developer` from any computer that can
   reach this one (see *Use it from another computer* in [How to use it](using.md)).
 - **Desktop edition:** the login screen appears. Log in and the desktop opens. The panel on the top has the menu (the mark of Total.js, first), the launcher of applications (the rocket), the terminal, the files and the
   browser. `Super + B` opens Total.js Center in Firefox.

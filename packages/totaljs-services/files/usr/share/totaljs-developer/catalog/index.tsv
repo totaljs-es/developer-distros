@@ -1,3 +1,3 @@
 redis	Redis 7: cache and queues, as redis:6379
-mailpit	Mailpit: catches the emails of your projects (smtp mailpit:1025, inbox at http://mailpit.totaljs.developer)
+mailpit	Mailpit: catches the emails of your projects (smtp mailpit:1025, inbox at https://mailpit.totaljs.developer)
 mongodb	MongoDB 8, as mongodb:27017

@@ -237,7 +237,7 @@ function conky_services()
 		cairo_line_to(cr, w - 24, y - 14)
 		color(cr, COLOR.line, 0.1)
 		cairo_stroke(cr)
-		text(cr, 'http://totaljs.developer', w / 2, y + 6, 10, COLOR.muted, { mono = true, align = 'center' })
+		text(cr, 'https://totaljs.developer', w / 2, y + 6, 10, COLOR.muted, { mono = true, align = 'center' })
 	end)
 end
 
