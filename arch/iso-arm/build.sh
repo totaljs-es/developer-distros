@@ -24,7 +24,15 @@ EDITION="${EDITION:-server}"
 [ "$(id -u)" = 0 ] || { echo "run this as root" >&2; exit 1; }
 [ "$(uname -m)" = aarch64 ] || { echo "this builds on an ARM machine (aarch64)" >&2; exit 1; }
 
-cleanup() { umount -R "${RFS}" 2>/dev/null || true; }
+# what pacman-key leaves running in the chroot (gpg-agent, dirmngr) keeps the mounts busy and they stay mounted: those processes are stopped first
+cleanup() {
+    local pid
+    for pid in /proc/[0-9]*; do
+        case "$(readlink "${pid}/root" 2>/dev/null)" in "${RFS}"|"${RFS}"/*) kill "${pid#/proc/}" 2>/dev/null || true ;; esac
+    done
+    sleep 1
+    umount -R -l "${RFS}" 2>/dev/null || true
+}
 trap cleanup EXIT
 in_rfs() { chroot "${RFS}" /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin "$@"; }
 
@@ -111,6 +119,8 @@ rm -rf "${RFS}/var/cache/pacman/pkg"/*
 
 echo "==> the live system in a SquashFS (gzip: the kernel of Arch Linux ARM reads it without more modules)"
 cleanup
+# the mounts are gone: if /proc or /dev were still mounted, mksquashfs would walk through them for ever
+for d in proc sys dev; do [ -z "$(ls -A "${RFS}/${d}" 2>/dev/null)" ] || { echo "${RFS}/${d} is still mounted: the build stops" >&2; exit 1; }; done
 rm -rf "${RFS}"/boot/*   # the kernel and the initramfs go next to the SquashFS, not inside it
 mksquashfs "${RFS}" "${ISO}/arch/aarch64/airootfs.sfs" -comp gzip -noappend -no-progress
 
