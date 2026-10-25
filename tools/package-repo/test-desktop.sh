@@ -34,7 +34,13 @@ install_logged() {
 install_logged totaljs-developer-release totaljs-docker-source totaljs-mozilla-source
 rm /etc/apt/sources.list.d/totaljs-test.list   # the release package wrote the same source with its own key
 apt-get update -qq
+# the real installer creates the person BEFORE this layer is installed: their home exists, and the packages have to leave ~/.config theirs
+useradd -m -s /bin/bash earlyuser
 install_logged totaljs-developer-desktop
+for item in /home/earlyuser/.config /home/earlyuser/.config/openbox /home/earlyuser/.config/conky; do
+    OWNER="$(stat -c %U "${item}")"
+    [ "${OWNER}" = earlyuser ] || { echo "${item} belongs to ${OWNER}, not to the person" >&2; exit 1; }
+done
 
 echo "==> what the desktop promises"
 for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/tint2/tint2rc /etc/skel/.config/gtk-3.0/settings.ini \

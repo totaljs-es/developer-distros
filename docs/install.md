@@ -79,8 +79,8 @@ The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not
 
 - **Server edition:** log in on the console or with SSH (`ssh your-user@address`). Open `http://totaljs.developer` from any computer that can
   reach this one (see *Use it from another computer* in [How to use it](using.md)).
-- **Desktop edition:** the login screen appears. Log in and the desktop opens. Total.js Center is the first button of the panel, and `Super + B`
-  opens it in Firefox.
+- **Desktop edition:** the login screen appears. Log in and the desktop opens. The panel on the top has the menu (the mark of Total.js, first), the launcher of applications (the rocket), the terminal, the files and the
+  browser. `Super + B` opens Total.js Center in Firefox.
 - The first time the services start, they download their images (Code, Flow, PostgreSQL and pgAdmin). Give them a few minutes and a connection:
   Total.js Center shows when each one is ready.
 

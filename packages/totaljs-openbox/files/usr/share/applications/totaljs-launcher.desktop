@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Applications
+Comment=Search and open applications
+Exec=rofi -show drun
+Icon=/usr/share/totaljs-developer/icons/launcher.svg
+Terminal=false
+NoDisplay=true
+Categories=Development;

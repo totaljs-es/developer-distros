@@ -22,10 +22,14 @@ pgrep -u "$(id -u)" -x tint2 >/dev/null || (
     sleep 2
   done
 ) &
-nm-applet &
-pasystray &
+# the tray: once each. The autostart entries of the system (/etc/xdg/autostart) would start them a second time, and they are turned off in ~/.config/autostart
+totaljs-launch-once nm-applet nm-applet &
+totaljs-launch-once pasystray pasystray &
 # Openbox has no agent of Polkit of its own, and the tools of the desktop that need a password ask for it through one
 for agent in /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1; do
   if [ -x "$agent" ]; then totaljs-launch-once polkit-gnome-authentication-agent-1 "$agent" & break; fi
 done
 totaljs-launch-once dunst dunst &
+# Openbox started by LightDM sometimes loads its configuration "cold" on the first login (window decorations and menus that do nothing until a reconfigure):
+# once the session has settled, it loads it again
+( sleep 3; openbox --reconfigure ) &

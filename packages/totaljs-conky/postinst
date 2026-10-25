@@ -8,10 +8,13 @@ for home in /home/*; do
   [ -d "${home}" ] || continue
   owner="$(stat -c %U "${home}")"
   [ "${owner}" != root ] || continue
+  group="$(stat -c %G "${home}")"
+  # ~/.config belongs to the person, never to root (see the package totaljs-openbox)
+  if [ ! -d "${home}/.config" ]; then install -d -o "${owner}" -g "${group}" -m 0755 "${home}/.config"
+  elif [ "$(stat -c %U "${home}/.config")" = root ]; then chown "${owner}:${group}" "${home}/.config"; fi
   [ ! -e "${home}/.config/conky" ] || continue
-  mkdir -p "${home}/.config"
   cp -a /etc/skel/.config/conky "${home}/.config/conky"
-  chown -R "${owner}:$(stat -c %G "${home}")" "${home}/.config/conky"
+  chown -R "${owner}:${group}" "${home}/.config/conky"
 done
 
 exit 0

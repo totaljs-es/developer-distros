@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Name=Menu
-Comment=Open the launcher
-Exec=rofi -show drun
-Icon=/usr/share/totaljs-developer/icons/launcher.svg
+Comment=The menu of the desktop
+Exec=xdotool key super+space
+Icon=/usr/share/totaljs-developer/icons/total-center.svg
 Terminal=false
 NoDisplay=true
 Categories=Development;

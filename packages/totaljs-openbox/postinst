@@ -13,12 +13,17 @@ for home in /home/*; do
   [ -d "${home}" ] || continue
   owner="$(stat -c %U "${home}")"
   [ "${owner}" != root ] || continue
+  group="$(stat -c %G "${home}")"
+  # ~/.config belongs to the person: a root-owned one stops every program of the session from keeping its settings (the wallpaper, the widget, Firefox...).
+  # An earlier version of this package left it owned by root, and it is put right here, whether the person has the configuration or not.
+  if [ ! -d "${home}/.config" ]; then install -d -o "${owner}" -g "${group}" -m 0755 "${home}/.config"
+  elif [ "$(stat -c %U "${home}/.config")" = root ]; then chown "${owner}:${group}" "${home}/.config"; fi
   [ ! -e "${home}/.config/openbox" ] || continue
-  mkdir -p "${home}/.config"
-  for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm gtk-3.0 gtk-4.0; do
+  for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm gtk-3.0 gtk-4.0 autostart; do
     [ ! -e "${home}/.config/${dir}" ] || continue
+    [ -e "/etc/skel/.config/${dir}" ] || continue
     cp -a "/etc/skel/.config/${dir}" "${home}/.config/${dir}"
-    chown -R "${owner}:$(stat -c %G "${home}")" "${home}/.config/${dir}"
+    chown -R "${owner}:${group}" "${home}/.config/${dir}"
   done
 done
 
