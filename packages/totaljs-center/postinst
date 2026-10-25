@@ -4,7 +4,7 @@ set -e
 [ "$1" = configure ] || exit 0
 
 # its own user, with no shell and in no group: the services are read through systemd, not through Docker
-getent passwd totalcenter >/dev/null || adduser --system --group --home /var/lib/totaljs-center --no-create-home --shell /usr/sbin/nologin totalcenter >/dev/null
+getent passwd totalcenter >/dev/null || useradd --system --user-group --home-dir /var/lib/totaljs-center --no-create-home --shell /usr/sbin/nologin totalcenter >/dev/null
 
 /usr/lib/totaljs-developer/center-sync
 systemctl daemon-reload >/dev/null 2>&1 || true

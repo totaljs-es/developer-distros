@@ -7,6 +7,8 @@ set -e
 /usr/lib/totaljs-developer/seed-www
 
 systemctl daemon-reload >/dev/null 2>&1 || true
+# Docker is enabled by its package in Ubuntu, not in every distribution
+systemctl enable docker.service >/dev/null 2>&1 || true
 for unit in totaljs-proxy totaljs-code totaljs-flow totaljs-postgres; do
   systemctl enable "${unit}.service" >/dev/null 2>&1 || true
 done

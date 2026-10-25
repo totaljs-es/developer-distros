@@ -1,0 +1,25 @@
+post_install() {
+  # the repository, in the configuration of pacman (once)
+  if ! grep -q '^\[totaljs-developer\]' /etc/pacman.conf; then
+    printf '\n[totaljs-developer]\nSigLevel = Required DatabaseOptional\nInclude = /etc/pacman.d/totaljs-developer-mirrorlist\n' >> /etc/pacman.conf
+  fi
+  # its key, trusted by pacman
+  if command -v pacman-key >/dev/null 2>&1; then
+    fpr="$(gpg --show-keys --with-colons /usr/share/totaljs-developer/repository-key.gpg 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }')"
+    pacman-key --add /usr/share/totaljs-developer/repository-key.gpg >/dev/null 2>&1 || true
+    [ -z "${fpr}" ] || pacman-key --lsign-key "${fpr}" >/dev/null 2>&1 || true
+  fi
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  if [ -f /etc/pacman.conf ] && grep -q '^\[totaljs-developer\]' /etc/pacman.conf; then
+    tmp="$(mktemp)"
+    awk '/^\[totaljs-developer\]$/ { skip = 1; next } skip && /^\[/ { skip = 0 } !skip { print }' /etc/pacman.conf > "${tmp}"
+    cat "${tmp}" > /etc/pacman.conf
+    rm -f "${tmp}"
+  fi
+}

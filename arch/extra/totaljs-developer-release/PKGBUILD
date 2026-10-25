@@ -1,0 +1,16 @@
+# The key and the repository of pacman of the Total.js Developer Distros. arch/build.sh puts next to this file the public key
+# (totaljs-developer.gpg) and the list of servers (totaljs-developer-mirrorlist) before it builds the package.
+pkgname=totaljs-developer-release
+pkgver=1.0.9
+pkgrel=1
+pkgdesc="The key and the repository of pacman of the Total.js Developer Distros"
+arch=('any')
+url="https://www.totaljs.com"
+license=('MIT')
+depends=('pacman' 'gnupg')
+install=totaljs-developer-release.install
+options=('!strip' '!debug')
+package() {
+  install -Dm644 "${startdir}/totaljs-developer.gpg" "${pkgdir}/usr/share/totaljs-developer/repository-key.gpg"
+  install -Dm644 "${startdir}/totaljs-developer-mirrorlist" "${pkgdir}/etc/pacman.d/totaljs-developer-mirrorlist"
+}

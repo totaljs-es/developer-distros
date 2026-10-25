@@ -12,6 +12,10 @@ case "$1" in
       rm -f /usr/local/share/ca-certificates/totaljs-developer.crt
       update-ca-certificates --fresh >/dev/null 2>&1 || true
     fi
+    if [ -e /etc/ca-certificates/trust-source/anchors/totaljs-developer.crt ]; then
+      rm -f /etc/ca-certificates/trust-source/anchors/totaljs-developer.crt
+      update-ca-trust >/dev/null 2>&1 || true
+    fi
     rm -f /www/proxy/data/certs/totaljs.developer.crt /www/proxy/data/certs/totaljs.developer.key
     ;;
 esac

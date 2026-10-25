@@ -1,0 +1,39 @@
+name: arch-repo
+
+# Builds the packages of Arch from packages/ (arch/mkpkg.py), makes a repository of pacman with them and installs the server edition from it,
+# in a container of Arch Linux (x86_64). The desktop edition and aarch64 come later.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'arch/**'
+      - 'packages/**'
+      - '.github/workflows/arch-repo.yml'
+
+jobs:
+  arch:
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    timeout-minutes: 60
+    steps:
+      - name: Tools
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git python sudo gnupg
+
+      - uses: actions/checkout@v7
+
+      - name: A throwaway key for the package of the release
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          sudo -H -u builder bash -c '
+            export GNUPGHOME="$HOME/gnupg"; mkdir -m 700 "$GNUPGHOME"
+            gpg --batch --passphrase "" --quick-generate-key "Throwaway Repo <test@example.com>" ed25519 sign never
+            gpg --armor --export > "$HOME/throwaway.gpg"'
+
+      - name: Build the packages and the repository
+        run: |
+          sudo -H -u builder env KEY_FILE=/home/builder/throwaway.gpg WORKSPACE="$GITHUB_WORKSPACE" bash -c 'cd "$WORKSPACE" && bash arch/build.sh'
+
+      - name: Install the server edition from it
+        run: bash arch/test-install.sh "$GITHUB_WORKSPACE/build/arch/x86_64"
