@@ -3,8 +3,9 @@ name: release-seed
 # Publishes what people download to install Total.js Developer: the two seed images (desktop and server), a few kilobytes each, with their
 # checksums and a signed attestation of where they came from. The ISO of Ubuntu is NOT published here: the release says where to get the
 # official one, with its checksum (docs/legal.md explains why).
-# The release of a version (the tag `v*`) is published by release-iso.yml, with the ISO of Total.js Developer and these same seeds. This workflow builds only the
-# seeds, by hand (Run workflow), and keeps them as an artifact of the run: to try them without building the ISO, which takes longer.
+# The release of a version (the tag `v*`) is published by release-iso.yml, with the ISO of Total.js Developer and these same seeds: while Canonical has not answered
+# about the ISO (docs/legal.md), do not push a tag `v*`. This workflow builds only the seeds, by hand (Run workflow), and keeps them as an artifact of the run.
+# With a `release_tag` it also publishes them as a release of their own, with a tag that does NOT start with `v` (for instance `seeds-0.1.0`), so that it does not start release-iso.yml.
 #
 # The seeds install the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the release:
 # the workflow checks it and stops if it does not.
@@ -14,6 +15,9 @@ on:
       repository_url:
         description: Address of the repository of packages that the seeds install from
         default: https://totaljs-es.github.io/developer-distros/repo
+      release_tag:
+        description: "Publish the seeds as a release with this tag (for instance seeds-0.1.0; never a tag that starts with v). Empty: only an artifact of the run"
+        default: ''
 
 permissions:
   contents: write
@@ -74,3 +78,42 @@ jobs:
           name: totaljs-developer-seeds
           path: dist/
           retention-days: 14
+
+      - name: Publish the seeds as a release
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          case "${RELEASE_TAG}" in v*) echo "::error::a tag that starts with v starts release-iso.yml, which publishes the ISO: use another one (seeds-0.1.0)"; exit 1 ;; esac
+          cat > notes.md <<NOTES
+          ## Total.js Developer: seeds for the official ISO of Ubuntu Server
+
+          Install **Total.js Developer** on Ubuntu 26.04 LTS with the **official, unmodified ISO of Ubuntu Server** and one of these seeds: a small image (a few kilobytes) that tells the installer of Ubuntu what to do and downloads Total.js Developer from ${REPO_URL}.
+
+          | Seed | For |
+          | --- | --- |
+          | \`totaljs-developer-desktop-seed.iso\` | Total.js Developer with an Openbox desktop |
+          | \`totaljs-developer-server-seed.iso\` | Total.js Developer for the command line only |
+
+          They are the same for Intel/AMD (amd64) and ARM (arm64) computers and virtual machines.
+
+          ### How
+          1. Download the official ISO of Ubuntu Server 26.04 LTS: \`${UBUNTU_ISO}\` (SHA-256 \`${UBUNTU_SHA256}\`) from https://releases.ubuntu.com/26.04/ for amd64, or from https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ for arm64.
+          2. Download **one** seed from this page.
+          3. Start the virtual machine or the computer with the Ubuntu ISO and the seed as a second drive (a second USB stick, or a second virtual drive). The installer finds it and asks for confirmation.
+          4. Answer the usual questions (language, keyboard, network, disk and who you are). **It needs an internet connection** while it installs.
+
+          The steps with pictures, for virtual machines and for real computers: https://github.com/${GITHUB_REPOSITORY}/blob/main/docs/install.md
+
+          Based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
+
+          ### Check the download
+          \`\`\`bash
+          sha256sum -c SHA256SUMS --ignore-missing
+          gh attestation verify totaljs-developer-desktop-seed.iso --repo ${GITHUB_REPOSITORY}
+          \`\`\`
+          NOTES
+          sed -i 's/^          //' notes.md
+          gh release create "${RELEASE_TAG}" dist/*.iso dist/SHA256SUMS \
+            --title "Total.js Developer: seeds (${RELEASE_TAG#seeds-})" --notes-file notes.md

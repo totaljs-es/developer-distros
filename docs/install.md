@@ -1,13 +1,13 @@
 # Install Total.js Developer
 
-Total.js Developer is **an Ubuntu remix**: Ubuntu Server 26.04 LTS with a development environment for Total.js that is installed together with it. You download **one ISO**, start a
-machine with it, choose the desktop or the server edition, and the installer asks you the usual questions.
+Total.js Developer is **Ubuntu Server 26.04 LTS with a development environment for Total.js** that is installed together with it. You start a machine with the **official ISO of Ubuntu Server**
+and one **seed**: a small image (a few kilobytes) that tells the installer of Ubuntu to install Total.js Developer, with the desktop or only the command line. The installer asks you the usual questions.
 
 It is made to run in a **virtual machine**, which is the easiest way to have it, and it also installs on a real computer in the same way.
 
 ## What you need
 
-- An **amd64** machine (Intel or AMD) or an **arm64** one (ARM), virtual or a computer. On a Mac with Apple Silicon, use the arm64 ISO in UTM, Parallels or VMware Fusion, or the
+- An **amd64** machine (Intel or AMD) or an **arm64** one (ARM), virtual or a computer. On a Mac with Apple Silicon, use the arm64 ISO of Ubuntu in UTM, Parallels or VMware Fusion, or the
   ready-made images of [TotalVM](https://totalvm.totaljs.es).
 - 4 GB of memory (8 GB or more is better with the desktop), 2 processor cores or more, and 30 GB of disk.
 - **An internet connection during the installation, in a virtual machine as well as on a computer.** The installer downloads Total.js Developer
@@ -16,17 +16,20 @@ It is made to run in a **virtual machine**, which is the easiest way to have it,
 
 ## 1. Download
 
-From the [releases](../../../releases) of this repository: the ISO for your processor, `totaljs-developer-amd64.iso` (Intel and AMD) or `totaljs-developer-arm64.iso` (ARM), and
-`SHA256SUMS` to check it:
+1. **The official ISO of Ubuntu Server 26.04 LTS**, unmodified, from Ubuntu: <https://releases.ubuntu.com/26.04/> for amd64 (Intel and AMD) or <https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/> for arm64 (ARM).
+   Its checksum is on the same page (`SHA256SUMS`).
+2. **One seed**, from the [releases](../../../releases) of this repository (the one called *seeds*), the same for both processors:
+
+| Edition | File |
+| --- | --- |
+| Desktop (Openbox, Firefox and Chrome) | `totaljs-developer-desktop-seed.iso` |
+| Server (command line only) | `totaljs-developer-server-seed.iso` |
+
+Check what you downloaded:
 
 ```bash
 sha256sum -c SHA256SUMS --ignore-missing
-```
-
-The ISO also carries a signed attestation of where it was built. If you use the GitHub CLI:
-
-```bash
-gh attestation verify totaljs-developer-amd64.iso --repo totaljs-es/developer-distros   # or the arm64 one
+gh attestation verify totaljs-developer-desktop-seed.iso --repo totaljs-es/developer-distros   # the signed attestation of where the seed was built (GitHub CLI)
 ```
 
 ## 2. Prepare the machine
@@ -43,7 +46,8 @@ Create a machine with these settings, in the program that you use (VirtualBox, V
 | Disk | 30 GB or more |
 | Firmware | UEFI (BIOS also works on amd64; arm64 always uses UEFI) |
 | Network | NAT or bridge, with internet |
-| Optical drive | the ISO |
+| First optical drive | the ISO of Ubuntu |
+| Second optical drive (or a second removable drive) | the seed |
 
 **UTM on a Mac with Apple Silicon:** when you create the machine (*Virtualize → Linux*), turn on **Use Apple Virtualization** in the advanced options. With it the boot shows the animation of
 Total.js. With the default engine of UTM (QEMU) the system installs and works the same, but the screen of the virtual machine stays off until the login appears, and the animation is not seen.
@@ -54,27 +58,27 @@ With QEMU it is:
 qemu-img create -f qcow2 totaljs.qcow2 30G
 qemu-system-x86_64 -enable-kvm -m 4096 -smp 2 -nic user,model=virtio-net-pci \
   -drive file=totaljs.qcow2,if=virtio \
-  -drive file=totaljs-developer-amd64.iso,media=cdrom \
+  -drive file=ubuntu-26.04-live-server-amd64.iso,media=cdrom \
+  -drive file=totaljs-developer-desktop-seed.iso,media=cdrom \
   -boot d
 ```
 
 ### On a computer
 
-1. Write the ISO to a USB stick, with [balenaEtcher](https://etcher.balena.io) or with `dd`.
-2. Connect it and start the computer from it. Most computers show a boot menu with a key at power on (`F12`, `F10`, `Esc` or `F2`; on a Mac, hold `Option`).
+1. Write the ISO of Ubuntu to a USB stick, and the seed to another one, with [balenaEtcher](https://etcher.balena.io) or with `dd`.
+2. Connect both and start the computer from the one of Ubuntu. Most computers show a boot menu with a key at power on (`F12`, `F10`, `Esc` or `F2`; on a Mac, hold `Option`).
    Choose the stick, in UEFI mode.
 
 The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not see your disk, your network card or your keyboard, Total.js Developer will not either.
 
 ## 3. Install
 
-1. Start the machine from the ISO. The menu has two entries: **Install Total.js Developer, desktop edition** (the first one) and **server edition** (command line only).
-2. Choose one. The installer starts. It is the installer of Ubuntu Server, in text mode: simple, and the same one that millions of servers use. You move with the arrow keys, `Tab` and `Enter`. When it
-   finishes and the system restarts, the desktop edition starts with the desktop of Total.js.
+1. Start the machine from the ISO of Ubuntu and choose **Try or Install Ubuntu Server**.
+2. The installer finds the seed and asks whether to continue with the autoinstall: type `yes`. It is the installer of Ubuntu Server, in text mode: simple, and the same one that millions of servers use. You move with the arrow keys, `Tab` and `Enter`.
 3. Answer the questions: language, keyboard, network, disk and who you are (your name, the name of the machine, your user and your password).
-   The guided disk layout with LVM leaves half of the disk free; the installer of Total.js Developer gives it to the system at the end. On a system that is already installed, you can do it yourself: `sudo lvextend -r -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv`.
+   The guided disk layout with LVM leaves half of the disk free; the seed gives it to the system at the end. On a system that is already installed, you can do it yourself: `sudo lvextend -r -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv`.
 4. Wait. The installer puts the system on the disk and then downloads and installs Total.js Developer. When it finishes it asks you to restart:
-   disconnect the ISO (take out the stick, or eject the virtual drive) and press Enter.
+   disconnect the drives (take out the sticks, or eject the virtual drives) and press Enter. The desktop edition starts with the desktop of Total.js.
 
 ## After the first start
 
@@ -92,19 +96,6 @@ The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not
 | It says that it cannot reach the repository | The installer needs internet from the start. Check the network of the virtual machine (NAT or bridge), or connect the cable or choose the Wi-Fi when the installer asks about the network, and start again. |
 | It stops with an error | Press Enter to open a shell and read `/var/log/installer/`, or start again. |
 | After restarting, the services do not answer | They download their images in the first minutes. Look at `systemctl status totaljs-proxy totaljs-code totaljs-flow totaljs-postgres`. |
-
-## Another way: the official ISO of Ubuntu and a seed
-
-If you prefer to start from the official ISO of Ubuntu Server 26.04 LTS, unmodified (<https://releases.ubuntu.com/26.04/> for amd64, <https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/> for arm64), add a **seed** next to it: a small image with the
-volume label `CIDATA` that tells the installer of Ubuntu to install Total.js Developer. It is in the same release as the ISO:
-
-| Edition | File |
-| --- | --- |
-| Desktop | `totaljs-developer-desktop-seed.iso` |
-| Server | `totaljs-developer-server-seed.iso` |
-
-Connect the ISO of Ubuntu as the first optical drive and the seed as a second one (on a computer, two USB sticks), start from the ISO of Ubuntu, choose **Try or Install Ubuntu Server** and
-when the installer asks whether to continue with the autoinstall, type `yes`. The rest is the same.
 
 ## Remove the installation
 

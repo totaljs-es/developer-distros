@@ -2,7 +2,7 @@
 
 <h1 align="center">Total.js Developer</h1>
 
-<p align="center"><b>A complete development environment for <a href="https://www.totaljs.com">Total.js</a>, installed in minutes.</b><br>An Ubuntu remix for virtual machines and computers, with a desktop or only the command line.</p>
+<p align="center"><b>A complete development environment for <a href="https://www.totaljs.com">Total.js</a>, installed in minutes.</b><br>Built on Ubuntu 26.04 LTS, for virtual machines and computers, with a desktop or only the command line.</p>
 
 <p align="center">
   <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml/badge.svg" alt="check"></a>
@@ -24,15 +24,14 @@
 
 ## Install
 
-Download **one ISO**, start a machine with it, choose the desktop or the server edition in the menu, and answer the usual questions of the installer. The rest
+Start a machine with the **official ISO of Ubuntu Server 26.04 LTS** and one **seed** (a small image, a few kilobytes) next to it, answer the usual questions of the installer, and the rest
 installs by itself. It needs an internet connection, in a virtual machine and on a computer.
 
-1. Download the ISO for your processor from the [releases](../../releases): `totaljs-developer-amd64.iso` (Intel and AMD) or `totaljs-developer-arm64.iso` (ARM, such as UTM or Parallels on a Mac with Apple Silicon), and `SHA256SUMS`.
-2. Attach the ISO to a virtual machine (4 GB of memory, 30 GB of disk), or write it to a USB stick.
-3. Start it, choose **desktop edition** or **server edition**, and install.
+1. Download the [official ISO of Ubuntu Server](https://releases.ubuntu.com/26.04/) (amd64, Intel and AMD) or the [one for arm64](https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/) (ARM, such as UTM or Parallels on a Mac with Apple Silicon).
+2. Download a seed from the [releases](../../releases): `totaljs-developer-desktop-seed.iso` (with a desktop) or `totaljs-developer-server-seed.iso` (command line only).
+3. Attach both to a virtual machine (4 GB of memory, 30 GB of disk) as two drives, or write them to two USB sticks, start from the one of Ubuntu, choose **Try or Install Ubuntu Server** and type `yes` when it asks about the autoinstall.
 
-**[Installation guide](docs/install.md)**. If you prefer the official ISO of Ubuntu Server, unmodified, the same release has a small seed image for each edition to
-put next to it.
+**[Installation guide](docs/install.md)**, with the settings of the virtual machine and the steps.
 
 ## Your first minutes
 
