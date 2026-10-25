@@ -5,6 +5,8 @@
 #   totaljs-wallpaper shuffle    force a new random pick (ignores the pin)
 #   totaljs-wallpaper pin        pin whatever is currently showing
 #   totaljs-wallpaper shuffle    go back to a random wallpaper each login
+#   totaljs-wallpaper choose     a grid with the pack and your own images (~/Pictures/Wallpapers); the one you pick is applied and pinned
+#   totaljs-wallpaper set FILE   apply and pin an image of yours
 set -euo pipefail
 PACK_DIR=/usr/share/backgrounds/totaljs
 STATE_DIR="$HOME/.config/totaljs"
@@ -12,7 +14,50 @@ PINNED="${STATE_DIR}/wallpaper"
 CURRENT="${STATE_DIR}/wallpaper.current"
 mkdir -p "${STATE_DIR}"
 
+MINE="$HOME/Pictures/Wallpapers"
+IMAGES='-iname *.jpg -o -iname *.jpeg -o -iname *.png -o -iname *.webp'
+
+# applies an image and keeps it for the next logins (a copy: it keeps working if the original is moved or deleted)
+apply_pinned() {
+    cp "$1" "${CURRENT}"
+    cp "$1" "${PINNED}"
+    feh --bg-fill "$1"
+}
+
 case "${1:-show}" in
+    set)
+        FILE="${2:?Usage: totaljs-wallpaper set FILE}"
+        [ -f "${FILE}" ] || { echo "no such image: ${FILE}" >&2; exit 1; }
+        apply_pinned "${FILE}"
+        exit 0
+        ;;
+    choose)
+        mkdir -p "${MINE}"
+        PATHS=()
+        while IFS= read -r image; do
+            [ -n "${image}" ] && PATHS+=("${image}")
+        done < <({ find "${MINE}" -maxdepth 1 -type f \( ${IMAGES} \) | sort; find "${PACK_DIR}" -maxdepth 1 -type f -name '*.jpg' | sort; } 2>/dev/null)
+        # rofi tells the position of the line (the first one is "Add an image..."); the icon of a line goes after a NUL, which a variable cannot hold: printf writes it
+        INDEX="$({
+            printf '%s\0icon\x1f%s\n' 'Add an image...' list-add
+            for image in "${PATHS[@]}"; do
+                name="$(basename "${image}")"
+                printf '%s\0icon\x1f%s\n' "${name%.*}" "${image}"
+            done
+        } | rofi -dmenu -i -show-icons -format i -p 'Wallpaper' \
+            -theme-str 'window { width: 78%; } listview { columns: 4; lines: 3; layout: vertical; spacing: 10px; } element { orientation: vertical; padding: 8px; } element-icon { size: 9em; horizontal-align: 0.5; } element-text { horizontal-align: 0.5; }' || true)"
+        [ -n "${INDEX}" ] || exit 0
+        if [ "${INDEX}" = 0 ]; then
+            FILE="$(zenity --file-selection --title='Choose an image' --filename="$HOME/Pictures/" --file-filter='Images | *.jpg *.jpeg *.png *.webp' 2>/dev/null || true)"
+            [ -n "${FILE}" ] && [ -f "${FILE}" ] || exit 0
+            TARGET="${MINE}/$(basename "${FILE}")"
+            [ "${FILE}" -ef "${TARGET}" ] || cp -n "${FILE}" "${TARGET}" 2>/dev/null || cp "${FILE}" "${MINE}/$(date +%s)-$(basename "${FILE}")"
+            apply_pinned "${FILE}"
+        else
+            apply_pinned "${PATHS[$((INDEX - 1))]}"
+        fi
+        exit 0
+        ;;
     pin)
         [ -f "${CURRENT}" ] && cp "${CURRENT}" "${PINNED}"
         notify-send "Total.js Developer" "Wallpaper pinned." 2>/dev/null || true

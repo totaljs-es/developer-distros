@@ -19,6 +19,7 @@
       <item label="Volume control"><action name="Execute"><command>pavucontrol</command></action></item>
       <menu id="widget-menu" label="Desktop widget" execute="totaljs-conky menu" />
       <menu id="wallpaper-menu" label="Wallpaper">
+        <item label="Choose wallpaper..."><action name="Execute"><command>totaljs-wallpaper choose</command></action></item>
         <item label="Change wallpaper (Super+W)"><action name="Execute"><command>totaljs-wallpaper next</command></action></item>
         <item label="Pin current wallpaper"><action name="Execute"><command>totaljs-wallpaper pin</command></action></item>
         <item label="Shuffle on login"><action name="Execute"><command>totaljs-wallpaper shuffle</command></action></item>

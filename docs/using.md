@@ -142,6 +142,8 @@ totaljs-conky hidden      # no widget
 The one that you choose is kept for the next sessions. The profiles are in `~/.config/conky`: edit them or add your own, with the name `<profile>.conf`.
 
 Wallpapers: there are twelve and a different one is chosen on each start. `totaljs-wallpaper pin` keeps the current one, `totaljs-wallpaper shuffle` goes back to
+
+**Your own wallpaper:** *Preferences → Wallpaper → Choose wallpaper...* opens a grid with the twelve of the pack and your own, and what you pick is applied and kept for the next sessions. *Add an image...* copies a picture of yours to `~/Pictures/Wallpapers` (you can also drop images there), and `totaljs-wallpaper set FILE` does the same from the terminal.
 a random one. The look of windows and applications is changed with *Preferences → Appearance*
 (in the menu of the desktop).
 

@@ -49,6 +49,9 @@ for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/r
 done
 for xml in /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml; do python3 -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' "${xml}"; done
 test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
+command -v zenity >/dev/null
+bash -n /usr/bin/totaljs-wallpaper
+grep -q 'totaljs-wallpaper choose' /etc/skel/.config/openbox/menu.xml
 command -v firefox >/dev/null
 POLICY="$(apt-cache policy firefox)"
 case "${POLICY}" in *packages.mozilla.org*) ;; *) echo "${POLICY}" >&2; echo 'firefox does not come from Mozilla' >&2; exit 1 ;; esac
