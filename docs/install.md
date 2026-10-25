@@ -7,8 +7,8 @@ It is made to run in a **virtual machine**, which is the easiest way to have it,
 
 ## What you need
 
-- An **amd64** machine (Intel or AMD): a virtual machine of that type, or a computer. On a Mac with Apple Silicon, use the images of
-  [TotalVM](https://totalvm.totaljs.es).
+- An **amd64** machine (Intel or AMD) or an **arm64** one (ARM), virtual or a computer. On a Mac with Apple Silicon, use the arm64 ISO in UTM, Parallels or VMware Fusion, or the
+  ready-made images of [TotalVM](https://totalvm.totaljs.es).
 - 4 GB of memory (8 GB or more is better with the desktop), 2 processor cores or more, and 30 GB of disk.
 - **An internet connection during the installation, in a virtual machine as well as on a computer.** The installer downloads Total.js Developer
   while it installs. A virtual machine gets it from its host with the usual network of the program (NAT or bridge); a computer needs a cable or Wi-Fi that the
@@ -16,16 +16,17 @@ It is made to run in a **virtual machine**, which is the easiest way to have it,
 
 ## 1. Download
 
-From the [releases](../../../releases) of this repository: `totaljs-developer-amd64.iso`, and `SHA256SUMS` to check it:
+From the [releases](../../../releases) of this repository: the ISO for your processor, `totaljs-developer-amd64.iso` (Intel and AMD) or `totaljs-developer-arm64.iso` (ARM), and
+`SHA256SUMS` to check it:
 
 ```bash
-sha256sum -c SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
 ```
 
 The ISO also carries a signed attestation of where it was built. If you use the GitHub CLI:
 
 ```bash
-gh attestation verify totaljs-developer-amd64.iso --repo totaljs-es/developer-distros
+gh attestation verify totaljs-developer-amd64.iso --repo totaljs-es/developer-distros   # or the arm64 one
 ```
 
 ## 2. Prepare the machine
@@ -36,11 +37,11 @@ Create a machine with these settings, in the program that you use (VirtualBox, V
 
 | Setting | Value |
 | --- | --- |
-| Type | Linux, Ubuntu 64-bit |
+| Type | Linux, Ubuntu 64-bit (arm64 on an ARM host) |
 | Memory | 4 GB or more (8 GB with the desktop) |
 | Processors | 2 or more |
 | Disk | 30 GB or more |
-| Firmware | UEFI, or BIOS: both work |
+| Firmware | UEFI (BIOS also works on amd64; arm64 always uses UEFI) |
 | Network | NAT or bridge, with internet |
 | Optical drive | the ISO |
 
@@ -89,7 +90,7 @@ The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not
 
 ## Another way: the official ISO of Ubuntu and a seed
 
-If you prefer to start from the official ISO of Ubuntu Server 26.04 LTS, unmodified (<https://releases.ubuntu.com/26.04/>), add a **seed** next to it: a small image with the
+If you prefer to start from the official ISO of Ubuntu Server 26.04 LTS, unmodified (<https://releases.ubuntu.com/26.04/> for amd64, <https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/> for arm64), add a **seed** next to it: a small image with the
 volume label `CIDATA` that tells the installer of Ubuntu to install Total.js Developer. It is in the same release as the ISO:
 
 | Edition | File |

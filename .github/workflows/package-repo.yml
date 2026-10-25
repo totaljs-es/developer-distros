@@ -12,8 +12,18 @@ on:
 
 jobs:
   repo:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    # the same test on each architecture of the repository, each one native: the runner of arm64 runs the container of Ubuntu as it is, with no emulation
+    name: repo (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
@@ -40,11 +50,11 @@ jobs:
         run: find build/site/repo -type f | sort
 
       # The layer in a clean Ubuntu 26.04 (the series of the repository): the sources, the install, what it promises, and the removal
-      - name: The server layer on Ubuntu 26.04
+      - name: The server layer on Ubuntu 26.04 (${{ matrix.arch }})
         run: docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-install.sh:/test.sh:ro" ubuntu:26.04 bash /test.sh
 
       # The desktop edition: installed in the same clean Ubuntu, and its session started in a virtual screen, with screenshots
-      - name: The desktop edition on Ubuntu 26.04
+      - name: The desktop edition on Ubuntu 26.04 (${{ matrix.arch }})
         run: |
           mkdir -p build/desktop
           docker run --rm -v "$PWD/build/site/repo:/repo:ro" -v "$PWD/tools/package-repo/test-desktop.sh:/test.sh:ro" -v "$PWD/build/desktop:/out" ubuntu:26.04 bash /test.sh
@@ -53,6 +63,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-screenshots
+          name: desktop-screenshots-${{ matrix.arch }}
           path: build/desktop
           if-no-files-found: ignore

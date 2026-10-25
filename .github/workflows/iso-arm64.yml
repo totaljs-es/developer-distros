@@ -1,0 +1,56 @@
+name: iso-arm64
+
+# The ISO for arm64 (computers and virtual machines with an ARM processor, such as UTM or Parallels on a Mac with Apple Silicon): the official installer of
+# Ubuntu Server for arm64, remastered like the one of amd64. It is built here and its structure is checked: the installer of arm64 needs UEFI and the runners
+# of GitHub have no KVM for arm64, so the install itself is not run here: it is tried on a real machine or a virtual one.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'iso/ubuntu/**'
+      - '.github/workflows/iso-arm64.yml'
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso gnupg
+
+      - name: Build the ISO of arm64
+        env:
+          ARCH: arm64
+          WORK_DIR: build/iso-arm64
+        run: |
+          mkdir -p dist
+          iso/ubuntu/build-iso.sh iso/ubuntu/seed dist/totaljs-developer-arm64.iso
+
+      # What has to be true for it to start: the kernel and the initrd, our seed, a boot menu that uses it, and the files of UEFI
+      - name: Check its structure
+        run: |
+          ISO=dist/totaljs-developer-arm64.iso
+          ls -l "${ISO}"
+          LIST="$(xorriso -indev "${ISO}" -find / -maxdepth 2 2>/dev/null | tr '\n' ' ')"
+          for path in /casper/vmlinuz /casper/initrd /nocloud/user-data /boot/grub/grub.cfg /EFI; do
+            case "${LIST}" in *"'${path}'"*) echo "ok: ${path}" ;; *) echo "MISSING: ${path}"; echo "${LIST}"; exit 1 ;; esac
+          done
+          xorriso -osirrox on -indev "${ISO}" -extract /boot/grub/grub.cfg build/grub.cfg >/dev/null 2>&1
+          grep -c 'autoinstall ds=nocloud' build/grub.cfg
+          grep -E "menuentry|totaljs.edition" build/grub.cfg | head -8
+          SIZE="$(ls -l "${ISO}" | awk '{ printf "%.0f", $5 / 1048576 }')"
+          echo "size: ${SIZE} MiB"
+          [ "${SIZE}" -lt 2000 ] || { echo "the ISO is over the 2 GiB limit of a release"; exit 1; }
+
+      - name: What was measured
+        if: always()
+        run: |
+          {
+            echo '### ISO of arm64'
+            ls -l dist/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
+            [ -f build/iso-arm64/contents.txt ] && { echo; echo '```'; cat build/iso-arm64/contents.txt; echo '```'; }
+          } >> "$GITHUB_STEP_SUMMARY"

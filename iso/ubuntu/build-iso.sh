@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# build-iso.sh - remaster the latest Ubuntu LTS live-server ISO (amd64) with an autoinstall seed.
+# build-iso.sh - remaster the latest Ubuntu LTS live-server ISO (amd64 or arm64) with an autoinstall seed.
 #
 #   iso/ubuntu/build-iso.sh <seed-dir> <output.iso>
 #
 # The seed directory has the user-data and meta-data of cloud-init. It is copied into the ISO as /nocloud and the
-# installer is told to use it (autoinstall). The ISO is downloaded from releases.ubuntu.com, and its checksum list is
+# installer is told to use it (autoinstall). The ISO is downloaded from releases.ubuntu.com (amd64) or cdimage.ubuntu.com (arm64), and its checksum list is
 # verified with the signing key of Ubuntu before anything else is trusted.
 #
 # Environment:
 #   UBUNTU_RELEASE   the series to take the newest ISO of (default 26.04, the latest LTS)
+#   ARCH             amd64 (default) or arm64
 #   WORK_DIR         where the downloads and the working files go (default build/iso)
 #   GRUB_TIMEOUT     seconds before the first boot entry starts (unset: the menu of Ubuntu is kept)
 #   EXTRA_KERNEL     more arguments for the kernel of the installer (the CI test adds the serial console)
@@ -23,7 +24,13 @@ set -euo pipefail
 SEED="${1:?usage: build-iso.sh <seed-dir> <output.iso>}"
 OUT="${2:?usage: build-iso.sh <seed-dir> <output.iso>}"
 RELEASE="${UBUNTU_RELEASE:-26.04}"
-BASE_URL="${UBUNTU_BASE_URL:-https://releases.ubuntu.com}/${RELEASE}"
+ARCH="${ARCH:-amd64}"
+# the ISO of amd64 is in releases.ubuntu.com; the one of arm64 is in cdimage.ubuntu.com, in another folder
+case "${ARCH}" in
+    amd64) BASE_URL="${UBUNTU_BASE_URL:-https://releases.ubuntu.com}/${RELEASE}" ;;
+    arm64) BASE_URL="${UBUNTU_BASE_URL:-https://cdimage.ubuntu.com/ubuntu/releases}/${RELEASE}/release" ;;
+    *) printf 'error: ARCH is amd64 or arm64\n' >&2; exit 1 ;;
+esac
 WORK="${WORK_DIR:-build/iso}"
 
 log() { printf '==> %s\n' "$*"; }
@@ -55,8 +62,8 @@ gpg --batch --verify "${WORK}/SHA256SUMS.gpg" "${WORK}/SHA256SUMS" 2>&1 | tee "$
 grep -q "Good signature" "${WORK}/gpg.log" || die "the signature of SHA256SUMS is not good"
 
 # 2. The newest live-server ISO of that series
-ISO_NAME="$(sed -n -E 's/^[0-9a-f]{64} \*(ubuntu-[0-9.]+-live-server-amd64\.iso)$/\1/p' "${WORK}/SHA256SUMS" | sort -V | tail -1)"
-[ -n "${ISO_NAME}" ] || die "no live-server amd64 ISO in the checksums of ${RELEASE}"
+ISO_NAME="$(sed -n -E "s/^[0-9a-f]{64} \*(ubuntu-[0-9.]+-live-server-${ARCH}\.iso)\$/\1/p" "${WORK}/SHA256SUMS" | sort -V | tail -1)"
+[ -n "${ISO_NAME}" ] || die "no live-server ${ARCH} ISO in the checksums of ${RELEASE}"
 log "base ISO: ${ISO_NAME}"
 
 if [ ! -f "${WORK}/${ISO_NAME}" ]; then

@@ -27,8 +27,8 @@
 Download **one ISO**, start a machine with it, choose the desktop or the server edition in the menu, and answer the usual questions of the installer. The rest
 installs by itself. It needs an internet connection, in a virtual machine and on a computer.
 
-1. Download `totaljs-developer-amd64.iso` and `SHA256SUMS` from the [releases](../../releases).
-2. Attach the ISO to an amd64 virtual machine (4 GB of memory, 30 GB of disk), or write it to a USB stick.
+1. Download the ISO for your processor from the [releases](../../releases): `totaljs-developer-amd64.iso` (Intel and AMD) or `totaljs-developer-arm64.iso` (ARM, such as UTM or Parallels on a Mac with Apple Silicon), and `SHA256SUMS`.
+2. Attach the ISO to a virtual machine (4 GB of memory, 30 GB of disk), or write it to a USB stick.
 3. Start it, choose **desktop edition** or **server edition**, and install.
 
 **[Installation guide](docs/install.md)**. If you prefer the official ISO of Ubuntu Server, unmodified, the same release has a small seed image for each edition to
