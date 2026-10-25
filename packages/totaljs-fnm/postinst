@@ -37,12 +37,21 @@ printf '%s\n' "${PREFIX}" > "${STATE}/prefix"
 
 # fnm goes in /etc/bash.bashrc, which is read by every interactive shell (/etc/profile.d is read only by login shells). It is between two marks, so that the package
 # can take it out again and an update does not repeat it. The Node.js of the system stays the default until the person chooses another one (fnm default 22).
+# the first version of the block did not set a default: take it out, and the new one goes in below
+if grep -q '^# >>> totaljs-fnm >>>$' /etc/bash.bashrc 2>/dev/null && ! grep -q 'fnm default system' /etc/bash.bashrc; then
+  tmp="$(mktemp)"
+  awk '/^# >>> totaljs-fnm >>>$/ { skip = 1 } !skip { print } /^# <<< totaljs-fnm <<<$/ { skip = 0 }' /etc/bash.bashrc > "${tmp}"
+  cat "${tmp}" > /etc/bash.bashrc
+  rm -f "${tmp}"
+fi
 if ! grep -q '^# >>> totaljs-fnm >>>$' /etc/bash.bashrc 2>/dev/null; then
   cat >> /etc/bash.bashrc <<'EOF'
 
 # >>> totaljs-fnm >>>
 # fnm, the manager of versions of Node.js: fnm install 22, fnm use 22. A folder with a .node-version, an .nvmrc or an engines field changes the version by itself.
 if command -v fnm >/dev/null 2>&1 && [ -n "$PS1" ]; then
+    # without a default, fnm asks to install one when you enter any folder that has no .node-version: the default is the Node.js of the system, until you choose another with fnm default
+    [ -e "${FNM_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/fnm}/aliases/default" ] || fnm default system >/dev/null 2>&1
     eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell bash)"
 fi
 # <<< totaljs-fnm <<<

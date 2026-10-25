@@ -43,9 +43,9 @@ taskbar_background_id = 0
 taskbar_name = 0
 task_text = 1
 task_icon = 1
-# the icons of the open windows are in grey, like the ones of the launchers, so that the panel looks like one piece
-task_icon_asb = 100 -100 0
-task_active_icon_asb = 100 -100 25
+# the icons of the open windows keep their colours: in grey a logo with several colours (Chrome, Firefox) turned into a white disc
+task_icon_asb = 100 0 0
+task_active_icon_asb = 100 0 10
 task_urgent_icon_asb = 100 0 0
 task_centered = 0
 task_maximum_size = 180 30
