@@ -56,6 +56,12 @@ scripts/check.js       the checks that run on every change
 
 `docs/layer.md` explains how the packages are organised. `docs/legal.md` explains what is and is not published, and why.
 
+## License
+
+The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under
+[CC BY-SA 4.0](LICENSE-ARTWORK). The logo and the mascot of Total.js are not covered by either: they are marks. The software that the packages install
+(Node.js, Docker, PostgreSQL, Firefox, Ubuntu...) keeps its own licenses.
+
 ## Trademarks
 
 Total.js Developer is made for Ubuntu and is not an official Ubuntu release, and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.

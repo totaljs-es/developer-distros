@@ -29,6 +29,12 @@ device: a USB stick or a second virtual drive, next to the official ISO. When th
 (without the parameter `autoinstall` on the kernel command line, it asks for a "yes"). The seed has the questions that the installer keeps for
 the person, and downloads the Total.js layer from the repository of packages.
 
+## Licenses
+
+The code is MIT (`LICENSE`) and the artwork of `shared/wallpapers` and `shared/plymouth` is CC BY-SA 4.0 (`LICENSE-ARTWORK`), like the artwork of Ubuntu. The logo and the mascot of
+Total.js are marks and are not licensed. The icons of the menu in `tools/package-repo/icons` came with the recipes of the images of TotalVM: before a release, confirm where they
+come from (if they are not ours, keep their license and give credit in this file, or replace them).
+
 ## Names
 
 - The product is **Total.js Developer**. Ubuntu is mentioned only to say what it is made for ("for Ubuntu 26.04 LTS"), never as part of a title.
