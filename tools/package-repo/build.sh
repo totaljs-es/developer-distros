@@ -39,6 +39,19 @@ if bsdtar --help 2>&1 | grep -q -- '--no-mac-metadata'; then TAR_OPTS="${TAR_OPT
 # Never serialize Finder/provenance xattrs into Linux packages. dpkg rejects
 # libarchive's PAX xattr records even though bsdtar can read them on macOS.
 export COPYFILE_DISABLE=1
+# The tar of a Debian package is GNU, not PAX, and has no file of the Finder: the dpkg of the installer rejects the PAX headers that BSD tar writes for a
+# .DS_Store ("unsupported PAX tar header type 'x'"), and a Linux runner never has such a file, so only a build on a Mac fails.
+DEB_TAR_OPTS="${TAR_OPTS} --format gnutar --exclude .DS_Store --exclude ._*"
+
+# A data tar with a PAX header cannot be installed by every dpkg: stop the build instead of publishing it
+verify_data_tar() {
+  python3 - "$1" <<'PY'
+import sys, tarfile
+bad = [m.name for m in tarfile.open(sys.argv[1]).getmembers() if m.pax_headers or m.name.endswith('.DS_Store') or '/._' in m.name]
+if bad:
+    sys.exit('the data tar ' + sys.argv[1] + ' has PAX headers or files of the Finder: ' + ', '.join(bad[:5]))
+PY
+}
 ARCH_PRIMARY="${ARCH_DIRS%% *}"
 mkdir -p "${OUT}/ubuntu/pool/main/t/${PACKAGE}" \
   "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}" \
@@ -149,8 +162,9 @@ exit 0
 EOF
 chmod 0755 "${DEBBUILD}/postrm"
 printf '2.0\n' > "${DEBBUILD}/debian-binary"
-(cd "${DEBBUILD}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst postrm)
-(cd "${DEBROOT}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DEBBUILD}/data.tar.gz" .)
+(cd "${DEBBUILD}" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst postrm)
+(cd "${DEBROOT}" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DEBBUILD}/data.tar.gz" .)
+verify_data_tar "${DEBBUILD}/data.tar.gz"
 DEBFILE="${PACKAGE}_${VERSION}-${RELEASE}_all.deb"
 (cd "${DEBBUILD}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" debian-binary control.tar.gz data.tar.gz)
 cp "${OUT}/ubuntu/pool/main/t/${PACKAGE}/${DEBFILE}" "${ASSETS}/${DEBFILE}"
@@ -193,8 +207,9 @@ exit 0
 EOF
 chmod 0755 "${DESKTOP_DEBBUILD}/postinst"
 printf '2.0\n' > "${DESKTOP_DEBBUILD}/debian-binary"
-(cd "${DESKTOP_DEBBUILD}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst)
-(cd "${DESKTOP_DEBROOT}" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DESKTOP_DEBBUILD}/data.tar.gz" .)
+(cd "${DESKTOP_DEBBUILD}" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf control.tar.gz control postinst)
+(cd "${DESKTOP_DEBROOT}" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf "${DESKTOP_DEBBUILD}/data.tar.gz" .)
+verify_data_tar "${DESKTOP_DEBBUILD}/data.tar.gz"
 DESKTOP_DEBFILE="${DESKTOP_PACKAGE}_${DESKTOP_VERSION}-${DESKTOP_RELEASE}_all.deb"
 (cd "${DESKTOP_DEBBUILD}" && bsdtar ${TAR_OPTS} --format=ar -cf "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" debian-binary control.tar.gz data.tar.gz)
 cp "${OUT}/ubuntu/pool/main/t/${DESKTOP_PACKAGE}/${DESKTOP_DEBFILE}" "${ASSETS}/${DESKTOP_DEBFILE}"
@@ -234,8 +249,9 @@ build_package() {
     [ ! -f "${dir}/${script}" ] || install -m 0755 "${dir}/${script}" "${work}/control/${script}"
   done
   printf '2.0\n' > "${work}/debian-binary"
-  (cd "${work}/control" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../control.tar.gz $(ls))
-  (cd "${work}/data" && bsdtar ${TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../data.tar.gz .)
+  (cd "${work}/control" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../control.tar.gz $(ls))
+  (cd "${work}/data" && bsdtar ${DEB_TAR_OPTS} --uid 0 --gid 0 --uname root --gname root -czf ../data.tar.gz .)
+  verify_data_tar "${work}/data.tar.gz"
 
   deb="${name}_${version}_${arch}.deb"
   mkdir -p "${OUT}/ubuntu/pool/main/t/${name}"
