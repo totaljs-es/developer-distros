@@ -48,6 +48,7 @@ Docker and Firefox come from their own repositories, which `apt` has to know bef
   is the Lua and Cairo script `/usr/share/totaljs-conky/totaljs.lua`. The network interface is the one of the default route, and the state of the services comes from systemd, so it needs no access to Docker.
 - **totaljs-openbox.** The configuration of each person is copied from `/etc/skel` when the person is created, and to the people that already exist only if they have none.
   The compositor is `picom`: GLX on a real computer and xrender in a virtual machine.
+  On a first install it also writes `/etc/netplan/90-totaljs-desktop.yaml` so that NetworkManager (the icon of the network of the panel) manages the network, as in the desktop of Ubuntu; it takes effect at the next start, and is removed with the package.
 
 ## The group of the system
 

@@ -53,6 +53,14 @@ command -v firefox >/dev/null
 POLICY="$(apt-cache policy firefox)"
 case "${POLICY}" in *packages.mozilla.org*) ;; *) echo "${POLICY}" >&2; echo 'firefox does not come from Mozilla' >&2; exit 1 ;; esac
 
+echo "==> the network of the desktop is managed by NetworkManager"
+if [ -d /etc/netplan ]; then
+    grep -q -E '^[[:space:]]*renderer:[[:space:]]*NetworkManager' /etc/netplan/90-totaljs-desktop.yaml
+    test "$(stat -c %a /etc/netplan/90-totaljs-desktop.yaml)" = 600
+else
+    echo "(this container has no netplan: nothing to check)"
+fi
+
 echo "==> the session in a virtual screen"
 apt-get install -y -qq --no-install-recommends xvfb imagemagick >/dev/null
 useradd -m -s /bin/bash deskuser

@@ -27,6 +27,23 @@ for home in /home/*; do
   done
 done
 
+# The network of the desktop is managed by NetworkManager, as in the desktop of Ubuntu: the icon of the network of the panel talks to it, and with the network of the
+# installer (systemd-networkd) it shows "disconnected" although there is internet. It is written only when the package is installed for the first time (a person who
+# takes the file out keeps it out), and only when nothing else has chosen NetworkManager. It is not applied now (that would cut the network in the middle of an
+# installation or of an SSH session): it takes effect at the next start.
+NETPLAN=/etc/netplan/90-totaljs-desktop.yaml
+if [ -z "${2:-}" ] && [ -d /etc/netplan ] && [ ! -e "${NETPLAN}" ] && ! grep -qs -E '^[[:space:]]*renderer:[[:space:]]*NetworkManager' /etc/netplan/*.yaml; then
+  (
+    umask 077
+    cat > "${NETPLAN}" <<'EOF'
+# The desktop of Total.js Developer lets NetworkManager (the icon of the network in the panel) manage the network, as the desktop of Ubuntu does.
+network:
+  version: 2
+  renderer: NetworkManager
+EOF
+  )
+fi
+
 # The system starts in the graphical session
 systemctl set-default graphical.target >/dev/null 2>&1 || true
 

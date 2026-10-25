@@ -4,6 +4,8 @@ set -e
 case "$1" in
   remove|purge)
     update-alternatives --remove x-terminal-emulator /usr/bin/alacritty >/dev/null 2>&1 || true
+    # the network goes back to the one of the installer at the next start
+    rm -f /etc/netplan/90-totaljs-desktop.yaml
     ;;
 esac
 
