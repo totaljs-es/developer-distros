@@ -35,7 +35,7 @@ jobs:
         run: |
           ISO=dist/totaljs-developer-arm64.iso
           ls -l "${ISO}"
-          LIST="$(xorriso -indev "${ISO}" -find / -maxdepth 2 2>/dev/null | tr '\n' ' ')"
+          LIST="$(xorriso -indev "${ISO}" -find / -maxdepth 3 2>/dev/null | tr '\n' ' ')"
           for path in /casper/vmlinuz /casper/initrd /nocloud/user-data /boot/grub/grub.cfg /EFI; do
             case "${LIST}" in *"'${path}'"*) echo "ok: ${path}" ;; *) echo "MISSING: ${path}"; echo "${LIST}"; exit 1 ;; esac
           done
