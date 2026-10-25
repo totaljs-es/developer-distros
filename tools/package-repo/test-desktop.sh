@@ -59,7 +59,9 @@ POLICY="$(apt-cache policy firefox)"
 case "${POLICY}" in *packages.mozilla.org*) ;; *) echo "${POLICY}" >&2; echo 'firefox does not come from Mozilla' >&2; exit 1 ;; esac
 
 command -v google-chrome-stable >/dev/null
-case "$(apt-cache policy google-chrome-stable)" in *dl.google.com*) ;; *) echo "chrome does not come from Google" >&2; exit 1 ;; esac
+# the package of Chrome rewrites its own source when it is installed (another address and its own key): the lists are refreshed to see where it comes from now
+apt-get update -qq >/dev/null
+case "$(apt-cache policy google-chrome-stable)" in *dl.google.com*) ;; *) apt-cache policy google-chrome-stable >&2; cat /etc/apt/sources.list.d/google-chrome.sources >&2; echo "chrome does not come from Google" >&2; exit 1 ;; esac
 # the package adds its own source when it is installed: the one of ours has to be the only one
 test "$(ls /etc/apt/sources.list.d | grep -c -i google)" = 1
 
