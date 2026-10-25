@@ -32,8 +32,7 @@ the person, and downloads the Total.js layer from the repository of packages.
 ## Licenses
 
 The code is MIT (`LICENSE`) and the artwork of `shared/wallpapers` and `shared/plymouth` is CC BY-SA 4.0 (`LICENSE-ARTWORK`), like the artwork of Ubuntu. The logo and the mascot of
-Total.js are marks and are not licensed. The icons of the menu in `tools/package-repo/icons` came with the recipes of the images of TotalVM: before a release, confirm where they
-come from (if they are not ours, keep their license and give credit in this file, or replace them).
+Total.js are marks and are not licensed. The icons of the menu in `tools/package-repo/icons` are the icons of Total.js, published with jComponent, and follow the license of the code (MIT).
 
 ## Names
 
