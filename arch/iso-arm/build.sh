@@ -108,7 +108,12 @@ if [ "$(tty)" = /dev/tty1 ]; then /usr/local/bin/totaljs-install --ask || true; 
 PROFILE
 echo totaljs-installer > "${RFS}/etc/hostname"
 # nothing of the keys of the machine that builds the medium
-rm -f "${RFS}/etc/machine-id" "${RFS}"/etc/ssh/ssh_host_*
+rm -f "${RFS}"/etc/ssh/ssh_host_*
+# the medium does not ask for the time zone and the like at every start (it is what systemd-firstboot does when there is no machine-id): masked, as archiso does
+mkdir -p "${RFS}/etc/systemd/system"
+ln -sf /dev/null "${RFS}/etc/systemd/system/systemd-firstboot.service"
+# a machine-id for the live system; the installed one makes its own
+printf "uninitialized\n" > "${RFS}/etc/machine-id"
 
 echo "==> the initramfs of archiso"
 KERNEL="$(ls "${RFS}/usr/lib/modules" | head -n 1)"
@@ -152,7 +157,7 @@ search --no-floppy --set=root --label ${LABEL}
 set default=0
 set timeout=5
 menuentry "Total.js Developer installer (aarch64, ${EDITION} edition)" {
-    linux /arch/boot/aarch64/Image archisobasedir=arch archisolabel=${LABEL} console=tty0 console=ttyAMA0,115200 totaljs.edition=${EDITION}
+    linux /arch/boot/aarch64/Image archisobasedir=arch archisolabel=${LABEL} console=tty0 console=ttyAMA0,115200 audit=0 totaljs.edition=${EDITION}
     initrd /arch/boot/aarch64/initramfs-linux.img
 }
 GRUBCFG
