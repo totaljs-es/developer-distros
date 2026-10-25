@@ -2,6 +2,8 @@ name: arch-repo
 
 # Builds the packages of Arch from packages/ (arch/mkpkg.py), makes a repository of pacman with them and installs the server edition from it,
 # in a container of Arch Linux (x86_64). The desktop edition and aarch64 come later.
+# The packages are not signed here: the key of Total.js never leaves the computer of the maintainers. The repository is kept as an artifact, and
+# arch/stage-repo.sh signs it and puts it where tools/package-repo/publish-pages.sh publishes it. The public key that the package of the release installs is the committed one.
 on:
   workflow_dispatch:
   push:
@@ -22,18 +24,21 @@ jobs:
 
       - uses: actions/checkout@v7
 
-      - name: A throwaway key for the package of the release
+      - name: A normal user to build (makepkg does not run as root)
         run: |
           useradd -m builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
-          sudo -H -u builder bash -c '
-            export GNUPGHOME="$HOME/gnupg"; mkdir -m 700 "$GNUPGHOME"
-            gpg --batch --passphrase "" --quick-generate-key "Throwaway Repo <test@example.com>" ed25519 sign never
-            gpg --armor --export > "$HOME/throwaway.gpg"'
 
       - name: Build the packages and the repository
         run: |
-          sudo -H -u builder env KEY_FILE=/home/builder/throwaway.gpg WORKSPACE="$GITHUB_WORKSPACE" bash -c 'cd "$WORKSPACE" && bash arch/build.sh'
+          sudo -H -u builder env KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" WORKSPACE="$GITHUB_WORKSPACE" bash -c 'cd "$WORKSPACE" && bash arch/build.sh'
 
       - name: Install the server edition from it
         run: bash arch/test-install.sh "$GITHUB_WORKSPACE/build/arch/x86_64"
+
+      - name: The repository, to be signed with the key of Total.js on the computer of the maintainers
+        uses: actions/upload-artifact@v7
+        with:
+          name: arch-repo-x86_64
+          path: build/arch/x86_64/
+          retention-days: 14

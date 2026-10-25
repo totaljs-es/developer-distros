@@ -68,6 +68,9 @@ test "$(grep -c '^# totaljs-https$' /etc/environment)" = 1
 
 echo "==> the local domain"
 test -f /etc/totaljs-developer/dns.conf
+test -f /usr/lib/tmpfiles.d/totaljs-dns.conf
+test -f /etc/NetworkManager/conf.d/90-totaljs-dns.conf
+test -e /etc/systemd/system/sysinit.target.wants/systemd-resolved.service || test -e /etc/systemd/system/multi-user.target.wants/systemd-resolved.service
 dnsmasq --test --conf-file=/etc/totaljs-developer/dns.conf
 dnsmasq --keep-in-foreground --conf-file=/etc/totaljs-developer/dns.conf --pid-file=/tmp/dns-test.pid --user=root >/tmp/dns-test.log 2>&1 &
 DNS_PID=$!

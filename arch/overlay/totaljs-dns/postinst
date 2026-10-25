@@ -1,0 +1,3 @@
+#!/bin/sh
+# Arch: systemd-resolved is there but not enabled
+systemctl enable systemd-resolved.service >/dev/null 2>&1 || true
