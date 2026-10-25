@@ -48,7 +48,7 @@ in_rfs pacman-key --init
 in_rfs pacman-key --populate archlinuxarm
 in_rfs pacman -Syu --noconfirm
 # what the installer needs inside the medium: disks, the root filesystem (bsdtar), network (iwd for Wi-Fi), an editor
-in_rfs pacman -S --noconfirm --needed mkinitcpio-archiso gptfdisk dosfstools e2fsprogs util-linux parted libarchive curl iwd nano
+in_rfs pacman -S --noconfirm --needed mkinitcpio-archiso pv gptfdisk dosfstools e2fsprogs util-linux parted libarchive curl iwd nano
 
 # our files: the installer, the key and the banner (the same ones of the ISO of x86_64)
 cp -r "${ROOT}/arch/iso/overlay/airootfs/." "${RFS}/"
@@ -81,15 +81,25 @@ echo totaljs-installer > "${RFS}/etc/hostname"
 rm -f "${RFS}/etc/machine-id" "${RFS}"/etc/ssh/ssh_host_*
 
 echo "==> the initramfs of archiso"
-cat > "${RFS}/etc/mkinitcpio-live.conf" <<'CONF'
-# the modules that the kernel of Arch Linux ARM has as modules are added; the ones that it has built in, or does not have, are not an error (the prefix ?)
-MODULES=(?loop ?squashfs ?overlay ?isofs ?sr_mod ?virtio_blk ?virtio_scsi ?virtio_pci ?virtio_net ?usb_storage ?uas)
+KERNEL="$(ls "${RFS}/usr/lib/modules" | head -n 1)"
+MODDIR="${RFS}/usr/lib/modules/${KERNEL}"
+# the modules that the medium needs: only the ones that this kernel has as modules go into the list (mkinitcpio fails with the ones that it has built in or does not have)
+MODS=()
+for m in loop squashfs overlay isofs sr_mod virtio_blk virtio_scsi virtio_pci virtio_net usb_storage uas; do
+    if grep -qE "/${m}\.ko(\.[a-z]+)?:" "${MODDIR}/modules.dep"; then MODS+=("${m}"); echo "module: ${m}"
+    elif grep -qE "/${m}\.ko" "${MODDIR}/modules.builtin"; then echo "built in: ${m}"
+    else
+        echo "missing: ${m}"
+        case "${m}" in loop|squashfs|overlay) echo "the kernel ${KERNEL} has not ${m}, which the live system needs" >&2; exit 1 ;; esac
+    fi
+done
+cat > "${RFS}/etc/mkinitcpio-live.conf" <<CONF
+MODULES=(${MODS[*]})
 BINARIES=()
 FILES=()
 HOOKS=(base udev modconf archiso archiso_loop_mnt block filesystems keyboard)
 COMPRESSION="gzip"
 CONF
-KERNEL="$(ls "${RFS}/usr/lib/modules" | head -n 1)"
 echo "hooks of mkinitcpio: $(ls "${RFS}/usr/lib/initcpio/install" | tr '\n' ' ')"
 in_rfs mkinitcpio -c /etc/mkinitcpio-live.conf -k "${KERNEL}" -g /boot/initramfs-live.img 2>&1 | tee "${BUILD}/mkinitcpio.log" || { echo "--- mkinitcpio failed (the errors are above)"; grep -n -i -E "error|not found|cannot" "${BUILD}/mkinitcpio.log" >&2 || true; exit 1; }
 # mkinitcpio says that the image may not be complete when it finds an error, and still exits with 0 in some versions
