@@ -6,8 +6,15 @@ set -e
 
 # Node.js does not read the certificates of the system: this line makes it trust the authority too (login sessions, desktop and terminals)
 MARK='# totaljs-https'
-if ! grep -q "${MARK}" /etc/environment 2>/dev/null; then
-  printf 'NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt %s\n' "${MARK}" >> /etc/environment
+# the first version wrote the mark at the end of the line, and pam_env takes it as part of the value: remove that line
+if grep -q 'NODE_EXTRA_CA_CERTS=.* # totaljs-https$' /etc/environment 2>/dev/null; then
+  tmp="$(mktemp)"
+  grep -v 'NODE_EXTRA_CA_CERTS=.* # totaljs-https$' /etc/environment > "${tmp}" || true
+  cat "${tmp}" > /etc/environment
+  rm -f "${tmp}"
+fi
+if ! grep -q "^${MARK}$" /etc/environment 2>/dev/null; then
+  printf '%s\nNODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt\n' "${MARK}" >> /etc/environment
 fi
 
 # a proxy that is already running reads the certificate at the next start of its Compose file (with port 443)

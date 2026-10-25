@@ -2,9 +2,9 @@
 set -e
 case "$1" in
   remove|purge)
-    if grep -q '# totaljs-https' /etc/environment 2>/dev/null; then
+    if grep -q '^# totaljs-https$' /etc/environment 2>/dev/null; then
       tmp="$(mktemp)"
-      grep -v '# totaljs-https' /etc/environment > "${tmp}" || true
+      grep -v -e '^# totaljs-https$' -e '^NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt$' /etc/environment > "${tmp}" || true
       cat "${tmp}" > /etc/environment
       rm -f "${tmp}"
     fi

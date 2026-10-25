@@ -104,7 +104,11 @@ test -s /usr/local/share/ca-certificates/totaljs-developer.crt
 openssl verify -CAfile /usr/local/share/ca-certificates/totaljs-developer.crt /www/proxy/data/certs/totaljs.developer.crt >/dev/null
 openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -text | grep -q 'DNS:\*\.totaljs\.developer'
 openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -checkend $((90 * 86400))
-test "$(grep -c '# totaljs-https' /etc/environment)" = 1
+test "$(grep -c '^# totaljs-https$' /etc/environment)" = 1
+grep -q '^NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt$' /etc/environment
+test -x /usr/local/bin/fd
+test -x /usr/local/bin/bat
+fd --version >/dev/null
 grep -q '443:443' /www/proxy/docker-compose.yml
 grep -q 'totaljs-developer.crt' /etc/firefox/policies/policies.json
 totaljs-https status >/dev/null
@@ -198,7 +202,7 @@ if grep -q '^Theme=totaljs$' /etc/plymouth/plymouthd.conf; then echo 'plymouthd.
 
 test ! -e /usr/bin/totaljs-https
 test ! -e /usr/local/share/ca-certificates/totaljs-developer.crt
-if grep -q '# totaljs-https' /etc/environment; then echo 'environment still has the line of totaljs-https' >&2; exit 1; fi
+if grep -q 'totaljs' /etc/environment; then echo 'environment still has the line of totaljs-https' >&2; exit 1; fi
 test ! -e /usr/bin/totaljs-service
 test ! -e /usr/lib/systemd/system/totaljs-service@.service
 
