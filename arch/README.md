@@ -12,6 +12,7 @@ The same packages as the Ubuntu edition, built for Arch from the same source: `p
 | `build.sh` | Builds the packages with `makepkg` and the repository with `repo-add` (on Arch, as a normal user). |
 | `test-install.sh` | Installs the server edition from that repository in a container of Arch and looks at what it promises. |
 | `stage-repo.sh` | Signs the repository that the CI built, with the key of Total.js, and puts it where `publish-pages.sh` publishes it. |
+| `install-arm.sh` | The installer for ARM (Arch Linux ARM has no ISO): it runs from the Archboot AArch64 ISO and installs the system and the server edition on an empty disk. |
 | `archinstall/` | The configuration for `archinstall`, the installer of Arch: the seed of the Arch edition. |
 
 ## How it is published
@@ -29,4 +30,4 @@ How to install it: [docs/install-arch.md](../docs/install-arch.md).
 
 ## What is not done yet
 
-The desktop edition, `aarch64` (Arch Linux ARM), the splash of plymouth (`totaljs-brand`) and Chromium/Firefox as packages of the meta-package of the desktop.
+The desktop edition, the test of `install-arm.sh` in the CI (today it is tried in a virtual machine), the splash of plymouth (`totaljs-brand`) and Chromium/Firefox as packages of the meta-package of the desktop.
