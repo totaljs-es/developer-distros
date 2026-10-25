@@ -1,0 +1,80 @@
+name: arch-iso
+
+# Builds the installation ISO of Total.js Developer for Arch (x86_64) with archiso, in a container of Arch Linux, and starts it in QEMU to see that it boots
+# to the shell with our banner. The ISO is kept as an artifact of the run: it is not published here.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'arch/iso/**'
+      - 'arch/archinstall/**'
+      - '.github/workflows/arch-iso.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: archlinux:latest
+      options: --privileged
+    timeout-minutes: 60
+    steps:
+      - name: Tools
+        run: pacman -Syu --noconfirm --needed archiso git python
+
+      - uses: actions/checkout@v7
+
+      - name: Build the ISO
+        run: |
+          KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso/build.sh
+
+      - name: The ISO, as an artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-developer-arch-x86_64-iso
+          path: build/arch-iso/out/*.iso
+          retention-days: 7
+
+  boot:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: totaljs-developer-arch-x86_64-iso
+          path: iso
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 xorriso
+
+      - name: What the ISO has
+        run: |
+          ISO="$(ls iso/*.iso | head -n 1)"
+          xorriso -indev "$ISO" -pvd_info 2>/dev/null | grep -E 'Volume Id|Publisher'
+          xorriso -indev "$ISO" -find / -maxdepth 3 2>/dev/null | grep -E 'vmlinuz|initramfs|airootfs' | head
+
+      - name: Boot it in QEMU
+        run: |
+          ISO="$(ls iso/*.iso | head -n 1)"
+          LABEL="$(xorriso -indev "$ISO" -pvd_info 2>&1 | sed -n 's/^Volume Id *: *//p' | head -n 1)"
+          mkdir kernel
+          xorriso -osirrox on -indev "$ISO" -extract /arch/boot/x86_64 kernel >/dev/null 2>&1
+          ls kernel
+          ACCEL=tcg; [ -w /dev/kvm ] && ACCEL=kvm
+          # the kernel and the initramfs of the ISO, started directly, with the console on the serial port
+          timeout 600 qemu-system-x86_64 -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
+            -kernel kernel/vmlinuz-linux -initrd kernel/initramfs-linux.img \
+            -append "archisobasedir=arch archisolabel=$LABEL console=ttyS0,115200 totaljs.edition=server" \
+            -drive file="$ISO",media=cdrom,readonly=on > boot.log 2>&1 &
+          QEMU=$!
+          for _ in $(seq 1 300); do
+            if grep -q 'Total.js Developer, installation medium' boot.log; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
+            kill -0 "$QEMU" 2>/dev/null || break
+            sleep 2
+          done
+          tail -n 60 boot.log
+          echo "the medium did not reach the banner" >&2
+          kill "$QEMU" 2>/dev/null || true
+          exit 1

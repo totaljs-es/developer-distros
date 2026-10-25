@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# totaljs-install - the installer of Total.js Developer on this medium: it trusts the key of the repository and starts archinstall with the configuration of the edition.
+#   totaljs-install            start it now
+#   totaljs-install --ask      ask first (the medium does this when it starts), so that a shell is one key away
+set -euo pipefail
+
+CONFIG_DIR=/usr/share/totaljs-developer/archinstall
+KEY=/usr/share/totaljs-developer/repository-key.gpg
+KEY_FPR=95454694523B8D18A376F7D5D722BA35C8427B40
+REPO=https://totaljs-es.github.io/developer-distros/repo
+
+# the edition comes from the entry of the boot menu (totaljs.edition=server|desktop)
+EDITION=server
+for word in $(cat /proc/cmdline); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
+CONFIG="${CONFIG_DIR}/${EDITION}.json"
+[ -f "${CONFIG}" ] || { echo "There is no configuration for the edition '${EDITION}' on this medium." >&2; exit 1; }
+
+if [ "${1:-}" = --ask ]; then
+    echo
+    echo "  Total.js Developer, ${EDITION} edition."
+    echo "  Press Enter to install it (it ERASES the disk that you choose), or type 'shell' to get a shell."
+    read -r answer || answer=shell
+    [ "${answer}" != shell ] || exit 0
+fi
+
+echo "Waiting for the network..."
+for _ in $(seq 1 30); do curl -fsS -o /dev/null --max-time 5 "${REPO}/totaljs-developer.gpg" && break; sleep 2; done
+curl -fsS -o /dev/null --max-time 5 "${REPO}/totaljs-developer.gpg" || { echo "No internet: the installer downloads Total.js Developer. Connect the network (iwctl for Wi-Fi) and run totaljs-install again." >&2; exit 1; }
+
+# the keyring of Arch is made when the medium starts: wait until it is ready, then trust the key of Total.js
+for _ in $(seq 1 60); do systemctl is-active --quiet pacman-init.service && break; sleep 1; done
+[ "$(gpg --show-keys --with-colons "${KEY}" | awk -F: '$1 == "fpr" { print $10; exit }')" = "${KEY_FPR}" ] || { echo "The key on this medium is not the one of Total.js." >&2; exit 1; }
+pacman-key --add "${KEY}"
+pacman-key --lsign-key "${KEY_FPR}"
+
+exec archinstall --config "${CONFIG}"
