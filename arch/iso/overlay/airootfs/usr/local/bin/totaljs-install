@@ -13,7 +13,10 @@ REPO=https://totaljs-es.github.io/developer-distros/repo
 EDITION=server
 for word in $(cat /proc/cmdline); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
 CONFIG="${CONFIG_DIR}/${EDITION}.json"
-[ -f "${CONFIG}" ] || { echo "There is no configuration for the edition '${EDITION}' on this medium." >&2; exit 1; }
+# in the medium of ARM there is no archinstall (Arch has no ARM): its installer is install-arm
+ARM_INSTALLER=/usr/local/bin/totaljs-install-arm
+if ! command -v archinstall >/dev/null 2>&1 && [ -x "${ARM_INSTALLER}" ]; then USE_ARM=1; else USE_ARM=0; fi
+[ "${USE_ARM}" = 1 ] || [ -f "${CONFIG}" ] || { echo "There is no configuration for the edition '${EDITION}' on this medium." >&2; exit 1; }
 
 if [ "${1:-}" = --ask ]; then
     echo
@@ -22,6 +25,8 @@ if [ "${1:-}" = --ask ]; then
     read -r answer || answer=shell
     [ "${answer}" != shell ] || exit 0
 fi
+
+[ "${USE_ARM}" = 0 ] || exec "${ARM_INSTALLER}"
 
 echo "Waiting for the network..."
 for _ in $(seq 1 30); do curl -fsS -o /dev/null --max-time 5 "${REPO}/totaljs-developer.gpg" && break; sleep 2; done

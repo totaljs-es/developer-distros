@@ -1,0 +1,54 @@
+name: arch-iso-arm
+
+# Builds the installation ISO of Total.js Developer for Arch Linux ARM (aarch64) on the runner arm64 of GitHub (native: the chroot of ARM needs no emulation),
+# and starts it in QEMU with UEFI to see that it reaches the shell with our banner. The ISO is kept as an artifact of the run: it is not published here.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'arch/iso-arm/**'
+      - 'arch/iso/overlay/**'
+      - 'arch/install-arm.sh'
+      - '.github/workflows/arch-iso-arm.yml'
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools squashfs-tools xorriso mtools dosfstools grub-efi-arm64-bin curl qemu-system-arm qemu-efi-aarch64
+
+      - name: Build the ISO
+        run: |
+          sudo env KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso-arm/build.sh
+
+      - name: The ISO, as an artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-developer-arch-aarch64-iso
+          path: build/arch-iso-arm/out/*.iso
+          retention-days: 7
+
+      - name: Boot it in QEMU (UEFI)
+        run: |
+          ISO="$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
+          cp /usr/share/AAVMF/AAVMF_VARS.fd vars.fd 2>/dev/null || truncate -s 64M vars.fd
+          ACCEL=tcg; [ -w /dev/kvm ] && ACCEL=kvm
+          timeout 900 qemu-system-aarch64 -M virt -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
+            -drive if=pflash,format=raw,readonly=on,file=/usr/share/AAVMF/AAVMF_CODE.fd -drive if=pflash,format=raw,file=vars.fd \
+            -drive if=none,id=cd,file="$ISO",media=cdrom,readonly=on -device virtio-scsi-pci -device scsi-cd,drive=cd > boot.log 2>&1 &
+          QEMU=$!
+          for _ in $(seq 1 400); do
+            if grep -q 'Total.js Developer, installation medium' boot.log; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
+            kill -0 "$QEMU" 2>/dev/null || break
+            sleep 2
+          done
+          tail -n 80 boot.log
+          echo "the medium did not reach the banner" >&2
+          kill "$QEMU" 2>/dev/null || true
+          exit 1

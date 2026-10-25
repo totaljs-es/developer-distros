@@ -50,20 +50,27 @@ unset PASS2
 
 # --- tools of the installer (Archboot is minimal: some of them have to be restored) ---------------------------------------------
 say "Tools"
-mkdir -p "${GPGDIR}"; chmod 0700 "${GPGDIR}"
-if need systemctl; then systemctl start systemd-networkd systemd-resolved >/dev/null 2>&1 || true; fi
+ALL_TOOLS=1
+for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot partprobe md5sum; do need "${t}" || ALL_TOOLS=0; done
+# the medium of Total.js Developer has them all; Archboot is minimal and some of them have to be restored
+if [ "${ALL_TOOLS}" = 0 ]; then
+    mkdir -p "${GPGDIR}"; chmod 0700 "${GPGDIR}"
+    if need systemctl; then systemctl start systemd-networkd systemd-resolved >/dev/null 2>&1 || true; fi
+    for ((i = 0; i < 30; i++)); do curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" && break; sleep 2; done
+    curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" || die "no internet: the installer downloads the system"
+    if grep -Eq '^[#[:space:]]*GPGDir[[:space:]]*=' /etc/pacman.conf; then sed -Ei "s|^[#[:space:]]*GPGDir[[:space:]]*=.*|GPGDir = ${GPGDIR}|" /etc/pacman.conf
+    else sed -i "/^\[options\]$/a GPGDir = ${GPGDIR}" /etc/pacman.conf; fi
+    pacman-key --gpgdir "${GPGDIR}" --init
+    pacman-key --gpgdir "${GPGDIR}" --populate archlinuxarm
+    for attempt in 1 2 3 4 5; do
+        pacman -Syy --noconfirm && pacman -S --noconfirm --overwrite '*' coreutils gptfdisk dosfstools e2fsprogs util-linux shadow && break
+        [ "${attempt}" -lt 5 ] || die "could not install the tools of the installer"
+        sleep $((attempt * 3))
+    done
+fi
+for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot; do need "${t}" || die "missing tool: ${t}"; done
 for ((i = 0; i < 30; i++)); do curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" && break; sleep 2; done
 curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" || die "no internet: the installer downloads the system"
-if grep -Eq '^[#[:space:]]*GPGDir[[:space:]]*=' /etc/pacman.conf; then sed -Ei "s|^[#[:space:]]*GPGDir[[:space:]]*=.*|GPGDir = ${GPGDIR}|" /etc/pacman.conf
-else sed -i "/^\[options\]$/a GPGDir = ${GPGDIR}" /etc/pacman.conf; fi
-pacman-key --gpgdir "${GPGDIR}" --init
-pacman-key --gpgdir "${GPGDIR}" --populate archlinuxarm
-for attempt in 1 2 3 4 5; do
-    pacman -Syy --noconfirm && pacman -S --noconfirm --overwrite '*' coreutils gptfdisk dosfstools e2fsprogs util-linux shadow && break
-    [ "${attempt}" -lt 5 ] || die "could not install the tools of the installer"
-    sleep $((attempt * 3))
-done
-for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot; do need "${t}" || die "missing tool: ${t}"; done
 
 # --- the disk: ESP + root --------------------------------------------------------------------------------------------------------
 say "The disk"
