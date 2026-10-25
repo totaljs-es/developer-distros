@@ -54,9 +54,31 @@ rm -f "${RFS}/etc/resolv.conf"; cp -L /etc/resolv.conf "${RFS}/etc/resolv.conf"
 echo "==> the live system"
 in_rfs pacman-key --init
 in_rfs pacman-key --populate archlinuxarm
-in_rfs pacman -Syu --noconfirm
+# the mirror of GeoIP can be slow for a while (pacman gives up with "Operation too slow"): several servers, fewer simultaneous downloads and some tries; the last ones wait without a limit
+cat > "${RFS}/etc/pacman.d/mirrorlist" <<'MIRRORS'
+Server = http://de3.mirror.archlinuxarm.org/$arch/$repo
+Server = http://fr.mirror.archlinuxarm.org/$arch/$repo
+Server = http://de.mirror.archlinuxarm.org/$arch/$repo
+Server = http://gr.mirror.archlinuxarm.org/$arch/$repo
+Server = http://mirror.archlinuxarm.org/$arch/$repo
+Server = http://ca.us.mirror.archlinuxarm.org/$arch/$repo
+MIRRORS
+if grep -Eq '^[#[:space:]]*ParallelDownloads' "${RFS}/etc/pacman.conf"; then sed -Ei 's/^[#[:space:]]*ParallelDownloads.*/ParallelDownloads = 2/' "${RFS}/etc/pacman.conf"
+else sed -i '/^\[options\]$/a ParallelDownloads = 2' "${RFS}/etc/pacman.conf"; fi
+pacman_retry() {
+    local attempt option
+    for attempt in 1 2 3 4 5 6; do
+        option=(); [ "${attempt}" -lt 4 ] || option=(--disable-download-timeout)
+        in_rfs pacman "$@" --noconfirm "${option[@]}" && return 0
+        echo "pacman failed (try ${attempt} of 6)" >&2
+        rm -f "${RFS}"/var/cache/pacman/pkg/*.part "${RFS}"/var/cache/pacman/pkg/download-* 2>/dev/null || true
+        sleep $((attempt * 5))
+    done
+    return 1
+}
+pacman_retry -Syu
 # what the installer needs inside the medium: disks, the root filesystem (bsdtar), network (iwd for Wi-Fi), an editor
-in_rfs pacman -S --noconfirm --needed mkinitcpio-archiso pv gptfdisk dosfstools e2fsprogs util-linux parted libarchive curl iwd nano
+pacman_retry -S --needed mkinitcpio-archiso pv gptfdisk dosfstools e2fsprogs util-linux parted libarchive curl iwd nano
 
 # our files: the installer, the key and the banner (the same ones of the ISO of x86_64)
 cp -r "${ROOT}/arch/iso/overlay/airootfs/." "${RFS}/"
