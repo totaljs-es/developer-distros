@@ -16,7 +16,9 @@ command -v totaljs-conky >/dev/null && totaljs-conky restore &
 # the panel is started again if it ends (a panel that is gone leaves the session without a way to reach anything), and how it ended is kept
 pgrep -u "$(id -u)" -x tint2 >/dev/null || (
   mkdir -p "$HOME/.cache"
-  while true; do
+  # only while the Openbox that started it is alive: when the person logs out, this loop has to end with the session (it would start a second panel in the next one)
+  OPENBOX="$(pgrep -u "$(id -u)" -x openbox | head -1)"
+  while [ -n "${OPENBOX}" ] && kill -0 "${OPENBOX}" 2>/dev/null; do
     tint2 -c "$HOME/.config/tint2/tint2rc"
     echo "$(date +%T) tint2 ended with status $?" >> "$HOME/.cache/tint2-exits.log"
     sleep 2

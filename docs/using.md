@@ -12,7 +12,7 @@ Everything is reached by name. The names are answered by the computer itself, so
 | `http://pgadmin.totaljs.developer` | **pgAdmin**: the database, in the browser |
 | `http://<project>.totaljs.developer` | each project that you create in Code |
 
-The first time the system starts, Code, Flow, PostgreSQL and pgAdmin download their images. Total.js Center shows the state of each service.
+The first time the system starts, Code, Flow, PostgreSQL and pgAdmin download their images, which needs internet: if it is not there yet, each service tries again every 20 seconds until it works, so nothing has to be started by hand. Total.js Center shows the state of each service, and while the proxy has not started the Center button opens it at `http://127.0.0.1:8010`.
 
 ## Your projects
 

@@ -1,12 +1,18 @@
 [Unit]
 Description=Total.js Code
-Requires=docker.service totaljs-proxy.service
+Requires=docker.service
+Wants=totaljs-proxy.service
+StartLimitIntervalSec=0
 After=docker.service network-online.target totaljs-proxy.service
 Wants=network-online.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+# The first start downloads the images, and the network may not be there yet (a virtual machine that has just been installed, a cable that is not connected):
+# the service tries again every 20 seconds, with no limit, until it works
+Restart=on-failure
+RestartSec=20
 WorkingDirectory=/www/code
 # the first start downloads the images: it can take a while
 TimeoutStartSec=1800

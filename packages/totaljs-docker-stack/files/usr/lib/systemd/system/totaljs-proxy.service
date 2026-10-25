@@ -1,5 +1,6 @@
 [Unit]
 Description=Total.js Developer reverse proxy (nginx-proxy)
+StartLimitIntervalSec=0
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
@@ -7,6 +8,10 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+# The first start downloads the images, and the network may not be there yet (a virtual machine that has just been installed, a cable that is not connected):
+# the service tries again every 20 seconds, with no limit, until it works
+Restart=on-failure
+RestartSec=20
 WorkingDirectory=/www/proxy
 # the network that every service joins, so that the proxy can reach it
 ExecStartPre=-/usr/bin/docker network create proxy
