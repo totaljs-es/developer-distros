@@ -159,7 +159,8 @@ GRUBCFG
 grub-mkstandalone -O arm64-efi -o "${ISO}/EFI/BOOT/BOOTAA64.EFI" --modules="part_gpt part_msdos iso9660 search search_label normal linux configfile" "boot/grub/grub.cfg=${BUILD}/grub-embedded.cfg"
 # the image of the ESP that goes into the ISO (the firmware of a computer reads it from the GPT of the USB stick or from the El Torito entry of the DVD)
 EFIIMG="${BUILD}/efiboot.img"
-truncate -s 32M "${EFIIMG}"
+# 30 MiB: the load size of El Torito is a number of 16 bits in sectors of 512 bytes (less than 32 MiB); with 32 MiB xorriso records 0 and the firmware may read nothing
+truncate -s 30M "${EFIIMG}"
 mkfs.vfat -n TOTALJS_EFI "${EFIIMG}" >/dev/null
 mmd -i "${EFIIMG}" ::/EFI ::/EFI/BOOT
 mcopy -i "${EFIIMG}" "${ISO}/EFI/BOOT/BOOTAA64.EFI" ::/EFI/BOOT/
