@@ -1,7 +1,7 @@
 [Unit]
 Description=Total.js Developer local domain DNS
-After=network.target
-Before=systemd-resolved.service
+# No ordering with network.target or systemd-resolved: a service that is after the basic system and before systemd-resolved makes a cycle (systemd-resolved is
+# part of sysinit.target), and systemd drops a job to break it. dnsmasq listens on the loopback, and systemd-resolved asks it when it is there.
 # if dnsmasq is not there, or the configuration is wrong, it is better to say so than to start and answer nothing
 ConditionFileIsExecutable=/usr/sbin/dnsmasq
 

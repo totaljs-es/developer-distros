@@ -1,7 +1,7 @@
 [Unit]
 Description=Add the first person of the system to the Total.js developer group
-# cloud-init creates the person that the installer asked for
-After=cloud-final.service
+# cloud-init creates the person that the installer asked for. Not after cloud-final.service: that one runs after multi-user.target, and this unit is wanted by it (a cycle)
+After=cloud-init.service cloud-config.service
 ConditionPathExists=!/var/lib/totaljs-developer/first-user
 
 [Service]
