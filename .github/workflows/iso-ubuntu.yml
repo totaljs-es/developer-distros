@@ -120,6 +120,8 @@ jobs:
             [ -f build/iso/timings.txt ] && echo "- control (not slimmed): $(cat build/iso/timings.txt)"
             [ -f build/iso-layer-pool/timings.txt ] && echo "- SLIM=pool: $(cat build/iso-layer-pool/timings.txt)"
             echo "- install with SLIM=pool: ${{ steps.install_pool.outcome }}"
+            [ -f build/iso-official/timings.txt ] && echo "- official ISO with a seed image: $(cat build/iso-official/timings.txt)"
+            echo "- install of the official ISO with a seed image: ${{ steps.install_official.outcome }}"
             if [ -f build/iso-product/contents.txt ]; then
               echo
               echo '#### What is inside the ISO'

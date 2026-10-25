@@ -1,0 +1,10 @@
+[Unit]
+Description=Says on the serial console that the live image of Total.js Developer booted
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '. /etc/os-release; echo "TOTALJS-LIVE-OK ${PRETTY_NAME} $(uname -r)" > /dev/ttyS0'
+
+[Install]
+WantedBy=multi-user.target

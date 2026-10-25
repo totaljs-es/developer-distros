@@ -1,0 +1,55 @@
+name: iso-own
+
+# The ISO of Total.js Developer that is ours: the packages of Ubuntu in a live image with our identity, with no installer and no marks of Canonical.
+# It is built in a clean Ubuntu 26.04 (a privileged container) and started in QEMU, with BIOS and with UEFI. See iso/own/README.md.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'iso/own/**'
+      - '.github/workflows/iso-own.yml'
+
+jobs:
+  live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the live image
+        run: |
+          mkdir -p build/own
+          docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 \
+            bash /src/iso/own/build.sh /out/totaljs-developer-live-amd64.iso
+
+      - name: Tools of the test
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf
+
+      - name: Start it with the BIOS
+        run: WORK_DIR=build/own/bios iso/own/test-boot.sh build/own/totaljs-developer-live-amd64.iso
+
+      - name: Start it with UEFI
+        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh build/own/totaljs-developer-live-amd64.iso
+
+      - name: What was measured
+        if: always()
+        run: |
+          {
+            echo '### Live image of Total.js Developer'
+            ls -l build/own/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
+            [ -f build/own/bios/timings.txt ] && echo "- BIOS: $(cat build/own/bios/timings.txt)"
+            [ -f build/own/uefi/timings.txt ] && echo "- UEFI: $(cat build/own/uefi/timings.txt)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: iso-own-logs
+          path: |
+            build/own/bios/boot.log
+            build/own/uefi/boot.log
+            build/own/bios/timings.txt
+            build/own/uefi/timings.txt
