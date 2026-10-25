@@ -6,6 +6,7 @@
 # The repository has to be built with BASE_URL=file:///repo and signed with a throwaway key. It installs the server layer,
 # checks what it promises, removes it and checks that nothing of it stays.
 set -euo pipefail
+# (no `| grep -q` in this file: grep -q quits at the first match, the command in front gets SIGPIPE and, with pipefail, the test dies with 141)
 
 export DEBIAN_FRONTEND=noninteractive
 # a container has no services to start
@@ -61,7 +62,7 @@ grep -q "Suites: ${CODENAME}" /etc/apt/sources.list.d/totaljs-developer.sources 
 
 echo "==> the tools of a developer, the manager of versions of Node.js, the limits of the watchers"
 for tool in psql sqlite3 gh rg fd bat fzf http nvim git-lfs fnm pnpm yarn; do command -v "${tool}" >/dev/null || { echo "missing ${tool}" >&2; exit 1; }; done
-fnm --version | grep -q '^fnm 1\.'
+fnm --version | grep '^fnm 1\.' >/dev/null
 grep -q 'totaljs-fnm' /etc/bash.bashrc
 test "$(grep -c '^# >>> totaljs-fnm >>>$' /etc/bash.bashrc)" = 1
 grep -q '^fs.inotify.max_user_watches = 524288$' /etc/sysctl.d/90-totaljs-developer.conf
@@ -95,14 +96,14 @@ test "$(stat -c %G /www)" = totaljs-developer
 for unit in totaljs-proxy totaljs-code totaljs-flow totaljs-postgres; do test -f "/usr/lib/systemd/system/${unit}.service"; done
 # what the person edits is not overwritten, and what is missing comes back
 test -x /usr/bin/totaljs-service
-totaljs-service list | grep -q '^redis .*off'
+totaljs-service list | grep '^redis .*off' >/dev/null
 for svc in redis mailpit mongodb; do
     docker compose -f "/usr/share/totaljs-developer/catalog/${svc}/docker-compose.yml" config -q
 done
 if totaljs-service enable nothing 2>/dev/null; then echo 'an unknown service was accepted' >&2; exit 1; fi
 test -s /usr/local/share/ca-certificates/totaljs-developer.crt
 openssl verify -CAfile /usr/local/share/ca-certificates/totaljs-developer.crt /www/proxy/data/certs/totaljs.developer.crt >/dev/null
-openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -text | grep -q 'DNS:\*\.totaljs\.developer'
+openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -text | grep 'DNS:\*\.totaljs\.developer' >/dev/null
 openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -checkend $((90 * 86400))
 test "$(grep -c '^# totaljs-https$' /etc/environment)" = 1
 grep -q '^NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt$' /etc/environment
