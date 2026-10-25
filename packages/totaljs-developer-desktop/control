@@ -4,7 +4,7 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Section: metapackages
 Priority: optional
-Depends: totaljs-developer-server (= 1.0.0-1), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, google-chrome-stable
+Depends: totaljs-developer-server (>= 1.0.0), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, google-chrome-stable
 Homepage: https://www.totaljs.com
 Description: Total.js Developer Distro, desktop edition
  The server edition plus the Openbox desktop: the theme, the panel, the launcher, the terminal, the files,

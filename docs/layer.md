@@ -80,3 +80,9 @@ The repository serves **Ubuntu 26.04 LTS** (`resolute`) for `amd64` and `arm64`,
 
 `tools/package-repo/test-install.sh` installs the server edition in a clean Ubuntu 26.04, checks what it promises and removes it, checking that nothing stays. `test-desktop.sh` installs the
 desktop edition, starts its session in a virtual screen and takes screenshots. `iso/ubuntu/test-install.sh` installs the system with the installer in QEMU and boots it.
+
+## Versions
+
+apt updates a package only when its version goes up. So **a package whose files change after a release gets a new version**: the revision after the dash for a fix (`1.0.0-1` → `1.0.0-2`), the number before it for a new feature (`1.0.0` → `1.1.0-1`).
+Packages that depend on another one ask for `>=`, never `=`, so that one can be updated alone. `tools/package-repo/check-versions.sh` compares each package with the last release (the tag `v*`) and fails if one changed with the same version; the CI runs it.
+Before the first release nothing is compared, and the packages can be rebuilt with the same number.

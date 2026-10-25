@@ -26,6 +26,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: The versions of the packages that changed since the last release
+        run: bash tools/package-repo/check-versions.sh
 
       - name: Tools
         run: |
