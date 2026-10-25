@@ -112,6 +112,9 @@ rm -f "${RFS}"/etc/ssh/ssh_host_*
 # the medium does not ask for the time zone and the like at every start (it is what systemd-firstboot does when there is no machine-id): masked, as archiso does
 mkdir -p "${RFS}/etc/systemd/system"
 ln -sf /dev/null "${RFS}/etc/systemd/system/systemd-firstboot.service"
+# not needed in a live medium, and they slow down the start
+ln -sf /dev/null "${RFS}/etc/systemd/system/systemd-homed.service"
+ln -sf /dev/null "${RFS}/etc/systemd/system/systemd-homed-activate.service"
 # a machine-id for the live system; the installed one makes its own
 printf "uninitialized\n" > "${RFS}/etc/machine-id"
 

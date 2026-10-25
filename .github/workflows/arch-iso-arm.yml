@@ -42,12 +42,15 @@ jobs:
           ISO="$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
           cp /usr/share/AAVMF/AAVMF_VARS.fd vars.fd 2>/dev/null || truncate -s 64M vars.fd
           ACCEL=tcg; [ -w /dev/kvm ] && ACCEL=kvm
-          timeout 900 qemu-system-aarch64 -M virt -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
+          timeout 1500 qemu-system-aarch64 -M virt -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
             -drive if=pflash,format=raw,readonly=on,file=/usr/share/AAVMF/AAVMF_CODE.fd -drive if=pflash,format=raw,file=vars.fd \
             -drive if=none,id=cd,file="$ISO",media=cdrom,readonly=on -device virtio-scsi-pci -device scsi-cd,drive=cd > boot.log 2>&1 &
           QEMU=$!
-          for _ in $(seq 1 400); do
+          # the runner has no KVM: QEMU emulates the processor and the start takes about ten minutes (in UTM, with Apple Virtualization, a few seconds). It is a success when
+          # the banner of the medium appears or when systemd reaches the multi-user target with the getty of the first console (the banner needs a login on the serial port)
+          for _ in $(seq 1 700); do
             if grep -q 'Total.js Developer, installation medium' boot.log; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
+            if grep -q 'Reached target Multi-User System' boot.log && grep -q 'Started Getty on tty1' boot.log; then echo "booted: systemd reached the multi-user target with the getty of the first console"; tail -n 5 boot.log; kill "$QEMU" 2>/dev/null || true; exit 0; fi
             kill -0 "$QEMU" 2>/dev/null || break
             sleep 2
           done
