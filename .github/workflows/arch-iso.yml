@@ -69,8 +69,9 @@ jobs:
             -append "archisobasedir=arch archisolabel=$LABEL console=ttyS0,115200 totaljs.edition=server" \
             -drive file="$ISO",media=cdrom,readonly=on > boot.log 2>&1 &
           QEMU=$!
+          seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' boot.log | tr -d '\r' | grep -q "$1"; }
           for _ in $(seq 1 300); do
-            if grep -q 'Total.js Developer, installation medium' boot.log; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
+            if seen 'Total.js Developer, installation medium' || { seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; }; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
             kill -0 "$QEMU" 2>/dev/null || break
             sleep 2
           done
