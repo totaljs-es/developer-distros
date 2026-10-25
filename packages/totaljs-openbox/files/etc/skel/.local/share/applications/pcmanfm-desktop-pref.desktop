@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=pcmanfm-desktop-pref
+NoDisplay=true
+# hidden in the menu and the launcher: needs PCManFM to own the desktop, and Openbox owns it

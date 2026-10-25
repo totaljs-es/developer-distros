@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=picom
+NoDisplay=true
+# hidden in the menu and the launcher: the compositor starts with the session

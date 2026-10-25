@@ -12,10 +12,11 @@ import os
 import shlex
 from configparser import RawConfigParser
 
+# the first folder that has a launcher decides: what the person has (even a copy that hides it) wins over the system
 DIRS = [
-    "/usr/share/applications",
-    "/usr/local/share/applications",
     os.path.expanduser("~/.local/share/applications"),
+    "/usr/local/share/applications",
+    "/usr/share/applications",
 ]
 
 # freedesktop main category -> friendly group label. Visible folders are sorted

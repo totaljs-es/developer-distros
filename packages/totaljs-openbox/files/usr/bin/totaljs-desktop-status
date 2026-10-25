@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# totaljs-desktop-status N: the mark of the desktop N in the panel, in green when it is the one that is shown (Tint2 draws the Pango markup that this prints)
+desktop="${1:-1}"
+current="$(xdotool get_desktop 2>/dev/null || echo 0)"
+if [ "${current}" = "$((desktop - 1))" ]; then
+    printf '<span foreground="#11161a" background="#6ac043"><b>  %s  </b></span>\n' "${desktop}"
+else
+    printf '<span foreground="#8b949e"><b>  %s  </b></span>\n' "${desktop}"
+fi

@@ -37,7 +37,7 @@ apt-get update -qq
 # the real installer creates the person BEFORE this layer is installed: their home exists, and the packages have to leave ~/.config theirs
 useradd -m -s /bin/bash earlyuser
 install_logged totaljs-developer-desktop
-for item in /home/earlyuser/.config /home/earlyuser/.config/openbox /home/earlyuser/.config/conky; do
+for item in /home/earlyuser/.config /home/earlyuser/.config/openbox /home/earlyuser/.config/conky /home/earlyuser/.local /home/earlyuser/.local/share /home/earlyuser/.local/share/applications; do
     OWNER="$(stat -c %U "${item}")"
     [ "${OWNER}" = earlyuser ] || { echo "${item} belongs to ${OWNER}, not to the person" >&2; exit 1; }
 done
@@ -52,6 +52,12 @@ test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
 command -v firefox >/dev/null
 POLICY="$(apt-cache policy firefox)"
 case "${POLICY}" in *packages.mozilla.org*) ;; *) echo "${POLICY}" >&2; echo 'firefox does not come from Mozilla' >&2; exit 1 ;; esac
+
+echo "==> the launchers that do nothing here are hidden, and the scripts of the panel work"
+test -f /home/earlyuser/.local/share/applications/pcmanfm-desktop-pref.desktop
+test "$(totaljs-desktop-status 2 | grep -c '6ac043')" = 0   # with no X the current desktop is 1: the desktop 2 is not the green one
+test -x /usr/bin/totaljs-trash-status && test -f "$(totaljs-trash-status)"
+test -f /usr/share/totaljs-developer/icons/trash-full.svg
 
 echo "==> the network of the desktop is managed by NetworkManager"
 if [ -d /etc/netplan ]; then

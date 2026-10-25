@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=tint2conf
+NoDisplay=true
+# hidden in the menu and the launcher: the panel is configured in its file

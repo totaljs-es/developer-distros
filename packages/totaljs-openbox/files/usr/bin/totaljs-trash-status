@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# The icon of the trash in the panel (Tint2 reads the path of the icon in the first line): full when the trash has something. GIO reports the whole trash, with every disk.
+if gio list trash:/// 2>/dev/null | head -n 1 | grep -q .; then
+    echo /usr/share/totaljs-developer/icons/trash-full.svg
+else
+    echo /usr/share/totaljs-developer/icons/trash-empty.svg
+fi

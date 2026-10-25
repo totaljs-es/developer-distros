@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=conky
+NoDisplay=true
+# hidden in the menu and the launcher: the widget is chosen in the menu of the desktop

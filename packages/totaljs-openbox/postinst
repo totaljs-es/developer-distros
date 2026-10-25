@@ -18,6 +18,14 @@ for home in /home/*; do
   # An earlier version of this package left it owned by root, and it is put right here, whether the person has the configuration or not.
   if [ ! -d "${home}/.config" ]; then install -d -o "${owner}" -g "${group}" -m 0755 "${home}/.config"
   elif [ "$(stat -c %U "${home}/.config")" = root ]; then chown "${owner}:${group}" "${home}/.config"; fi
+  # the launchers that are hidden in the menu (they do nothing here): every person gets them, whatever configuration they have. Each level of the folder is made by itself, so that it is the person's
+  for hidden in /etc/skel/.local/share/applications/*.desktop; do
+    [ -e "${hidden}" ] || continue
+    for level in "${home}/.local" "${home}/.local/share" "${home}/.local/share/applications"; do
+      [ -d "${level}" ] || install -d -o "${owner}" -g "${group}" -m 0755 "${level}"
+    done
+    [ -e "${home}/.local/share/applications/$(basename "${hidden}")" ] || install -o "${owner}" -g "${group}" -m 0644 "${hidden}" "${home}/.local/share/applications/"
+  done
   [ ! -e "${home}/.config/openbox" ] || continue
   for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm gtk-3.0 gtk-4.0 autostart; do
     [ ! -e "${home}/.config/${dir}" ] || continue

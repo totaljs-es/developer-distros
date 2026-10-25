@@ -79,7 +79,7 @@ npm ls -g --depth=0
 | `Super + 1` ... `4` | Go to the desktop 1 ... 4 (with `Shift`, send the window there) |
 | `Print` | Screenshot, saved in `~/Pictures` (with `Alt`, of an area) |
 
-The panel on the top has, from the left: the menu of the desktop (the mark of Total.js), the launcher of applications (the rocket), the terminal, the files and the browser (which opens Total.js Center), then the list of windows, the tray (network and volume) and the clock.
+The panel on the top has, from the left: the menu of the desktop (the mark of Total.js), the launcher of applications (the rocket), the terminal, the files and the browser (which opens Total.js Center), then the four desktops (the one that you are in is green; click on one to go to it, or use `Super + 1` to `4`), the list of windows, the trash (click to open it, right click to empty it), the tray (network and volume) and the clock.
 
 The **widget** on the wallpaper is Conky. It starts with the session with the profile of the system (processor, memory, disk and network). To change it, use *Preferences → Desktop widget* in the menu of the desktop, or the command:
 

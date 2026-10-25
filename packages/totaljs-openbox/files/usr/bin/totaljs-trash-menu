@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# The menu of the trash (right click on its icon in the panel): open it, or empty it after asking. It uses Rofi, so it looks like the rest of the desktop.
+choice="$(printf 'Open the trash\nEmpty the trash\n' | rofi -dmenu -i -no-custom -p Trash -l 2)" || exit 0
+case "${choice}" in
+    'Open the trash') exec pcmanfm trash:/// ;;
+    'Empty the trash')
+        if ! gio list trash:/// 2>/dev/null | head -n 1 | grep -q .; then notify-send 'Trash' 'The trash is already empty.' 2>/dev/null; exit 0; fi
+        answer="$(printf 'Yes, empty it\nNo\n' | rofi -dmenu -i -no-custom -p 'Empty the trash for ever?' -l 2)" || exit 0
+        [ "${answer}" = 'Yes, empty it' ] && gio trash --empty ;;
+esac

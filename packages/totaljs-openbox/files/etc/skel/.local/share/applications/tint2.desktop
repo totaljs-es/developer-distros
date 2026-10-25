@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=tint2
+NoDisplay=true
+# hidden in the menu and the launcher: the panel starts with the session
