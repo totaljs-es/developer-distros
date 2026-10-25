@@ -1,8 +1,11 @@
 name: release-iso
 
-# Builds the remastered ISO (the official installer of Ubuntu Server with our seed in it) and keeps it as an artifact of the run, to try it.
-# It is NEVER published in a release: a modified installer image that carries the marks of Ubuntu is not something we may redistribute
-# (docs/legal.md). What people download is the official ISO of Ubuntu and the small seed image of release-seed.yml.
+# Builds the ISO of Total.js Developer, an Ubuntu remix: the installer of Ubuntu Server with our seed in it and a boot menu with the desktop and the
+# server edition, slimmed to fit in a release (1.6 GiB), with its checksums and a signed attestation of where it came from. A tag `v*` publishes it
+# in a release, together with the two seed images of the other way to install. By hand (Run workflow) it builds the same and keeps the ISO as an artifact of the run, without publishing: to try it.
+#
+# Canonical has been asked for approval to distribute it (docs/legal.md). The seed images of release-seed.yml, which go with the official ISO of Ubuntu and
+# modify nothing of Canonical, are the other way to install, and they stay.
 #
 # The ISO installs the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the
 # ISO is published: an ISO whose repository does not exist cannot install anything. The workflow checks it and stops if it does not.
@@ -16,6 +19,9 @@ on:
         description: Stop if that address does not answer (leave it on for a release)
         type: boolean
         default: true
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -55,19 +61,58 @@ jobs:
       - name: Build the ISO
         run: |
           mkdir -p dist
-          iso/ubuntu/build-iso.sh iso/ubuntu/seed dist/totaljs-developer-server-amd64.iso
-          (cd dist && sha256sum totaljs-developer-server-amd64.iso > SHA256SUMS && cat SHA256SUMS)
+          iso/ubuntu/build-iso.sh iso/ubuntu/seed dist/totaljs-developer-amd64.iso
+          # the other way to install, in the same release: the two seeds that go next to the official ISO of Ubuntu
+          iso/ubuntu/build-seed.sh desktop dist/totaljs-developer-desktop-seed.iso
+          iso/ubuntu/build-seed.sh server dist/totaljs-developer-server-seed.iso
+          (cd dist && sha256sum *.iso > SHA256SUMS && cat SHA256SUMS)
           ls -l dist
 
       # The attestation says that this file was built by this workflow from this commit: whoever downloads it can check it
       - name: Attest where it came from
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: dist/totaljs-developer-server-amd64.iso
+          subject-path: dist/*.iso
 
       - name: Keep it as an artifact of the run
         uses: actions/upload-artifact@v7
         with:
-          name: totaljs-developer-server-amd64
+          name: totaljs-developer-amd64
           path: dist/
           retention-days: 14
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE="$(grep -m1 '^# ubuntu-' build/iso/contents.txt | sed 's/^# ubuntu-//; s/-live-server.*//')"
+          SIZE="$(ls -l dist/totaljs-developer-amd64.iso | awk '{ printf "%.0f", $5 / 1048576 }')"
+          cat > notes.md <<NOTES
+          ## Total.js Developer ${GITHUB_REF_NAME#v}
+
+          **Total.js Developer, an Ubuntu remix.** One ISO to install a development environment for Total.js on Ubuntu 26.04 LTS: Node.js, Total.js, Docker, PostgreSQL, Code, Flow and Total.js Center, and in the desktop edition an Openbox desktop with Firefox.
+
+          The ISO is the installer of Ubuntu Server ${BASE} with a seed and a boot menu added: **choose the desktop or the server edition in the menu**. The installer asks the usual questions (language, keyboard, network, disk and who you are) and downloads Total.js Developer from ${REPO_URL}.
+
+          - **It needs an internet connection** while it installs, in a virtual machine and on a computer.
+          - Size: ${SIZE} MiB. For an amd64 computer or virtual machine.
+          - Based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
+          - How to install: https://github.com/${GITHUB_REPOSITORY}/blob/main/docs/install.md
+
+          ### Another way: the official ISO of Ubuntu and a seed
+
+          If you prefer the official ISO of Ubuntu Server 26.04 LTS, unmodified, put one of these seeds next to it (a second drive, or a second USB stick): \`totaljs-developer-desktop-seed.iso\` or \`totaljs-developer-server-seed.iso\`. The installer of Ubuntu finds it and installs the same. The guide has the steps.
+
+          ### Check the download
+
+          \`\`\`bash
+          sha256sum -c SHA256SUMS
+          gh attestation verify totaljs-developer-amd64.iso --repo ${GITHUB_REPOSITORY}
+          \`\`\`
+          NOTES
+          sed -i 's/^          //' notes.md
+          flags=""
+          case "${GITHUB_REF_NAME}" in *-rc*|*-beta*|*-alpha*) flags="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" dist/*.iso dist/SHA256SUMS \
+            --title "Total.js Developer ${GITHUB_REF_NAME#v}" --notes-file notes.md ${flags}

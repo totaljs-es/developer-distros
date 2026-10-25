@@ -16,17 +16,13 @@ in a virtual machine (the usual way) or on a computer, with a desktop or only th
 
 ## Install
 
-You need the official ISO of Ubuntu Server 26.04 LTS and the small seed of the edition that you want, connected together when the computer starts.
-The installer asks you the usual questions and installs everything else by itself. It needs an internet connection, in a virtual machine and on a computer, and how long it takes depends on it.
+Download **one ISO**, start a machine with it, choose the desktop or the server edition in the menu, and answer the usual questions of the installer. The rest
+installs by itself. It needs an internet connection, in a virtual machine and on a computer, and how long it takes depends on it.
 
 **[How to install](docs/install.md)** · **[How to use it](docs/using.md)**
 
-| Edition | Seed |
-| --- | --- |
-| Desktop | `totaljs-developer-desktop-seed.iso` |
-| Server | `totaljs-developer-server-seed.iso` |
-
-The seeds are in the [releases](../../releases) of this repository.
+The ISO is in the [releases](../../releases) of this repository: `totaljs-developer-amd64.iso`. If you prefer the official ISO of Ubuntu, unmodified, the same releases have a
+small seed for each edition to put next to it; `docs/install.md` explains it.
 
 ## Already have Ubuntu 26.04?
 
@@ -64,5 +60,5 @@ The code is under the [MIT License](LICENSE). The wallpapers and the images of t
 
 ## Trademarks
 
-Total.js Developer is made for Ubuntu and is not an official Ubuntu release, and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
+Total.js Developer is based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
 Arch Linux and the Arch logo are trademarks of their owners.
