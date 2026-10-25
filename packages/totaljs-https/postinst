@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+[ "$1" = configure ] || exit 0
+
+/usr/lib/totaljs-developer/https-setup
+
+# Node.js does not read the certificates of the system: this line makes it trust the authority too (login sessions, desktop and terminals)
+MARK='# totaljs-https'
+if ! grep -q "${MARK}" /etc/environment 2>/dev/null; then
+  printf 'NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt %s\n' "${MARK}" >> /etc/environment
+fi
+
+# a proxy that is already running reads the certificate at the next start of its Compose file (with port 443)
+exit 0

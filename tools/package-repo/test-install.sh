@@ -100,6 +100,17 @@ for svc in redis mailpit mongodb; do
     docker compose -f "/usr/share/totaljs-developer/catalog/${svc}/docker-compose.yml" config -q
 done
 if totaljs-service enable nothing 2>/dev/null; then echo 'an unknown service was accepted' >&2; exit 1; fi
+test -s /usr/local/share/ca-certificates/totaljs-developer.crt
+openssl verify -CAfile /usr/local/share/ca-certificates/totaljs-developer.crt /www/proxy/data/certs/totaljs.developer.crt >/dev/null
+openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -text | grep -q 'DNS:\*\.totaljs\.developer'
+openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -checkend $((90 * 86400))
+test "$(grep -c '# totaljs-https' /etc/environment)" = 1
+grep -q '443:443' /www/proxy/docker-compose.yml
+grep -q 'totaljs-developer.crt' /etc/firefox/policies/policies.json
+totaljs-https status >/dev/null
+KEY_BEFORE="$(sha256sum /var/lib/totaljs-developer/ca/ca.key)"
+/usr/lib/totaljs-developer/https-setup
+test "$(sha256sum /var/lib/totaljs-developer/ca/ca.key)" = "${KEY_BEFORE}"   # the authority is made once
 echo '# edited' >> /www/proxy/docker-compose.yml
 rm /www/flow/docker-compose.yml
 /usr/lib/totaljs-developer/seed-www
@@ -161,7 +172,7 @@ test "$(grep -c '^# >>> totaljs-fetch >>>$' /etc/bash.bashrc)" = 1   # the greet
 test "$(node --version)" = "${NODE_VERSION}"
 
 echo "==> removing it"
-apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-fnm totaljs-services totaljs-brand totaljs-node >/dev/null
+apt-get remove -y totaljs-developer-server totaljs-docker-stack totaljs-docker-source totaljs-dns totaljs-center totaljs-fetch totaljs-fnm totaljs-services totaljs-https totaljs-brand totaljs-node >/dev/null
 test ! -e /usr/local/bin/fnm
 test ! -e /usr/local/bin/pnpm
 if grep -q 'totaljs-fnm' /etc/bash.bashrc; then echo 'bash.bashrc still has fnm' >&2; exit 1; fi
@@ -185,6 +196,9 @@ REMAINING="$(update-alternatives --query default.plymouth 2>/dev/null || true)"
 case "${REMAINING}" in *'themes/totaljs/totaljs.plymouth'*) echo 'the alternative of the theme is still there' >&2; exit 1 ;; esac
 if grep -q '^Theme=totaljs$' /etc/plymouth/plymouthd.conf; then echo 'plymouthd.conf still names the theme' >&2; exit 1; fi
 
+test ! -e /usr/bin/totaljs-https
+test ! -e /usr/local/share/ca-certificates/totaljs-developer.crt
+if grep -q '# totaljs-https' /etc/environment; then echo 'environment still has the line of totaljs-https' >&2; exit 1; fi
 test ! -e /usr/bin/totaljs-service
 test ! -e /usr/lib/systemd/system/totaljs-service@.service
 

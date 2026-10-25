@@ -12,6 +12,7 @@ totaljs-developer-server      meta-package: the server edition
   totaljs-fnm                 fnm, the manager of versions of Node.js (the one of the system stays the default)
   totaljs-docker-source       the repository of Docker, where Docker Engine and Compose come from
   totaljs-docker-stack        /www with the Compose files and the units of the services: proxy, Code, Flow, PostgreSQL and pgAdmin
+  totaljs-https               the authority of this machine and the certificate of *.totaljs.developer, trusted by the system, Node.js and Firefox
   totaljs-services            the optional services (Redis, Mailpit, MongoDB), off until `totaljs-service enable`
   totaljs-dns                 the local domain: totaljs.developer and everything under it is this computer
   totaljs-center              Total.js Center, a Total.js 5 application on the port 8010
@@ -41,6 +42,7 @@ Docker and Firefox come from their own repositories, which `apt` has to know bef
   checked when the package is installed. `total4` and `total5` are installed as global npm packages. The versions are in that file and nowhere else.
 - **totaljs-fnm.** The pinned release of fnm (with its SHA-256, for amd64 and arm64) is downloaded when the package is installed, and `fnm env` goes in `/etc/bash.bashrc` between two marks.
   The Node.js of `totaljs-node` is still the default: the person installs the others with `fnm install`.
+- **totaljs-https.** An authority is made on the first install (its key stays in `/var/lib/totaljs-developer/ca`, readable only by root, and never leaves the machine) and signs a certificate for `totaljs.developer` and `*.totaljs.developer` that nginx-proxy uses from `/www/proxy/data/certs`. The authority goes to the trust of the system, to `NODE_EXTRA_CA_CERTS` (`/etc/environment`) and to the policies of Firefox.
 - **totaljs-services.** A catalog of Compose files in `/usr/share/totaljs-developer/catalog` and the template unit `totaljs-service@.service`. `totaljs-service enable NAME` copies the file to `/www/services/NAME` (never overwriting) and starts it; nothing is published on the host.
 - **totaljs-docker-stack.** Puts the Compose files in `/www` only when they are missing, and never overwrites what the person edited. Each stack has its own unit
   (`totaljs-proxy`, `totaljs-code`, `totaljs-flow`, `totaljs-postgres`). The images are pulled when the services start for the first time, not when the package is installed.

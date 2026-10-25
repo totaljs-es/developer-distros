@@ -27,6 +27,20 @@ sudo usermod -aG totaljs-developer,docker other-user
 
 > The group `docker` can control Docker, which in practice is the same as being the administrator of the computer. Add only people that you trust.
 
+### HTTPS
+
+Every address also works with `https://` and no warning: `https://totaljs.developer`, `https://code.totaljs.developer`, and the ones of your projects.
+The authority that signs the certificate is made on your machine, and the system, Node.js and Firefox trust it, so `curl`, `git` and your own code can call `https://something.totaljs.developer` without changes.
+Plain `http://` keeps working.
+
+```bash
+totaljs-https status      # the certificate and when it ends
+totaljs-https renew       # a new one (it lasts 800 days, and an update of the package renews it when less than 60 days remain)
+```
+
+A system that was installed before HTTPS has to update `/www/proxy/docker-compose.yml` (the file is yours, so an update does not touch it): add the port `"443:443"`, the volume `./data/certs:/etc/nginx/certs:ro` and the variable `HTTPS_METHOD=noredirect`, and run `sudo systemctl restart totaljs-proxy`.
+To use another browser than Firefox, import `/usr/local/share/ca-certificates/totaljs-developer.crt` as an authority.
+
 ## The database
 
 PostgreSQL runs in a container that is **not published** outside the computer: only the containers of your projects reach it, through the Docker network

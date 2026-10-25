@@ -1,6 +1,9 @@
 {
   "policies": {
     "DontCheckDefaultBrowser": true,
+    "Certificates": {
+      "Install": ["/usr/local/share/ca-certificates/totaljs-developer.crt"]
+    },
     "HttpAllowlist": [
       "http://totaljs.developer",
       "http://code.totaljs.developer",

@@ -1,0 +1,62 @@
+#!/bin/sh
+# Makes (or renews) the certificate authority of this machine and the certificate of *.totaljs.developer.
+# The authority is made once and its key stays here, readable only by root. The certificate is renewed when it is missing or about to expire.
+set -eu
+
+DOMAIN=totaljs.developer
+CA_DIR=/var/lib/totaljs-developer/ca
+CERTS=/www/proxy/data/certs
+TRUST=/usr/local/share/ca-certificates/totaljs-developer.crt
+GROUP=totaljs-developer
+FORCE="${1:-}"
+
+umask 077
+mkdir -p "${CA_DIR}"
+chmod 0700 "${CA_DIR}"
+
+if [ ! -s "${CA_DIR}/ca.key" ] || [ ! -s "${CA_DIR}/ca.crt" ]; then
+    openssl genrsa -out "${CA_DIR}/ca.key" 3072 2>/dev/null
+    openssl req -x509 -new -sha256 -key "${CA_DIR}/ca.key" -days 3650 \
+        -subj "/O=Total.js Developer Distros/CN=Total.js Developer local CA" \
+        -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
+        -addext "keyUsage=critical,keyCertSign,cRLSign" \
+        -out "${CA_DIR}/ca.crt"
+fi
+
+# the authority is trusted by the system
+if ! cmp -s "${CA_DIR}/ca.crt" "${TRUST}" 2>/dev/null; then
+    install -d -m 0755 /usr/local/share/ca-certificates
+    install -m 0644 "${CA_DIR}/ca.crt" "${TRUST}"
+    update-ca-certificates >/dev/null 2>&1 || true
+fi
+
+mkdir -p "${CERTS}"
+if getent group "${GROUP}" >/dev/null; then chgrp "${GROUP}" "${CERTS}" 2>/dev/null || true; fi
+chmod 2775 "${CERTS}" 2>/dev/null || true
+
+# renew when it is missing, when the authority changed, or when less than 60 days remain
+if [ "${FORCE}" != --force ] && [ -s "${CERTS}/${DOMAIN}.crt" ] && [ -s "${CERTS}/${DOMAIN}.key" ] \
+   && openssl verify -CAfile "${CA_DIR}/ca.crt" "${CERTS}/${DOMAIN}.crt" >/dev/null 2>&1 \
+   && openssl x509 -in "${CERTS}/${DOMAIN}.crt" -noout -checkend $((60 * 86400)) >/dev/null 2>&1; then
+    exit 0
+fi
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "${WORK}"' EXIT
+openssl genrsa -out "${WORK}/leaf.key" 2048 2>/dev/null
+openssl req -new -key "${WORK}/leaf.key" -subj "/O=Total.js Developer Distros/CN=${DOMAIN}" -out "${WORK}/leaf.csr"
+printf 'basicConstraints=CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectAltName=DNS:%s,DNS:*.%s\n' "${DOMAIN}" "${DOMAIN}" > "${WORK}/ext.cnf"
+openssl x509 -req -sha256 -in "${WORK}/leaf.csr" -CA "${CA_DIR}/ca.crt" -CAkey "${CA_DIR}/ca.key" -CAcreateserial \
+    -days 800 -extfile "${WORK}/ext.cnf" -out "${WORK}/leaf.crt" 2>/dev/null
+
+# nginx-proxy uses the certificate named like the parent domain for every host under it
+cat "${WORK}/leaf.crt" > "${CERTS}/${DOMAIN}.crt"
+cat "${WORK}/leaf.key" > "${CERTS}/${DOMAIN}.key"
+chmod 0644 "${CERTS}/${DOMAIN}.crt"
+chmod 0640 "${CERTS}/${DOMAIN}.key"
+if getent group "${GROUP}" >/dev/null; then chgrp "${GROUP}" "${CERTS}/${DOMAIN}.crt" "${CERTS}/${DOMAIN}.key" 2>/dev/null || true; fi
+
+# the proxy reads the new certificate without restarting
+if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx totaljs-proxy; then
+    docker exec totaljs-proxy nginx -s reload >/dev/null 2>&1 || true
+fi

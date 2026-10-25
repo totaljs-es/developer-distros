@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+case "$1" in
+  remove|purge)
+    if grep -q '# totaljs-https' /etc/environment 2>/dev/null; then
+      tmp="$(mktemp)"
+      grep -v '# totaljs-https' /etc/environment > "${tmp}" || true
+      cat "${tmp}" > /etc/environment
+      rm -f "${tmp}"
+    fi
+    if [ -e /usr/local/share/ca-certificates/totaljs-developer.crt ]; then
+      rm -f /usr/local/share/ca-certificates/totaljs-developer.crt
+      update-ca-certificates --fresh >/dev/null 2>&1 || true
+    fi
+    rm -f /www/proxy/data/certs/totaljs.developer.crt /www/proxy/data/certs/totaljs.developer.key
+    ;;
+esac
+exit 0

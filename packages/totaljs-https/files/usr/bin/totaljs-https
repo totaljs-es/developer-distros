@@ -1,0 +1,20 @@
+#!/bin/sh
+# State and renewal of the certificate of totaljs.developer
+set -eu
+CRT=/www/proxy/data/certs/totaljs.developer.crt
+CA=/var/lib/totaljs-developer/ca/ca.crt
+TRUST=/usr/local/share/ca-certificates/totaljs-developer.crt
+
+case "${1:-status}" in
+    status)
+        if [ ! -s "${CRT}" ]; then echo "no certificate yet: sudo totaljs-https renew"; exit 1; fi
+        echo "authority (trusted by the system, Node.js and Firefox): ${TRUST}"
+        openssl x509 -in "${CRT}" -noout -subject -enddate -ext subjectAltName
+        ;;
+    renew)
+        [ "$(id -u)" = 0 ] || exec sudo "$0" renew
+        /usr/lib/totaljs-developer/https-setup --force
+        echo "renewed"
+        ;;
+    *) echo "usage: totaljs-https [status|renew]" >&2; exit 2 ;;
+esac

@@ -12,7 +12,7 @@ GROUP=totaljs-developer
 getent group "${GROUP}" >/dev/null || groupadd --system "${GROUP}"
 
 # the folders: group of the developers, with the setgid bit so that what is created in them belongs to the group too
-for dir in /www /www/proxy /www/proxy/data /www/proxy/data/vhost.d /www/proxy/data/html /www/proxy/totalcenter-gateway \
+for dir in /www /www/proxy /www/proxy/data /www/proxy/data/vhost.d /www/proxy/data/html /www/proxy/data/certs /www/proxy/totalcenter-gateway \
            /www/code /www/flow /www/www /www/node_modules /www/services /www/services/postgres; do
     mkdir -p "${dir}"
     chgrp "${GROUP}" "${dir}" 2>/dev/null || true

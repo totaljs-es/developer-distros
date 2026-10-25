@@ -4,7 +4,7 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Section: metapackages
 Priority: optional
-Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0), totaljs-brand (>= 1.0.0), totaljs-docker-stack (>= 1.0.0), totaljs-dns (>= 1.0.0), totaljs-center (>= 1.0.0), totaljs-fetch (>= 1.0.0), totaljs-fnm (>= 1.0.0), totaljs-services (>= 1.0.0),
+Depends: totaljs-developer-release (>= 1.0.9), totaljs-node (>= 1.0.0), totaljs-brand (>= 1.0.0), totaljs-docker-stack (>= 1.0.0), totaljs-dns (>= 1.0.0), totaljs-center (>= 1.0.0), totaljs-fetch (>= 1.0.0), totaljs-fnm (>= 1.0.0), totaljs-services (>= 1.0.0), totaljs-https (>= 1.0.0),
  ca-certificates, curl, wget, gnupg, git, unzip, zip, zstd, xz-utils,
  build-essential, pkg-config, python3-minimal,
  htop, nano, vim, less, tree, jq, tmux, sudo,

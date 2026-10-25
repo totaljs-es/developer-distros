@@ -1,0 +1,15 @@
+Package: totaljs-https
+Version: 1.0.0-1
+Architecture: all
+Maintainer: Total.js <repository@totaljs.com>
+Section: admin
+Priority: optional
+Depends: totaljs-docker-stack (>= 1.0.0), openssl, ca-certificates
+Homepage: https://www.totaljs.com
+Description: Trusted HTTPS for totaljs.developer
+ Makes a certificate authority for this machine (its key never leaves the machine)
+ and a certificate for totaljs.developer and every *.totaljs.developer, so the
+ addresses of the services and of your projects work with https:// and no warning.
+ The authority is trusted by the system (curl, git), by Node.js (NODE_EXTRA_CA_CERTS)
+ and by Firefox (through its policies). The proxy keeps serving plain http too.
+ The command totaljs-https shows the state and renews the certificate.
