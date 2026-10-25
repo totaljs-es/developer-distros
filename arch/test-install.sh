@@ -20,7 +20,7 @@ pacman -Syu --noconfirm
 pacman -Si totaljs-developer-server >/dev/null
 
 echo "==> install the server edition"
-# the person that the installer made before the layer: it has to end in the group of the developers
+# a second person, made before the layer, like the installer does with the first one
 useradd -m -s /bin/bash earlyuser
 pacman -S --noconfirm totaljs-developer-server
 
@@ -33,8 +33,11 @@ fnm --version | grep '^fnm 1\.' >/dev/null
 
 echo "==> the group and the first person"
 getent group totaljs-developer >/dev/null
-case " $(id -nG earlyuser) " in *' totaljs-developer '*) ;; *) echo "earlyuser is not in totaljs-developer: $(id -nG earlyuser)" >&2; exit 1 ;; esac
-case " $(id -nG earlyuser) " in *' docker '*) ;; *) echo "earlyuser is not in docker: $(id -nG earlyuser)" >&2; exit 1 ;; esac
+# the first regular person of the system (in this container it is "builder", the one that built the packages, with the uid 1000: earlyuser has the next one)
+FIRST="$(cat /var/lib/totaljs-developer/first-user)"
+test -n "${FIRST}"
+case " $(id -nG "${FIRST}") " in *' totaljs-developer '*) ;; *) echo "${FIRST} is not in totaljs-developer: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
+case " $(id -nG "${FIRST}") " in *' docker '*) ;; *) echo "${FIRST} is not in docker: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
 
 echo "==> the tools of a developer"
 for c in git curl jq tmux psql sqlite3 git-lfs gh rg fd fzf bat http nvim; do command -v "${c}" >/dev/null || { echo "missing: ${c}" >&2; exit 1; }; done
