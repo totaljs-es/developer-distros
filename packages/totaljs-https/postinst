@@ -17,5 +17,13 @@ if ! grep -q "^${MARK}$" /etc/environment 2>/dev/null; then
   printf '%s\nNODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt\n' "${MARK}" >> /etc/environment
 fi
 
+# The people that already exist (Chrome reads its own store, ~/.pki/nssdb): their store gets the authority now, and the others at the start of every session
+for home in /home/*; do
+  [ -d "${home}" ] || continue
+  owner="$(stat -c %U "${home}")"
+  [ "${owner}" != root ] || continue
+  runuser -u "${owner}" -- env HOME="${home}" /usr/bin/totaljs-trust-ca >/dev/null 2>&1 || true
+done
+
 # a proxy that is already running reads the certificate at the next start of its Compose file (with port 443)
 exit 0

@@ -106,6 +106,10 @@ openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -text | grep
 openssl x509 -in /www/proxy/data/certs/totaljs.developer.crt -noout -checkend $((90 * 86400))
 test "$(grep -c '^# totaljs-https$' /etc/environment)" = 1
 grep -q '^NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/totaljs-developer.crt$' /etc/environment
+test -x /usr/bin/totaljs-trust-ca
+HOME=/tmp/trust-home totaljs-trust-ca
+certutil -d sql:/tmp/trust-home/.pki/nssdb -L -n 'Total.js Developer local CA' >/dev/null
+HOME=/tmp/trust-home totaljs-trust-ca   # a second time: nothing changes, nothing fails
 test -x /usr/local/bin/fd
 test -x /usr/local/bin/bat
 fd --version >/dev/null

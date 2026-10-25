@@ -30,7 +30,7 @@ sudo usermod -aG totaljs-developer,docker other-user
 ### HTTPS
 
 Every address opens with `https://` and no warning: Center, Code, Flow, pgAdmin and the ones of your projects. The buttons, the menu and the links of Total.js Center already use it.
-The authority that signs the certificate is made on your machine, and the system, Node.js and Firefox trust it, so `curl`, `git` and your own code can call `https://something.totaljs.developer` without changes.
+The authority that signs the certificate is made on your machine, and the system, Node.js, Firefox and Chrome trust it, so `curl`, `git` and your own code can call `https://something.totaljs.developer` without changes.
 Plain `http://` keeps working too, and is what the address uses until the certificate is there (the first minutes of a new system).
 
 ```bash
@@ -39,7 +39,7 @@ totaljs-https renew       # a new one (it lasts 800 days, and an update of the p
 ```
 
 A system that was installed before HTTPS has to update `/www/proxy/docker-compose.yml` (the file is yours, so an update does not touch it): add the port `"443:443"`, the volume `./data/certs:/etc/nginx/certs:ro` and the variable `HTTPS_METHOD=noredirect`, and run `sudo systemctl restart totaljs-proxy`.
-To use another browser than Firefox, import `/usr/local/share/ca-certificates/totaljs-developer.crt` as an authority.
+Chrome does not read the certificates of the system but its own store (`~/.pki/nssdb`): `totaljs-trust-ca` fills it at the start of every session. For any other browser, import `/usr/local/share/ca-certificates/totaljs-developer.crt` as an authority.
 
 ## The database
 

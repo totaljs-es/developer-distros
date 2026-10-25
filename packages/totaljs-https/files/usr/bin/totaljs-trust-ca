@@ -1,0 +1,21 @@
+#!/bin/sh
+# Puts the authority of this machine in the store of certificates of the person (~/.pki/nssdb), which is the one that Chrome, Chromium and other browsers of
+# the Chrome family use on Linux: they do not read the certificates of the system. Firefox has it from its policies and Node.js from NODE_EXTRA_CA_CERTS.
+# It is safe to run it again: it only adds the authority when it is not there, and replaces it if the one of the system is another.
+set -eu
+
+CA=/usr/local/share/ca-certificates/totaljs-developer.crt
+NAME='Total.js Developer local CA'
+DB="${HOME}/.pki/nssdb"
+
+[ -s "${CA}" ] || exit 0
+command -v certutil >/dev/null 2>&1 || exit 0
+
+mkdir -p "${DB}"
+[ -f "${DB}/cert9.db" ] || certutil -d "sql:${DB}" -N --empty-password
+
+if certutil -d "sql:${DB}" -L -n "${NAME}" -a 2>/dev/null | cmp -s - "${CA}"; then
+    exit 0
+fi
+certutil -d "sql:${DB}" -D -n "${NAME}" >/dev/null 2>&1 || true
+certutil -d "sql:${DB}" -A -t 'C,,' -n "${NAME}" -i "${CA}"

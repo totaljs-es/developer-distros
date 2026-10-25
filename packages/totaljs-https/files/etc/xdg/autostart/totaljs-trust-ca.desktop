@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Total.js local certificate authority
+Comment=Makes Chrome trust the certificate of totaljs.developer
+Exec=totaljs-trust-ca
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
