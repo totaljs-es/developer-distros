@@ -3,7 +3,7 @@
 <p align="center"><img src="shared/branding/mascot.png" alt="Tux hugging the Total.js logo" width="220"></p>
 
 A complete environment for developing with [Total.js](https://www.totaljs.com), ready to use as soon as it is installed. It runs on **Ubuntu 26.04 LTS**
-on a computer or in a virtual machine, with a desktop or only the command line.
+in a virtual machine (the usual way) or on a computer, with a desktop or only the command line.
 
 ## What you get
 
@@ -17,7 +17,7 @@ on a computer or in a virtual machine, with a desktop or only the command line.
 ## Install
 
 You need the official ISO of Ubuntu Server 26.04 LTS and the small seed of the edition that you want, connected together when the computer starts.
-The installer asks you the usual questions and installs everything else by itself. It needs a network connection, and how long it takes depends on it.
+The installer asks you the usual questions and installs everything else by itself. It needs an internet connection, in a virtual machine and on a computer, and how long it takes depends on it.
 
 **[How to install](docs/install.md)** · **[How to use it](docs/using.md)**
 
