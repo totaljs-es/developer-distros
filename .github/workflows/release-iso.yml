@@ -95,6 +95,8 @@ jobs:
           cat > notes.md <<NOTES
           ## Total.js Developer ${GITHUB_REF_NAME#v}
 
+          > **Testing release.** The ISO is a modified image that carries marks of Ubuntu and **Canonical has not answered yet** (we asked on 2026-10-25). Until it does, please do not mirror or redistribute it, use it in a virtual machine or on a computer that you can reinstall (not in production), and keep in mind that it is provided as is, with no warranty (MIT license).
+
           **Total.js Developer, an Ubuntu remix.** One ISO to install a development environment for Total.js on Ubuntu 26.04 LTS: Node.js, Total.js, Docker, PostgreSQL, Code, Flow and Total.js Center, and in the desktop edition an Openbox desktop with Firefox.
 
           | ISO | For | Size |
