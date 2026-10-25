@@ -55,7 +55,7 @@ The Compose files are in `/www`. What you edit there stays: an update of the pac
 
 ## Node.js and Total.js
 
-Node.js (LTS) is installed for the whole system, with `total5` and `total.js` as global packages and `npm`:
+Node.js (LTS) is installed for the whole system, with `total4` and `total5` as global packages and `npm`:
 
 ```bash
 node --version

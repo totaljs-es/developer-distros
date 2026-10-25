@@ -7,7 +7,7 @@ on a computer or in a virtual machine, with a desktop or only the command line.
 
 ## What you get
 
-- **Node.js** (LTS) with **Total.js 5** and Total.js 3, and `npm`.
+- **Node.js** (LTS) with **Total.js 5** and **Total.js 4**, and `npm`.
 - **Code**, the editor of Total.js in the browser, and **Flow**, to program with diagrams.
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy so that every project has its own address: `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.

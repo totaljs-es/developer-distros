@@ -11,7 +11,7 @@ STATE=/var/lib/totaljs-node
 PREFIX="$(cat "${STATE}/prefix")"
 
 if [ -x "${PREFIX}/bin/npm" ]; then
-  PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" uninstall -g --prefix /usr/local total5 total.js >/dev/null 2>&1 || true
+  PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" uninstall -g --prefix /usr/local total4 total5 >/dev/null 2>&1 || true
 fi
 
 # Only the links that this package made

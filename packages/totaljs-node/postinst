@@ -42,6 +42,6 @@ printf '%s\n' "${PREFIX}" > "${STATE}/prefix"
 
 # The frameworks are part of this release of the distro, not a moving channel
 PATH="${PREFIX}/bin:${PATH}" "${PREFIX}/bin/npm" install -g --prefix /usr/local --no-fund --no-audit \
-  "total5@${TOTAL5_VERSION}" "total.js@${TOTAL3_VERSION}"
+  "total4@${TOTAL4_VERSION}" "total5@${TOTAL5_VERSION}"
 
 exit 0

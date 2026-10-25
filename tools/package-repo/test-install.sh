@@ -46,8 +46,8 @@ echo "==> the runtime"
 test "$(node --version)" = "${NODE_VERSION}"
 test "$(/usr/bin/node --version)" = "${NODE_VERSION}"
 npm --version
-test "$(npm ls -g --depth=0 --prefix /usr/local 2>/dev/null | grep -c -E 'total5@|total.js@')" = 2
-node -e "require('/usr/local/lib/node_modules/total5/package.json')"
+test "$(npm ls -g --depth=0 --prefix /usr/local 2>/dev/null | grep -c -E 'total4@|total5@')" = 2
+node -e "require('/usr/local/lib/node_modules/total4/package.json'); require('/usr/local/lib/node_modules/total5/package.json')"
 
 echo "==> the group and the first person"
 getent group totaljs-developer
@@ -149,6 +149,7 @@ test ! -e /usr/local/bin/node
 test ! -e /usr/bin/node
 test ! -e "/opt/node-${NODE_VERSION}"
 test ! -e /usr/local/lib/node_modules/total5
+test ! -e /usr/local/lib/node_modules/total4
 test ! -e /usr/share/plymouth/themes/totaljs
 test ! -e /usr/lib/systemd/system/totaljs-proxy.service
 test ! -e /usr/lib/systemd/system/totaljs-dns.service

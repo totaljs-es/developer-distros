@@ -9,4 +9,4 @@ Homepage: https://www.totaljs.com
 Description: Node.js LTS and Total.js for the Total.js Developer Distros
  Installs the Node.js LTS release that is pinned in /usr/share/totaljs-node/versions
  (downloaded from nodejs.org and checked with its SHA-256), links it into
- /usr/local/bin, and installs total5 and total.js as global npm packages.
+ /usr/local/bin, and installs total4 and total5 as global npm packages.
