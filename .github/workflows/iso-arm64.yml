@@ -46,6 +46,15 @@ jobs:
           echo "size: ${SIZE} MiB"
           [ "${SIZE}" -lt 2000 ] || { echo "the ISO is over the 2 GiB limit of a release"; exit 1; }
 
+      # To try it on a computer or in a virtual machine (UTM, Parallels...): it is kept for a week and it is never published from here
+      - name: Keep the ISO as an artifact of the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-developer-arm64
+          path: dist/totaljs-developer-arm64.iso
+          retention-days: 7
+          compression-level: 0
+
       - name: What was measured
         if: always()
         run: |
