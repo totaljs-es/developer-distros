@@ -11,9 +11,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
 </p>
 
-> [!NOTE]
-> **The Ubuntu edition is in testing.** The packages, the repository and the installation already work and are tested on amd64 and arm64, with a desktop and with only the command line. Total.js Developer is an Ubuntu remix: it is not an official Ubuntu release and it is not endorsed by Canonical. Its ISO is a modified image that carries marks of Ubuntu, and Canonical has to approve a modified image that carries its marks: **we asked on 2026-10-25 and the answer is pending**. Until then, the installation that is fully ours is the official Ubuntu Server ISO plus a small seed (see [the installation guide](docs/install.md)). Until the answer arrives, please do not mirror or redistribute the ISO, use it in a virtual machine or on a computer that you can reinstall (not in production), and keep in mind that it is provided as is, with no warranty (see [LICENSE](LICENSE)). If you find something that does not work, [open an issue](https://github.com/totaljs-es/developer-distros/issues): it helps to leave this edition as it should be.
-
 <p align="center"><img src="docs/images/launcher.jpg" alt="The desktop of Total.js Developer: the widget, a terminal and the launcher" width="860"></p>
 
 ## What you get

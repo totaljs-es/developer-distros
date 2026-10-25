@@ -117,7 +117,6 @@ test -x /usr/local/bin/fd
 test -x /usr/local/bin/bat
 fd --version >/dev/null
 grep -q '443:443' /www/proxy/docker-compose.yml
-grep -q 'totaljs-developer.crt' /etc/firefox/policies/policies.json
 totaljs-https status >/dev/null
 KEY_BEFORE="$(sha256sum /var/lib/totaljs-developer/ca/ca.key)"
 /usr/lib/totaljs-developer/https-setup

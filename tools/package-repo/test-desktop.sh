@@ -50,6 +50,8 @@ done
 for xml in /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml; do python3 -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' "${xml}"; done
 test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
 command -v zenity >/dev/null
+grep -q 'totaljs-developer.crt' /etc/firefox/policies/policies.json
+grep -q '"URL": "https://totaljs.developer"' /etc/firefox/policies/policies.json
 bash -n /usr/bin/totaljs-wallpaper
 grep -q 'totaljs-wallpaper choose' /etc/skel/.config/openbox/menu.xml
 command -v firefox >/dev/null

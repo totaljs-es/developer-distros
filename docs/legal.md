@@ -22,7 +22,7 @@ read it again before each release.
 | The official ISO of Ubuntu Server | **Not ours and not modified.** People may download it from Ubuntu together with a seed. |
 | **The ISO of Total.js Developer** (`totaljs-developer-amd64.iso`): the installer of Ubuntu Server with our seed and a boot menu added | **Distributed as an Ubuntu remix**, called "Total.js Developer, an Ubuntu remix" and not "Ubuntu". It is a modified installer image that carries the marks of Ubuntu: **Canonical was asked for approval on 2026-10-25** (the form of <https://ubuntu.com/legal/terms-and-policies/contact-us>). If it asks for a licence agreement, conditions or another form, this page and `iso/own/README.md` say what was decided. |
 
-**2026-10-25:** the form was answered with an automatic reply ("we have received your query and will respond in due course"; urgent matters: legal@canonical.com). There is no decision yet. While it is pending, the README and the notes of every release say that the ISO is a testing release, that it is not endorsed by Canonical and that it should not be redistributed.
+**2026-10-25:** the form was answered with an automatic reply ("we have received your query and will respond in due course"; urgent matters: legal@canonical.com). There is no decision yet. **The ISO is not published until Canonical answers**: do not push a tag `v*` (the workflow `release-iso` publishes it); the seeds and the repository do not need the answer.
 
 If Canonical does not approve it, the ways out are the seeds with the official ISO (already published), or our own image without its marks (`iso/own`).
 
