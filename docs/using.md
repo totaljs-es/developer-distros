@@ -94,7 +94,7 @@ totaljs-conky hidden      # no widget
 The one that you choose is kept for the next sessions. The profiles are in `~/.config/conky`: edit them or add your own, with the name `<profile>.conf`.
 
 Wallpapers: there are twelve and a different one is chosen on each start. `totaljs-wallpaper pin` keeps the current one, `totaljs-wallpaper shuffle` goes back to
-a random one and `totaljs-wallpaper signature` uses the one with Tux. The look of windows and applications is changed with *Preferences → Appearance*
+a random one. The look of windows and applications is changed with *Preferences → Appearance*
 (in the menu of the desktop).
 
 The configuration of each person is in `~/.config` (`openbox`, `tint2`, `rofi`...). It is copied from `/etc/skel` when the person is created, and is yours to change.

@@ -17,18 +17,11 @@
       <item label="Window borders"><action name="Execute"><command>obconf</command></action></item>
       <item label="Network"><action name="Execute"><command>nm-connection-editor</command></action></item>
       <item label="Volume control"><action name="Execute"><command>pavucontrol</command></action></item>
-      <menu id="widget-menu" label="Desktop widget">
-        <item label="System"><action name="Execute"><command>totaljs-conky system</command></action></item>
-        <item label="Services"><action name="Execute"><command>totaljs-conky services</command></action></item>
-        <item label="Compact"><action name="Execute"><command>totaljs-conky compact</command></action></item>
-        <item label="Clock"><action name="Execute"><command>totaljs-conky clock</command></action></item>
-        <item label="Hide"><action name="Execute"><command>totaljs-conky hidden</command></action></item>
-      </menu>
+      <menu id="widget-menu" label="Desktop widget" execute="totaljs-conky menu" />
       <menu id="wallpaper-menu" label="Wallpaper">
         <item label="Change wallpaper (Super+W)"><action name="Execute"><command>totaljs-wallpaper next</command></action></item>
         <item label="Pin current wallpaper"><action name="Execute"><command>totaljs-wallpaper pin</command></action></item>
         <item label="Shuffle on login"><action name="Execute"><command>totaljs-wallpaper shuffle</command></action></item>
-        <item label="Total.js signature"><action name="Execute"><command>totaljs-wallpaper signature</command></action></item>
       </menu>
     </menu>
     <menu id="totaljs-menu" label="Total.js" icon="/usr/share/totaljs-developer/icons/totaljs.svg">

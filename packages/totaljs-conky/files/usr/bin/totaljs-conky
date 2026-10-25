@@ -1,7 +1,31 @@
 #!/usr/bin/env bash
-# totaljs-conky [system|services|compact|clock|hidden|restore]: shows a profile of the widget on the wallpaper, or hides it. "restore" starts the one that the
+# totaljs-conky [system|services|compact|clock|<your profile>|hidden|restore|menu]: shows a profile of the widget on the wallpaper, or hides it. "restore" starts the one that the
 # person chose last (the system one the first time), once the session is ready: it is what the session runs.
 set -euo pipefail
+
+# the menu of the desktop asks for its entries (an Openbox pipe menu): every profile that the person has, with a mark on the one that is shown
+if [ "${1:-}" = menu ]; then
+    CURRENT="$(cat "${HOME}/.config/totaljs/conky-profile" 2>/dev/null || echo system)"
+    echo '<openbox_pipe_menu>'
+    NAMES="system services compact clock"
+    for file in "${HOME}"/.config/conky/*.conf; do
+        [ -f "${file}" ] || continue
+        name="$(basename "${file}" .conf)"
+        case "${name}" in *[!a-z0-9_-]*) continue ;; esac
+        case " ${NAMES} " in *" ${name} "*) ;; *) NAMES="${NAMES} ${name}" ;; esac
+    done
+    for name in ${NAMES}; do
+        [ -f "${HOME}/.config/conky/${name}.conf" ] || [ -f "/etc/skel/.config/conky/${name}.conf" ] || continue
+        label="$(printf '%s' "${name:0:1}" | tr 'a-z' 'A-Z')${name:1}"
+        [ "${name}" = "${CURRENT}" ] && label="● ${label}"
+        printf '  <item label="%s"><action name="Execute"><command>totaljs-conky %s</command></action></item>\n' "${label}" "${name}"
+    done
+    echo '  <separator />'
+    label=Hide; [ "${CURRENT}" = hidden ] && label="● Hide"
+    printf '  <item label="%s"><action name="Execute"><command>totaljs-conky hidden</command></action></item>\n' "${label}"
+    echo '</openbox_pipe_menu>'
+    exit 0
+fi
 
 PROFILE="${1:-system}"
 STATE_DIR="${HOME}/.config/totaljs"
@@ -22,7 +46,9 @@ if [ "${PROFILE}" = hidden ]; then
     pkill -u "$(id -u)" -x conky 2>/dev/null || true
     exit 0
 fi
-case "${PROFILE}" in system|services|compact|clock) ;; *) PROFILE=system ;; esac
+# a profile is any file ~/.config/conky/<name>.conf: the name has only letters, digits, - and _
+case "${PROFILE}" in ""|*[!a-z0-9_-]*) PROFILE=system ;; esac
+[ -f "${HOME}/.config/conky/${PROFILE}.conf" ] || [ -f "/etc/skel/.config/conky/${PROFILE}.conf" ] || PROFILE=system
 echo "${PROFILE}" > "${STATE}"
 
 CONFIG="${HOME}/.config/conky/${PROFILE}.conf"

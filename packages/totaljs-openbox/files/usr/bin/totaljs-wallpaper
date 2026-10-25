@@ -5,7 +5,6 @@
 #   totaljs-wallpaper shuffle    force a new random pick (ignores the pin)
 #   totaljs-wallpaper pin        pin whatever is currently showing
 #   totaljs-wallpaper shuffle    go back to a random wallpaper each login
-#   totaljs-wallpaper signature  use the Total.js signature background
 set -euo pipefail
 PACK_DIR=/usr/share/backgrounds/totaljs
 STATE_DIR="$HOME/.config/totaljs"
@@ -43,13 +42,11 @@ case "${1:-show}" in
         rm -f "${PINNED}"
         FORCE_RANDOM=1
         ;;
-    signature)
-        cp /usr/share/backgrounds/totaljs/mascot.jpg "${PINNED}"
-        CHOICE="${PINNED}"
-        ;;
 esac
 
-if [ -z "${FORCE_RANDOM:-}" ] && [ -f "${PINNED}" ]; then
+if [ -n "${CHOICE:-}" ]; then
+    :   # "next" has chosen one that is not the current
+elif [ -z "${FORCE_RANDOM:-}" ] && [ -f "${PINNED}" ]; then
     CHOICE="${PINNED}"
 elif [ -d "${PACK_DIR}" ] && [ -n "$(find "${PACK_DIR}" -maxdepth 1 -name '*.jpg' 2>/dev/null)" ]; then
     CHOICE="$(find "${PACK_DIR}" -maxdepth 1 -type f -name '*.jpg' | shuf -n 1)"
