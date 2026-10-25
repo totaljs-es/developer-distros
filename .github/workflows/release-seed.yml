@@ -104,7 +104,7 @@ jobs:
           3. Start the virtual machine or the computer with the Ubuntu ISO and the seed as a second drive (a second USB stick, or a second virtual drive). The installer finds it and asks for confirmation.
           4. Answer the usual questions (language, keyboard, network, disk and who you are). **It needs an internet connection** while it installs.
 
-          The steps with pictures, for virtual machines and for real computers: https://github.com/${GITHUB_REPOSITORY}/blob/main/docs/install.md
+          The steps, for virtual machines and for real computers: https://github.com/${GITHUB_REPOSITORY}/blob/main/docs/install.md
 
           Based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
 
