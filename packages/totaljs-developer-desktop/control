@@ -4,10 +4,10 @@ Architecture: all
 Maintainer: Total.js <repository@totaljs.com>
 Section: metapackages
 Priority: optional
-Depends: totaljs-developer-server (= 1.0.0-1), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-vscode-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, code, google-chrome-stable
+Depends: totaljs-developer-server (= 1.0.0-1), totaljs-openbox (>= 1.0.0), totaljs-conky (>= 1.0.0), totaljs-wallpapers (>= 1.0.0), totaljs-mozilla-source (>= 1.0.0), totaljs-chrome-source (>= 1.0.0), firefox, google-chrome-stable
 Homepage: https://www.totaljs.com
 Description: Total.js Developer Distro, desktop edition
  The server edition plus the Openbox desktop: the theme, the panel, the launcher, the terminal, the files,
- the wallpapers, Firefox, Google Chrome and Visual Studio Code (from the repositories of Mozilla, Google and Microsoft, not from ours). This package installs the pieces; each one is a package of its own and can be
+ the wallpapers, Firefox and Google Chrome (from the repositories of Mozilla and Google, not from ours). This package installs the pieces; each one is a package of its own and can be
  updated alone. To install it, install totaljs-developer-release, totaljs-docker-source and
- totaljs-mozilla-source, totaljs-vscode-source and totaljs-chrome-source first, update the lists of apt, and then this one.
+ totaljs-mozilla-source and totaljs-chrome-source first, update the lists of apt, and then this one.

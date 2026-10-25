@@ -60,8 +60,8 @@ EOF
 # updated, before apt resolves the layer
 curtin in-target --target="${TARGET}" -- apt-get update
 SOURCES="totaljs-developer-release totaljs-docker-source"
-# the desktop edition also takes Firefox from the repository of Mozilla (Ubuntu offers it only as a snap), and Chrome and Visual Studio Code from those of Google and Microsoft
-case "${PACKAGE}" in totaljs-developer-desktop) SOURCES="${SOURCES} totaljs-mozilla-source totaljs-vscode-source totaljs-chrome-source" ;; esac
+# the desktop edition also takes Firefox from the repository of Mozilla (Ubuntu offers it only as a snap), and Chrome from the one of Google
+case "${PACKAGE}" in totaljs-developer-desktop) SOURCES="${SOURCES} totaljs-mozilla-source totaljs-chrome-source" ;; esac
 curtin in-target --target="${TARGET}" -- env DEBIAN_FRONTEND=noninteractive apt-get install -y ${SOURCES}
 curtin in-target --target="${TARGET}" -- apt-get update
 curtin in-target --target="${TARGET}" -- env DEBIAN_FRONTEND=noninteractive apt-get install -y "${PACKAGE}"

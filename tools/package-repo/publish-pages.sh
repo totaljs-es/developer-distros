@@ -91,7 +91,7 @@ sudo apt install totaljs-developer-release totaljs-docker-source
 sudo rm /etc/apt/sources.list.d/totaljs-developer.list
 sudo apt update
 sudo apt install totaljs-developer-server</pre>
-<p>For the desktop edition, install <code>totaljs-mozilla-source</code>, <code>totaljs-vscode-source</code> and <code>totaljs-chrome-source</code> with the other two sources, and <code>totaljs-developer-desktop</code> at the end. To install from nothing, with the Ubuntu installer, see the <a href="https://github.com/totaljs-es/developer-distros/blob/main/docs/install.md">installation guide</a>.</p>
+<p>For the desktop edition, install <code>totaljs-mozilla-source</code> and <code>totaljs-chrome-source</code> with the other two sources, and <code>totaljs-developer-desktop</code> at the end. To install from nothing, with the Ubuntu installer, see the <a href="https://github.com/totaljs-es/developer-distros/blob/main/docs/install.md">installation guide</a>.</p>
 
 <h2>Packages</h2>
 <table>
