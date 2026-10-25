@@ -82,14 +82,18 @@ rm -f "${RFS}/etc/machine-id" "${RFS}"/etc/ssh/ssh_host_*
 
 echo "==> the initramfs of archiso"
 cat > "${RFS}/etc/mkinitcpio-live.conf" <<'CONF'
-MODULES=(loop squashfs overlay isofs sr_mod virtio_blk virtio_scsi virtio_pci virtio_net usb_storage uas)
+# the modules that the kernel of Arch Linux ARM has as modules are added; the ones that it has built in, or does not have, are not an error (the prefix ?)
+MODULES=(?loop ?squashfs ?overlay ?isofs ?sr_mod ?virtio_blk ?virtio_scsi ?virtio_pci ?virtio_net ?usb_storage ?uas)
 BINARIES=()
 FILES=()
-HOOKS=(base udev modconf memdisk archiso archiso_loop_mnt block filesystems keyboard)
+HOOKS=(base udev modconf archiso archiso_loop_mnt block filesystems keyboard)
 COMPRESSION="gzip"
 CONF
 KERNEL="$(ls "${RFS}/usr/lib/modules" | head -n 1)"
-in_rfs mkinitcpio -c /etc/mkinitcpio-live.conf -k "${KERNEL}" -g /boot/initramfs-live.img
+echo "hooks of mkinitcpio: $(ls "${RFS}/usr/lib/initcpio/install" | tr '\n' ' ')"
+in_rfs mkinitcpio -c /etc/mkinitcpio-live.conf -k "${KERNEL}" -g /boot/initramfs-live.img 2>&1 | tee "${BUILD}/mkinitcpio.log" || { echo "--- mkinitcpio failed (the errors are above)"; grep -n -i -E "error|not found|cannot" "${BUILD}/mkinitcpio.log" >&2 || true; exit 1; }
+# mkinitcpio says that the image may not be complete when it finds an error, and still exits with 0 in some versions
+if grep -q -E "^==> ERROR|ERROR:" "${BUILD}/mkinitcpio.log"; then grep -n -E "ERROR" "${BUILD}/mkinitcpio.log" >&2; exit 1; fi
 cp "${RFS}/boot/Image" "${ISO}/arch/boot/aarch64/Image"
 cp "${RFS}/boot/initramfs-live.img" "${ISO}/arch/boot/aarch64/initramfs-linux.img"
 rm -f "${RFS}/etc/resolv.conf"; ln -s ../run/systemd/resolve/stub-resolv.conf "${RFS}/etc/resolv.conf"
