@@ -72,10 +72,11 @@ test -f /usr/lib/tmpfiles.d/totaljs-dns.conf
 test -f /etc/NetworkManager/conf.d/90-totaljs-dns.conf
 test -e /etc/systemd/system/sysinit.target.wants/systemd-resolved.service || test -e /etc/systemd/system/multi-user.target.wants/systemd-resolved.service
 dnsmasq --test --conf-file=/etc/totaljs-developer/dns.conf
-dnsmasq --keep-in-foreground --conf-file=/etc/totaljs-developer/dns.conf --pid-file=/tmp/dns-test.pid --user=root >/tmp/dns-test.log 2>&1 &
+dnsmasq --keep-in-foreground --conf-file=/etc/totaljs-developer/dns.conf --pid-file=/tmp/dns-test.pid >/tmp/dns-test.log 2>&1 &
 DNS_PID=$!
 sleep 1
 if command -v dig >/dev/null 2>&1; then test "$(dig +short +time=2 +tries=1 @127.0.0.100 code.totaljs.developer)" = 127.0.0.1; fi
+kill -0 "${DNS_PID}"   # still running: it dropped to its user and group without failing (an unknown group makes it stop)
 kill "${DNS_PID}" 2>/dev/null || true
 
 echo "==> Total.js Center"

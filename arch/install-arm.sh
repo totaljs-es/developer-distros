@@ -41,6 +41,9 @@ DISK="$(ask 'Disk to erase and install on (for example /dev/vda): ')"
 [ -b "${DISK}" ] || die "${DISK} is not a disk"
 [ "$(ask "Everything on ${DISK} will be ERASED. Type the name of the disk again to continue: ")" = "${DISK}" ] || die "not confirmed"
 
+KEYMAP_NEW="$(ask 'Keyboard layout [us] (for example es, de, fr, uk, latam, it): ')"; KEYMAP_NEW="${KEYMAP_NEW:-us}"
+if need loadkeys; then loadkeys "${KEYMAP_NEW}" 2>/dev/null || echo "(this medium does not know the layout '${KEYMAP_NEW}': the system will use it when it starts)"; fi
+TZ_NEW="$(ask 'Time zone [UTC] (for example Europe/Madrid, America/Mexico_City): ')"; TZ_NEW="${TZ_NEW:-UTC}"
 HOSTNAME_NEW="$(ask 'Name of the machine [totaljs]: ')"; HOSTNAME_NEW="${HOSTNAME_NEW:-totaljs}"
 USER_NEW="$(ask 'Your user name: ')"
 [[ "${USER_NEW}" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die "the user name has to be lower case letters, numbers, - or _"
@@ -147,6 +150,11 @@ install -Dm440 /dev/stdin "${MNT}/etc/sudoers.d/10-wheel" <<'SUDO'
 %wheel ALL=(ALL:ALL) ALL
 SUDO
 in_target locale-gen >/dev/null
+# the keyboard of the console and the time zone
+in_target pacman -S --needed --noconfirm kbd >/dev/null 2>&1 || true
+printf 'KEYMAP=%s\n' "${KEYMAP_NEW}" > "${MNT}/etc/vconsole.conf"
+if [ -e "${MNT}/usr/share/zoneinfo/${TZ_NEW}" ]; then ln -sf "../usr/share/zoneinfo/${TZ_NEW}" "${MNT}/etc/localtime"
+else echo "(the time zone '${TZ_NEW}' does not exist: UTC stays; it is changed later with timedatectl set-timezone)"; fi
 in_target systemctl enable systemd-networkd.service systemd-resolved.service systemd-timesyncd.service
 
 # --- the repository of Total.js: its key, and trusted ---------------------------------------------------------------------------------
