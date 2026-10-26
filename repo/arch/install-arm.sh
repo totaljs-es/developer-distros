@@ -41,6 +41,22 @@ DISK="$(ask 'Disk to erase and install on (for example /dev/vda): ')"
 [ -b "${DISK}" ] || die "${DISK} is not a disk"
 [ "$(ask "Everything on ${DISK} will be ERASED. Type the name of the disk again to continue: ")" = "${DISK}" ] || die "not confirmed"
 
+list_keymaps() { find /usr/share/kbd/keymaps -name '*.map.gz' -printf '%f\n' 2>/dev/null | sed 's/\.map\.gz$//' | sort -u | "${PAGER:-less}"; }
+list_zones() { find /usr/share/zoneinfo -type f -not -path '*/posix/*' -not -path '*/right/*' 2>/dev/null | sed 's#/usr/share/zoneinfo/##' | sort | "${PAGER:-less}"; }
+# the layout is applied to the medium at once (the user and the password are typed with it); a name that does not exist is asked again
+while :; do
+    KEYMAP_NEW="$(ask 'Keyboard layout [us] (for example es, de, fr, uk, latam, it; "list" shows them): ')"; KEYMAP_NEW="${KEYMAP_NEW:-us}"
+    if [ "${KEYMAP_NEW}" = list ]; then list_keymaps; continue; fi
+    if ! need loadkeys; then break; fi
+    if loadkeys "${KEYMAP_NEW}" 2>/dev/null; then break; fi
+    echo "the layout '${KEYMAP_NEW}' does not exist: try again (type list to see them)"
+done
+while :; do
+    TZ_NEW="$(ask 'Time zone [UTC] (for example Europe/Madrid, America/Mexico_City; "list" shows them): ')"; TZ_NEW="${TZ_NEW:-UTC}"
+    if [ "${TZ_NEW}" = list ]; then list_zones; continue; fi
+    if [ ! -d /usr/share/zoneinfo ] || [ -f "/usr/share/zoneinfo/${TZ_NEW}" ]; then break; fi
+    echo "the time zone '${TZ_NEW}' does not exist: try again (type list to see them)"
+done
 HOSTNAME_NEW="$(ask 'Name of the machine [totaljs]: ')"; HOSTNAME_NEW="${HOSTNAME_NEW:-totaljs}"
 USER_NEW="$(ask 'Your user name: ')"
 [[ "${USER_NEW}" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die "the user name has to be lower case letters, numbers, - or _"
@@ -50,20 +66,27 @@ unset PASS2
 
 # --- tools of the installer (Archboot is minimal: some of them have to be restored) ---------------------------------------------
 say "Tools"
-mkdir -p "${GPGDIR}"; chmod 0700 "${GPGDIR}"
-if need systemctl; then systemctl start systemd-networkd systemd-resolved >/dev/null 2>&1 || true; fi
+ALL_TOOLS=1
+for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot partprobe md5sum; do need "${t}" || ALL_TOOLS=0; done
+# the medium of Total.js Developer has them all; Archboot is minimal and some of them have to be restored
+if [ "${ALL_TOOLS}" = 0 ]; then
+    mkdir -p "${GPGDIR}"; chmod 0700 "${GPGDIR}"
+    if need systemctl; then systemctl start systemd-networkd systemd-resolved >/dev/null 2>&1 || true; fi
+    for ((i = 0; i < 30; i++)); do curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" && break; sleep 2; done
+    curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" || die "no internet: the installer downloads the system"
+    if grep -Eq '^[#[:space:]]*GPGDir[[:space:]]*=' /etc/pacman.conf; then sed -Ei "s|^[#[:space:]]*GPGDir[[:space:]]*=.*|GPGDir = ${GPGDIR}|" /etc/pacman.conf
+    else sed -i "/^\[options\]$/a GPGDir = ${GPGDIR}" /etc/pacman.conf; fi
+    pacman-key --gpgdir "${GPGDIR}" --init
+    pacman-key --gpgdir "${GPGDIR}" --populate archlinuxarm
+    for attempt in 1 2 3 4 5; do
+        pacman -Syy --noconfirm && pacman -S --noconfirm --overwrite '*' coreutils gptfdisk dosfstools e2fsprogs util-linux shadow && break
+        [ "${attempt}" -lt 5 ] || die "could not install the tools of the installer"
+        sleep $((attempt * 3))
+    done
+fi
+for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot; do need "${t}" || die "missing tool: ${t}"; done
 for ((i = 0; i < 30; i++)); do curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" && break; sleep 2; done
 curl -fsS -o /dev/null --max-time 5 "${ROOTFS_URL}.md5" || die "no internet: the installer downloads the system"
-if grep -Eq '^[#[:space:]]*GPGDir[[:space:]]*=' /etc/pacman.conf; then sed -Ei "s|^[#[:space:]]*GPGDir[[:space:]]*=.*|GPGDir = ${GPGDIR}|" /etc/pacman.conf
-else sed -i "/^\[options\]$/a GPGDir = ${GPGDIR}" /etc/pacman.conf; fi
-pacman-key --gpgdir "${GPGDIR}" --init
-pacman-key --gpgdir "${GPGDIR}" --populate archlinuxarm
-for attempt in 1 2 3 4 5; do
-    pacman -Syy --noconfirm && pacman -S --noconfirm --overwrite '*' coreutils gptfdisk dosfstools e2fsprogs util-linux shadow && break
-    [ "${attempt}" -lt 5 ] || die "could not install the tools of the installer"
-    sleep $((attempt * 3))
-done
-for t in sgdisk mkfs.fat mkfs.ext4 bsdtar blkid chroot; do need "${t}" || die "missing tool: ${t}"; done
 
 # --- the disk: ESP + root --------------------------------------------------------------------------------------------------------
 say "The disk"
@@ -140,6 +163,11 @@ install -Dm440 /dev/stdin "${MNT}/etc/sudoers.d/10-wheel" <<'SUDO'
 %wheel ALL=(ALL:ALL) ALL
 SUDO
 in_target locale-gen >/dev/null
+# the keyboard of the console and the time zone
+in_target pacman -S --needed --noconfirm kbd >/dev/null 2>&1 || true
+printf 'KEYMAP=%s\n' "${KEYMAP_NEW}" > "${MNT}/etc/vconsole.conf"
+if [ -e "${MNT}/usr/share/zoneinfo/${TZ_NEW}" ]; then ln -sf "../usr/share/zoneinfo/${TZ_NEW}" "${MNT}/etc/localtime"
+else echo "(the time zone '${TZ_NEW}' does not exist: UTC stays; it is changed later with timedatectl set-timezone)"; fi
 in_target systemctl enable systemd-networkd.service systemd-resolved.service systemd-timesyncd.service
 
 # --- the repository of Total.js: its key, and trusted ---------------------------------------------------------------------------------
