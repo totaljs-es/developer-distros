@@ -75,6 +75,7 @@ pacman_retry() {
     done
     return 1
 }
+for option in Color ILoveCandy; do grep -q "^${option}" "${RFS}/etc/pacman.conf" || sed -i "/^\[options\]/a ${option}" "${RFS}/etc/pacman.conf"; done
 pacman_retry -Syu
 # what the installer needs inside the medium: disks, the root filesystem (bsdtar), network (iwd for Wi-Fi), an editor
 pacman_retry -S --needed mkinitcpio-archiso kbd pv gptfdisk dosfstools e2fsprogs util-linux parted libarchive curl iwd nano

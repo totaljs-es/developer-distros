@@ -1,4 +1,9 @@
 post_install() {
+  # colour and the candy (ILoveCandy: the bar of pacman is a Pac-Man that eats the dots) in the [options] of pacman.conf, once
+  for option in Color ILoveCandy; do
+    if ! grep -q "^${option}" /etc/pacman.conf 2>/dev/null; then sed -i "/^\[options\]/a ${option}" /etc/pacman.conf; fi
+  done
+
   # the repository, in the configuration of pacman (once)
   if ! grep -q '^\[totaljs-developer\]' /etc/pacman.conf; then
     printf '\n[totaljs-developer]\nSigLevel = Required DatabaseOptional\nInclude = /etc/pacman.d/totaljs-developer-mirrorlist\n' >> /etc/pacman.conf

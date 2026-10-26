@@ -141,6 +141,11 @@ options root=PARTUUID=${ROOT_PARTUUID} rw rootwait preempt=none
 ENTRY
 printf 'PARTUUID=%s / ext4 defaults,noatime 0 1\nPARTUUID=%s /boot vfat defaults 0 2\n' "${ROOT_PARTUUID}" "${EFI_PARTUUID}" > "${MNT}/etc/fstab"
 
+# colour and the candy in pacman, from the start (the first update of the installer already shows the Pac-Man)
+for option in Color ILoveCandy; do
+    grep -q "^${option}" "${MNT}/etc/pacman.conf" || sed -i "/^\[options\]/a ${option}" "${MNT}/etc/pacman.conf"
+done
+
 # --- the system of the person ---------------------------------------------------------------------------------------------------------
 say "The system"
 echo "${HOSTNAME_NEW}" > "${MNT}/etc/hostname"

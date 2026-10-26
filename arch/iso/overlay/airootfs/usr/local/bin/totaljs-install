@@ -44,6 +44,7 @@ curl -fsS -o /dev/null --max-time 5 "${REPO}/totaljs-developer.gpg" || { echo "N
 # the keyring of Arch is made when the medium starts: wait until it is ready, then trust the key of Total.js
 for _ in $(seq 1 60); do systemctl is-active --quiet pacman-init.service && break; sleep 1; done
 [ "$(gpg --show-keys --with-colons "${KEY}" | awk -F: '$1 == "fpr" { print $10; exit }')" = "${KEY_FPR}" ] || { echo "The key on this medium is not the one of Total.js." >&2; exit 1; }
+for option in Color ILoveCandy; do grep -q "^${option}" /etc/pacman.conf || sed -i "/^\[options\]/a ${option}" /etc/pacman.conf; done
 pacman-key --add "${KEY}"
 pacman-key --lsign-key "${KEY_FPR}"
 
