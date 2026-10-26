@@ -41,9 +41,22 @@ DISK="$(ask 'Disk to erase and install on (for example /dev/vda): ')"
 [ -b "${DISK}" ] || die "${DISK} is not a disk"
 [ "$(ask "Everything on ${DISK} will be ERASED. Type the name of the disk again to continue: ")" = "${DISK}" ] || die "not confirmed"
 
-KEYMAP_NEW="$(ask 'Keyboard layout [us] (for example es, de, fr, uk, latam, it): ')"; KEYMAP_NEW="${KEYMAP_NEW:-us}"
-if need loadkeys; then loadkeys "${KEYMAP_NEW}" 2>/dev/null || echo "(this medium does not know the layout '${KEYMAP_NEW}': the system will use it when it starts)"; fi
-TZ_NEW="$(ask 'Time zone [UTC] (for example Europe/Madrid, America/Mexico_City): ')"; TZ_NEW="${TZ_NEW:-UTC}"
+list_keymaps() { find /usr/share/kbd/keymaps -name '*.map.gz' -printf '%f\n' 2>/dev/null | sed 's/\.map\.gz$//' | sort -u | "${PAGER:-less}"; }
+list_zones() { find /usr/share/zoneinfo -type f -not -path '*/posix/*' -not -path '*/right/*' 2>/dev/null | sed 's#/usr/share/zoneinfo/##' | sort | "${PAGER:-less}"; }
+# the layout is applied to the medium at once (the user and the password are typed with it); a name that does not exist is asked again
+while :; do
+    KEYMAP_NEW="$(ask 'Keyboard layout [us] (for example es, de, fr, uk, latam, it; "list" shows them): ')"; KEYMAP_NEW="${KEYMAP_NEW:-us}"
+    if [ "${KEYMAP_NEW}" = list ]; then list_keymaps; continue; fi
+    if ! need loadkeys; then break; fi
+    if loadkeys "${KEYMAP_NEW}" 2>/dev/null; then break; fi
+    echo "the layout '${KEYMAP_NEW}' does not exist: try again (type list to see them)"
+done
+while :; do
+    TZ_NEW="$(ask 'Time zone [UTC] (for example Europe/Madrid, America/Mexico_City; "list" shows them): ')"; TZ_NEW="${TZ_NEW:-UTC}"
+    if [ "${TZ_NEW}" = list ]; then list_zones; continue; fi
+    if [ ! -d /usr/share/zoneinfo ] || [ -f "/usr/share/zoneinfo/${TZ_NEW}" ]; then break; fi
+    echo "the time zone '${TZ_NEW}' does not exist: try again (type list to see them)"
+done
 HOSTNAME_NEW="$(ask 'Name of the machine [totaljs]: ')"; HOSTNAME_NEW="${HOSTNAME_NEW:-totaljs}"
 USER_NEW="$(ask 'Your user name: ')"
 [[ "${USER_NEW}" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die "the user name has to be lower case letters, numbers, - or _"
