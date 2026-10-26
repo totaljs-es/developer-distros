@@ -5,3 +5,14 @@
 systemctl enable NetworkManager.service lightdm.service >/dev/null 2>&1 || true
 systemctl disable systemd-networkd.service systemd-networkd.socket systemd-networkd-wait-online.service >/dev/null 2>&1 || true
 systemctl set-default graphical.target >/dev/null 2>&1 || true
+
+# The tray of the panel shows the icons in white (tint2 takes away their colour), which needs a glyph. pasystray asks for the names without "-symbolic" (audio-volume-high...) and
+# in Arch, where Papirus has only the symbolic ones, the first it finds is the round coloured icon of AdwaitaLegacy: a white disc. The same names are made in Papirus with the symbolic glyphs.
+for size in 16x16 22x22 24x24; do
+  dir="/usr/share/icons/Papirus/${size}/symbolic/status"
+  [ -d "${dir}" ] || continue
+  for name in audio-volume-high audio-volume-medium audio-volume-low audio-volume-muted audio-volume-overamplified microphone-sensitivity-high microphone-sensitivity-medium microphone-sensitivity-low microphone-sensitivity-muted; do
+    if [ -f "${dir}/${name}-symbolic.svg" ] && [ ! -e "${dir}/${name}.svg" ]; then cp "${dir}/${name}-symbolic.svg" "${dir}/${name}.svg"; fi
+  done
+done
+gtk-update-icon-cache -f /usr/share/icons/Papirus >/dev/null 2>&1 || true

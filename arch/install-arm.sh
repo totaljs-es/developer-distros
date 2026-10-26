@@ -196,6 +196,14 @@ say "Updating the system and installing Total.js Developer, ${EDITION} edition (
 in_target pacman -Syu --noconfirm
 in_target pacman -S --noconfirm --overwrite /etc/pacman.d/totaljs-developer-mirrorlist totaljs-developer-release "totaljs-developer-${EDITION}"
 
+# the keyboard of the desktop: the console reads vconsole.conf, X reads its own layout (LightDM, Openbox and the terminal). The name of the layout of the console is
+# almost always the one of X (es, de, fr, latam, it...); the ones that differ are translated, and a name that X does not have is left out
+case "${KEYMAP_NEW}" in uk) XLAYOUT=gb ;; *) XLAYOUT="${KEYMAP_NEW%%[-_.]*}" ;; esac
+if [ "${XLAYOUT}" != us ] && { [ ! -f "${MNT}/usr/share/X11/xkb/rules/evdev.lst" ] || grep -qE "^[[:space:]]+${XLAYOUT}[[:space:]]" "${MNT}/usr/share/X11/xkb/rules/evdev.lst"; }; then
+    mkdir -p "${MNT}/etc/X11/xorg.conf.d"
+    printf 'Section "InputClass"\n    Identifier "totaljs-keyboard"\n    MatchIsKeyboard "on"\n    Option "XkbLayout" "%s"\nEndSection\n' "${XLAYOUT}" > "${MNT}/etc/X11/xorg.conf.d/00-keyboard.conf"
+fi
+
 # the system uses its own DNS (systemd-resolved) from now on
 rm -f "${MNT}/etc/resolv.conf"
 ln -s ../run/systemd/resolve/stub-resolv.conf "${MNT}/etc/resolv.conf"
