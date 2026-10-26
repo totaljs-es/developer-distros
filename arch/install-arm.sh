@@ -57,6 +57,12 @@ while :; do
     if [ ! -d /usr/share/zoneinfo ] || [ -f "/usr/share/zoneinfo/${TZ_NEW}" ]; then break; fi
     echo "the time zone '${TZ_NEW}' does not exist: try again (type list to see them)"
 done
+# the edition: the entry of the boot menu says it (totaljs.edition=desktop|server); without it, it is asked
+EDITION=""
+for word in $(cat /proc/cmdline 2>/dev/null); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
+while [ "${EDITION}" != desktop ] && [ "${EDITION}" != server ]; do
+    EDITION="$(ask 'Edition: desktop (Openbox, Firefox, Chromium) or server (command line) [desktop]: ')"; EDITION="${EDITION:-desktop}"
+done
 HOSTNAME_NEW="$(ask 'Name of the machine [totaljs]: ')"; HOSTNAME_NEW="${HOSTNAME_NEW:-totaljs}"
 USER_NEW="$(ask 'Your user name: ')"
 [[ "${USER_NEW}" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die "the user name has to be lower case letters, numbers, - or _"
@@ -181,9 +187,9 @@ printf 'Server = %s/arch/$arch\n' "${REPO_URL}" > "${MNT}/etc/pacman.d/totaljs-d
 printf '\n[totaljs-developer]\nSigLevel = Required DatabaseOptional\nInclude = /etc/pacman.d/totaljs-developer-mirrorlist\n' >> "${MNT}/etc/pacman.conf"
 
 # --- the system up to date, and the server edition ------------------------------------------------------------------------------------
-say "Updating the system and installing Total.js Developer (this takes a while)"
+say "Updating the system and installing Total.js Developer, ${EDITION} edition (this takes a while)"
 in_target pacman -Syu --noconfirm
-in_target pacman -S --noconfirm --overwrite /etc/pacman.d/totaljs-developer-mirrorlist totaljs-developer-release totaljs-developer-server
+in_target pacman -S --noconfirm --overwrite /etc/pacman.d/totaljs-developer-mirrorlist totaljs-developer-release "totaljs-developer-${EDITION}"
 
 # the system uses its own DNS (systemd-resolved) from now on
 rm -f "${MNT}/etc/resolv.conf"
@@ -192,3 +198,4 @@ sync
 umount -R "${MNT}"
 trap - EXIT ERR
 say "Done. Take out the ISO and restart: the machine starts Total.js Developer. Log in as ${USER_NEW}, and open https://totaljs.developer"
+[ "${EDITION}" != desktop ] || echo "The login screen of the desktop appears when it starts."

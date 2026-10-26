@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# totaljs-install - the installer of Total.js Developer on this medium: it trusts the key of the repository and starts archinstall with the configuration of the edition.
+# totaljs-install - the installer of Total.js Developer on this medium: it asks for the edition, trusts the key of the repository and starts the installer of the medium
+# (archinstall on x86_64; install-arm on ARM, where Arch has no archinstall) with the configuration of that edition.
 #   totaljs-install            start it now
 #   totaljs-install --ask      ask first (the medium does this when it starts), so that a shell is one key away
 set -euo pipefail
@@ -8,25 +9,33 @@ CONFIG_DIR=/usr/share/totaljs-developer/archinstall
 KEY=/usr/share/totaljs-developer/repository-key.gpg
 KEY_FPR=95454694523B8D18A376F7D5D722BA35C8427B40
 REPO=https://totaljs-es.github.io/developer-distros/repo
-
-# the edition comes from the entry of the boot menu (totaljs.edition=server|desktop)
-EDITION=server
-for word in $(cat /proc/cmdline); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
-CONFIG="${CONFIG_DIR}/${EDITION}.json"
-# in the medium of ARM there is no archinstall (Arch has no ARM): its installer is install-arm
 ARM_INSTALLER=/usr/local/bin/totaljs-install-arm
+
+# in the medium of ARM there is no archinstall: its installer is install-arm
 if ! command -v archinstall >/dev/null 2>&1 && [ -x "${ARM_INSTALLER}" ]; then USE_ARM=1; else USE_ARM=0; fi
-[ "${USE_ARM}" = 1 ] || [ -f "${CONFIG}" ] || { echo "There is no configuration for the edition '${EDITION}' on this medium." >&2; exit 1; }
 
 if [ "${1:-}" = --ask ]; then
     echo
-    echo "  Total.js Developer, ${EDITION} edition."
+    echo "  Total.js Developer, installation medium."
     echo "  Press Enter to install it (it ERASES the disk that you choose), or type 'shell' to get a shell."
     read -r answer || answer=shell
     [ "${answer}" != shell ] || exit 0
 fi
 
-[ "${USE_ARM}" = 0 ] || exec "${ARM_INSTALLER}"
+# the edition: the entry of the boot menu may say it (totaljs.edition=desktop|server); if not, it is asked
+EDITION=""
+for word in $(cat /proc/cmdline); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
+if [ "${USE_ARM}" = 0 ]; then
+    while [ "${EDITION}" != desktop ] && [ "${EDITION}" != server ]; do
+        read -r -p "Edition: desktop (Openbox, Firefox, Chromium) or server (command line) [desktop]: " EDITION || EDITION=server
+        EDITION="${EDITION:-desktop}"
+    done
+    CONFIG="${CONFIG_DIR}/${EDITION}.json"
+    [ -f "${CONFIG}" ] || { echo "There is no configuration for the edition '${EDITION}' on this medium." >&2; exit 1; }
+else
+    # install-arm asks for the edition itself when the menu did not say it, and checks the network and the key of Total.js
+    exec "${ARM_INSTALLER}"
+fi
 
 echo "Waiting for the network..."
 for _ in $(seq 1 30); do curl -fsS -o /dev/null --max-time 5 "${REPO}/totaljs-developer.gpg" && break; sleep 2; done

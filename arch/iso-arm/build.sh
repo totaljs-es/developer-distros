@@ -19,7 +19,6 @@ OUT="${BUILD}/out"
 ROOTFS_URL="${ROOTFS_URL:-http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz}"
 LABEL="TOTALJS_ARM_$(date +%Y%m)"
 VERSION="$(date +%Y.%m.%d)"
-EDITION="${EDITION:-server}"
 
 [ "$(id -u)" = 0 ] || { echo "run this as root" >&2; exit 1; }
 [ "$(uname -m)" = aarch64 ] || { echo "this builds on an ARM machine (aarch64)" >&2; exit 1; }
@@ -158,9 +157,13 @@ echo "==> the boot: GRUB for UEFI"
 cat > "${BUILD}/grub-embedded.cfg" <<GRUBCFG
 search --no-floppy --set=root --label ${LABEL}
 set default=0
-set timeout=5
-menuentry "Total.js Developer installer (aarch64, ${EDITION} edition)" {
-    linux /arch/boot/aarch64/Image archisobasedir=arch archisolabel=${LABEL} console=tty0 console=ttyAMA0,115200 audit=0 totaljs.edition=${EDITION}
+set timeout=8
+menuentry "Install Total.js Developer, desktop edition (aarch64)" {
+    linux /arch/boot/aarch64/Image archisobasedir=arch archisolabel=${LABEL} console=tty0 console=ttyAMA0,115200 audit=0 totaljs.edition=desktop
+    initrd /arch/boot/aarch64/initramfs-linux.img
+}
+menuentry "Install Total.js Developer, server edition (aarch64)" {
+    linux /arch/boot/aarch64/Image archisobasedir=arch archisolabel=${LABEL} console=tty0 console=ttyAMA0,115200 audit=0 totaljs.edition=server
     initrd /arch/boot/aarch64/initramfs-linux.img
 }
 GRUBCFG

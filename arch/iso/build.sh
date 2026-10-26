@@ -13,7 +13,6 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 KEY_FILE="${KEY_FILE:?KEY_FILE is the public key of the repository}"
 BUILD="${ROOT}/build/arch-iso"
 PROFILE="${BUILD}/profile"
-EDITION="${EDITION:-server}"
 
 [ "$(id -u)" = 0 ] || { echo "run this as root: mkarchiso needs to mount" >&2; exit 1; }
 [ -d /usr/share/archiso/configs/releng ] || { echo "the package archiso is not installed" >&2; exit 1; }
@@ -47,12 +46,9 @@ s = s.replace('file_permissions=(', 'file_permissions=(\n  ["/usr/local/bin/tota
 open(path, 'w').write(s)
 PY
 
-# --- the menu of the boot (BIOS: syslinux, UEFI: systemd-boot and GRUB): our names, and the edition on the command line
+# --- the menu of the boot (BIOS: syslinux, UEFI: systemd-boot and GRUB): our names (the edition is asked by totaljs-install)
 grep -rl 'Arch Linux' "${PROFILE}/syslinux" "${PROFILE}/grub" "${PROFILE}/efiboot" 2>/dev/null | while read -r f; do
     sed -i "s/Arch Linux install medium/Total.js Developer installer/g; s/Arch Linux/Total.js Developer/g" "${f}"
-done
-grep -rl 'archisobasedir=' "${PROFILE}/syslinux" "${PROFILE}/grub" "${PROFILE}/efiboot" 2>/dev/null | while read -r f; do
-    sed -i "/archisobasedir=/ s/\$/ totaljs.edition=${EDITION}/" "${f}"
 done
 
 mkarchiso -v -w "${BUILD}/work" -o "${BUILD}/out" "${PROFILE}"

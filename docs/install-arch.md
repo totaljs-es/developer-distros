@@ -1,7 +1,9 @@
 # Install Total.js Developer on Arch Linux (testing)
 
-The Arch edition is built from the same packages as the Ubuntu one. Today it is the **server edition** (command line, with everything that Total.js needs: Node.js, Total.js,
-Docker, PostgreSQL, Code, Flow, Total.js Center, HTTPS for `totaljs.developer`), for **x86_64** and for **ARM**. The desktop comes later.
+The Arch edition is built from the same packages as the Ubuntu one, for **x86_64** and for **ARM**, in two editions:
+
+- **Server:** the command line, with everything that Total.js needs: Node.js, Total.js, Docker, PostgreSQL, Code, Flow, Total.js Center and HTTPS for `totaljs.developer`.
+- **Desktop:** the server plus an Openbox desktop with the look of Total.js, Firefox and Chromium (the ones of the repositories of Arch).
 
 It uses the **official ISO of Arch Linux, unmodified**, and its own installer, `archinstall`, with a configuration of ours: nothing of Arch is remastered.
 
@@ -20,10 +22,10 @@ It uses the **official ISO of Arch Linux, unmodified**, and its own installer, `
    pacman-key --lsign-key 95454694523B8D18A376F7D5D722BA35C8427B40
    ```
 
-3. Start the installer with our configuration:
+3. Start the installer with the configuration of the edition that you want (`desktop.json` or `server.json`):
 
    ```bash
-   archinstall --config https://totaljs-es.github.io/developer-distros/repo/arch/server.json
+   archinstall --config https://totaljs-es.github.io/developer-distros/repo/arch/desktop.json
    ```
 
 4. Choose what is not decided by the configuration (the disk, the language and keyboard, the time zone, and the root password and your user with the permission of `sudo`) and select **Install**.
@@ -42,7 +44,7 @@ Arch Linux has no official ISO for ARM. The ARM edition uses **Arch Linux ARM** 
    curl -fsSL https://totaljs-es.github.io/developer-distros/repo/arch/install-arm.sh | bash
    ```
 
-3. It asks for the disk (**it erases it**), the name of the machine, your user and your password; it downloads and checks the root filesystem of Arch Linux ARM, trusts the key of the repository of Total.js (it checks the fingerprint) and installs the server edition.
+3. It asks for the edition (desktop or server), the keyboard layout and the time zone (type `list` to see them), the disk (**it erases it**), the name of the machine, your user and your password; it downloads and checks the root filesystem of Arch Linux ARM, trusts the key of the repository of Total.js (it checks the fingerprint) and installs the server edition.
 4. Take out the ISO and restart. Log in with your user.
 
 The root account is locked, the user `alarm` of Arch Linux ARM is removed, and your user can use `sudo`.
