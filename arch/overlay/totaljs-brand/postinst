@@ -1,0 +1,23 @@
+#!/bin/sh
+# Arch: the splash is shown from the initramfs of mkinitcpio (the hook plymouth) and the kernel is asked for it by the boot loader of the system (systemd-boot or GRUB).
+# All of it is best effort: in a container, or in a system that is being installed, some of those files may not be there.
+if [ -f /etc/mkinitcpio.conf ] && ! grep -Eq '^HOOKS=.*plymouth' /etc/mkinitcpio.conf; then
+  sed -i -E '/^HOOKS=/ s/\budev\b/udev plymouth/' /etc/mkinitcpio.conf
+fi
+# systemd-boot: the entries of the system
+for entry in /boot/loader/entries/*.conf; do
+  [ -f "${entry}" ] || continue
+  grep -q '^options ' "${entry}" || continue
+  grep -Eq '^options .*\bsplash\b' "${entry}" || sed -i -E '/^options / s/$/ quiet splash/' "${entry}"
+done
+# GRUB: the line of the default options of the kernel
+if [ -f /etc/default/grub ] && ! grep -Eq '^GRUB_CMDLINE_LINUX_DEFAULT=.*splash' /etc/default/grub; then
+  if grep -q '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub; then
+    sed -i -E '/^GRUB_CMDLINE_LINUX_DEFAULT=/ s/"$/ quiet splash"/' /etc/default/grub
+  else
+    printf 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"\n' >> /etc/default/grub
+  fi
+  if command -v grub-mkconfig >/dev/null 2>&1 && [ -d /boot/grub ]; then grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1 || true; fi
+fi
+# the initramfs, with the hook
+if command -v mkinitcpio >/dev/null 2>&1 && [ -d /usr/lib/modules ]; then mkinitcpio -P >/dev/null 2>&1 || true; fi

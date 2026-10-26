@@ -6,8 +6,10 @@ set -e
 THEME=/usr/share/plymouth/themes/totaljs/totaljs.plymouth
 
 # Ubuntu chooses the theme with the alternative default.plymouth; the configuration of the daemon says it too
-update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "${THEME}" 200
-update-alternatives --set default.plymouth "${THEME}"
+if command -v update-alternatives >/dev/null 2>&1; then
+  update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "${THEME}" 200
+  update-alternatives --set default.plymouth "${THEME}"
+fi
 mkdir -p /etc/plymouth
 if [ ! -f /etc/plymouth/plymouthd.conf ] || ! grep -q '^Theme=' /etc/plymouth/plymouthd.conf; then
   printf '[Daemon]\nTheme=totaljs\nShowDelay=0\n' > /etc/plymouth/plymouthd.conf

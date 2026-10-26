@@ -50,7 +50,6 @@ neovim               neovim
 totaljs-docker-source   -
 totaljs-mozilla-source  -
 totaljs-chrome-source   -
-totaljs-brand           -
 
 # the desktop (totaljs-openbox, totaljs-conky, totaljs-developer-desktop)
 xorg                    xorg-server xorg-xinit xorg-xrandr xorg-xauth xorg-xset xorg-xsetroot xorg-xprop xorg-xwininfo xf86-input-libinput xf86-video-fbdev
@@ -98,6 +97,8 @@ mesa-utils              mesa-utils
 libgl1-mesa-dri         mesa
 libglx-mesa0            libglvnd
 plymouth-label          -
+plymouth                plymouth
+fonts-dejavu-core       ttf-dejavu
 conky-all               conky
 systemd                 systemd
 # the browsers: Firefox and Chromium are in the official repositories of Arch (the Chrome of Google is not, and the AUR is not used)

@@ -39,6 +39,11 @@ test -n "${FIRST}"
 case " $(id -nG "${FIRST}") " in *' totaljs-developer '*) ;; *) echo "${FIRST} is not in totaljs-developer: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
 case " $(id -nG "${FIRST}") " in *' docker '*) ;; *) echo "${FIRST} is not in docker: $(id -nG "${FIRST}")" >&2; exit 1 ;; esac
 
+echo "==> the splash of the boot"
+test -f /usr/share/plymouth/themes/totaljs/totaljs.plymouth
+grep '^Theme=totaljs$' /etc/plymouth/plymouthd.conf >/dev/null
+if [ -f /etc/mkinitcpio.conf ]; then grep -E '^HOOKS=.*plymouth' /etc/mkinitcpio.conf >/dev/null; fi
+
 echo "==> the tools of a developer"
 for c in git curl jq tmux psql sqlite3 git-lfs gh rg fd fzf bat http nvim; do command -v "${c}" >/dev/null || { echo "missing: ${c}" >&2; exit 1; }; done
 test "$(sysctl -n fs.inotify.max_user_watches 2>/dev/null || echo 524288)" -ge 8192
