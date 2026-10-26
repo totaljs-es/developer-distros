@@ -31,6 +31,7 @@ for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/r
 done
 for xml in /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml; do python -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' "${xml}"; done
 test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
+test "$(ls /usr/share/totaljs-developer/icons/*.svg | wc -l)" -ge 10   # the icons of the menu: `include` too
 grep -q 'totaljs-wallpaper choose' /etc/skel/.config/openbox/menu.xml
 bash -n /usr/bin/totaljs-wallpaper
 for c in openbox tint2 picom rofi dunst feh alacritty pcmanfm conky firefox chromium nm-applet pasystray lightdm; do command -v "${c}" >/dev/null || { echo "missing command: ${c}" >&2; exit 1; }; done

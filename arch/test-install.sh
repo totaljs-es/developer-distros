@@ -81,6 +81,7 @@ kill "${DNS_PID}" 2>/dev/null || true
 
 echo "==> Total.js Center"
 test -f /var/lib/totaljs-center/index.js
+test -f /usr/share/totaljs-developer/center/public/logo.svg   # the mark: it comes from shared/branding with `include`
 id totalcenter >/dev/null
 case " $(id -nG totalcenter) " in *' docker '*) echo 'totalcenter is in docker' >&2; exit 1 ;; esac
 

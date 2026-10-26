@@ -104,6 +104,26 @@ def make(package_dir, out_dir, table):
     else:
         os.makedirs(os.path.join(target, 'files'))
 
+    # `include`: lines "<path in this repository> <path in the package>" (the wallpapers, the splash, the icons and the logo are kept once, in shared/ and tools/)
+    include = os.path.join(package_dir, 'include')
+    if os.path.isfile(include):
+        repo_root = os.path.dirname(PACKAGES)
+        with open(include) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                source, dest = line.split(None, 1)
+                source = os.path.join(repo_root, source)
+                dest = os.path.join(target, 'files', dest.strip())
+                if not os.path.exists(source):
+                    sys.exit(f'{name}: include: {source} does not exist')
+                if os.path.isdir(source):
+                    shutil.copytree(source, dest, dirs_exist_ok=True)
+                else:
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    shutil.copy2(source, dest)
+
     overlay = os.path.join(HERE, 'overlay', name)
     if os.path.isdir(os.path.join(overlay, 'files')):
         shutil.copytree(os.path.join(overlay, 'files'), os.path.join(target, 'files'), symlinks=True, dirs_exist_ok=True)
