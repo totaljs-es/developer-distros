@@ -19,7 +19,8 @@ fi
 pacman -Syu --noconfirm
 
 echo "==> install the desktop edition"
-useradd -m -s /bin/bash earlyuser
+# the person that the installer made before the layer (the test of the server may have made it already)
+id earlyuser >/dev/null 2>&1 || useradd -m -s /bin/bash earlyuser
 pacman -S --noconfirm totaljs-developer-desktop
 
 echo "==> what the desktop promises"
