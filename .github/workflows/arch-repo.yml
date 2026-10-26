@@ -36,6 +36,9 @@ jobs:
       - name: Install the server edition from it
         run: bash arch/test-install.sh "$GITHUB_WORKSPACE/build/arch/x86_64"
 
+      - name: Install the desktop edition from it
+        run: bash arch/test-desktop.sh "$GITHUB_WORKSPACE/build/arch/x86_64"
+
       - name: The repository, to be signed with the key of Total.js on the computer of the maintainers
         uses: actions/upload-artifact@v7
         with:

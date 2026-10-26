@@ -1,11 +1,7 @@
 # Packages of packages/ that are not built for Arch: they only write the sources of apt, or they need the plymouth of Ubuntu.
-# (The desktop pieces come in a later step.)
+
 totaljs-docker-source
 totaljs-mozilla-source
 totaljs-chrome-source
 totaljs-brand
-totaljs-developer-desktop
-totaljs-openbox
-totaljs-conky
-totaljs-wallpapers
 totaljs-developer-release

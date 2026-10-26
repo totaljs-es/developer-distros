@@ -51,3 +51,55 @@ totaljs-docker-source   -
 totaljs-mozilla-source  -
 totaljs-chrome-source   -
 totaljs-brand           -
+
+# the desktop (totaljs-openbox, totaljs-conky, totaljs-developer-desktop)
+xorg                    xorg-server xorg-xinit xorg-xrandr xorg-xauth xorg-xset xorg-xsetroot xorg-xprop xorg-xwininfo xf86-input-libinput xf86-video-fbdev
+openbox                 openbox
+obconf                  obconf-qt
+tint2                   tint2
+picom                   picom
+rofi                    rofi
+dunst                   dunst
+libnotify-bin           libnotify
+feh                     feh
+zenity                  zenity
+alacritty               alacritty
+pcmanfm                 pcmanfm
+gvfs                    gvfs
+xarchiver               xarchiver
+lightdm                 lightdm
+lightdm-gtk-greeter     lightdm-gtk-greeter
+lxappearance            lxappearance
+papirus-icon-theme      papirus-icon-theme
+adwaita-icon-theme-full adwaita-icon-theme
+librsvg2-common         librsvg
+shared-mime-info        shared-mime-info
+fonts-firacode          ttf-fira-code
+fonts-noto              noto-fonts
+gsimplecal              gsimplecal
+python3                 python
+python3-xdg             python-pyxdg
+network-manager         networkmanager
+network-manager-gnome   network-manager-applet
+policykit-1-gnome       polkit-gnome
+pipewire                pipewire
+pipewire-pulse          pipewire-pulse
+wireplumber             wireplumber
+alsa-utils              alsa-utils
+pavucontrol             pavucontrol
+pasystray               pasystray
+dbus-x11                dbus
+xdg-utils               xdg-utils
+x11-xserver-utils       xorg-xrdb xorg-xmodmap xorg-xrandr xorg-xset
+x11-utils               xorg-xprop xorg-xwininfo xorg-xdpyinfo
+xdotool                 xdotool
+scrot                   scrot
+mesa-utils              mesa-utils
+libgl1-mesa-dri         mesa
+libglx-mesa0            libglvnd
+plymouth-label          -
+conky-all               conky
+systemd                 systemd
+# the browsers: Firefox and Chromium are in the official repositories of Arch (the Chrome of Google is not, and the AUR is not used)
+firefox                 firefox
+google-chrome-stable    chromium

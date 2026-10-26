@@ -1,0 +1,7 @@
+#!/bin/sh
+# Arch: the network of the desktop is NetworkManager (the icon of the panel talks to it), not the systemd-networkd of the installer, and the login screen is enabled
+# (the Debian script chooses the graphical target; Arch needs the services enabled by hand). They start at the next boot: nothing is stopped now, so that an SSH session
+# or an installation in progress does not lose the network.
+systemctl enable NetworkManager.service lightdm.service >/dev/null 2>&1 || true
+systemctl disable systemd-networkd.service systemd-networkd.socket systemd-networkd-wait-online.service >/dev/null 2>&1 || true
+systemctl set-default graphical.target >/dev/null 2>&1 || true
