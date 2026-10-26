@@ -57,6 +57,12 @@ while :; do
     if [ ! -d /usr/share/zoneinfo ] || [ -f "/usr/share/zoneinfo/${TZ_NEW}" ]; then break; fi
     echo "the time zone '${TZ_NEW}' does not exist: try again (type list to see them)"
 done
+# the edition: the entry of the boot menu says it (totaljs.edition=desktop|server); without it, it is asked
+EDITION=""
+for word in $(cat /proc/cmdline 2>/dev/null); do case "${word}" in totaljs.edition=*) EDITION="${word#totaljs.edition=}" ;; esac; done
+while [ "${EDITION}" != desktop ] && [ "${EDITION}" != server ]; do
+    EDITION="$(ask 'Edition: desktop (Openbox, Firefox, Chromium) or server (command line) [desktop]: ')"; EDITION="${EDITION:-desktop}"
+done
 HOSTNAME_NEW="$(ask 'Name of the machine [totaljs]: ')"; HOSTNAME_NEW="${HOSTNAME_NEW:-totaljs}"
 USER_NEW="$(ask 'Your user name: ')"
 [[ "${USER_NEW}" =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die "the user name has to be lower case letters, numbers, - or _"
@@ -135,6 +141,11 @@ options root=PARTUUID=${ROOT_PARTUUID} rw rootwait preempt=none
 ENTRY
 printf 'PARTUUID=%s / ext4 defaults,noatime 0 1\nPARTUUID=%s /boot vfat defaults 0 2\n' "${ROOT_PARTUUID}" "${EFI_PARTUUID}" > "${MNT}/etc/fstab"
 
+# colour and the candy in pacman, from the start (the first update of the installer already shows the Pac-Man)
+for option in Color ILoveCandy; do
+    grep -q "^${option}" "${MNT}/etc/pacman.conf" || sed -i "/^\[options\]/a ${option}" "${MNT}/etc/pacman.conf"
+done
+
 # --- the system of the person ---------------------------------------------------------------------------------------------------------
 say "The system"
 echo "${HOSTNAME_NEW}" > "${MNT}/etc/hostname"
@@ -181,9 +192,17 @@ printf 'Server = %s/arch/$arch\n' "${REPO_URL}" > "${MNT}/etc/pacman.d/totaljs-d
 printf '\n[totaljs-developer]\nSigLevel = Required DatabaseOptional\nInclude = /etc/pacman.d/totaljs-developer-mirrorlist\n' >> "${MNT}/etc/pacman.conf"
 
 # --- the system up to date, and the server edition ------------------------------------------------------------------------------------
-say "Updating the system and installing Total.js Developer (this takes a while)"
+say "Updating the system and installing Total.js Developer, ${EDITION} edition (this takes a while)"
 in_target pacman -Syu --noconfirm
-in_target pacman -S --noconfirm --overwrite /etc/pacman.d/totaljs-developer-mirrorlist totaljs-developer-release totaljs-developer-server
+in_target pacman -S --noconfirm --overwrite /etc/pacman.d/totaljs-developer-mirrorlist totaljs-developer-release "totaljs-developer-${EDITION}"
+
+# the keyboard of the desktop: the console reads vconsole.conf, X reads its own layout (LightDM, Openbox and the terminal). The name of the layout of the console is
+# almost always the one of X (es, de, fr, latam, it...); the ones that differ are translated, and a name that X does not have is left out
+case "${KEYMAP_NEW}" in uk) XLAYOUT=gb ;; *) XLAYOUT="${KEYMAP_NEW%%[-_.]*}" ;; esac
+if [ "${XLAYOUT}" != us ] && { [ ! -f "${MNT}/usr/share/X11/xkb/rules/evdev.lst" ] || grep -qE "^[[:space:]]+${XLAYOUT}[[:space:]]" "${MNT}/usr/share/X11/xkb/rules/evdev.lst"; }; then
+    mkdir -p "${MNT}/etc/X11/xorg.conf.d"
+    printf 'Section "InputClass"\n    Identifier "totaljs-keyboard"\n    MatchIsKeyboard "on"\n    Option "XkbLayout" "%s"\nEndSection\n' "${XLAYOUT}" > "${MNT}/etc/X11/xorg.conf.d/00-keyboard.conf"
+fi
 
 # the system uses its own DNS (systemd-resolved) from now on
 rm -f "${MNT}/etc/resolv.conf"
@@ -192,3 +211,4 @@ sync
 umount -R "${MNT}"
 trap - EXIT ERR
 say "Done. Take out the ISO and restart: the machine starts Total.js Developer. Log in as ${USER_NEW}, and open https://totaljs.developer"
+[ "${EDITION}" != desktop ] || echo "The login screen of the desktop appears when it starts."

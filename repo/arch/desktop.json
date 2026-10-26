@@ -1,0 +1,34 @@
+{
+  "archinstall-language": "English",
+  "hostname": "totaljs",
+  "kernels": [
+    "linux"
+  ],
+  "bootloader_config": {
+    "bootloader": "Grub",
+    "uki": false,
+    "removable": false
+  },
+  "mirror_config": {
+    "custom_repositories": [
+      {
+        "name": "totaljs-developer",
+        "url": "https://totaljs-es.github.io/developer-distros/repo/arch/$arch",
+        "sign_check": "Required",
+        "sign_option": "TrustedOnly"
+      }
+    ]
+  },
+  "network_config": {
+    "type": "nm"
+  },
+  "ntp": true,
+  "swap": {
+    "enabled": true,
+    "algorithm": "zstd"
+  },
+  "packages": [
+    "totaljs-developer-release",
+    "totaljs-developer-desktop"
+  ]
+}
