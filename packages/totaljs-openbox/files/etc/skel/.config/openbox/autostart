@@ -26,7 +26,13 @@ pgrep -u "$(id -u)" -x tint2 >/dev/null || (
 ) &
 # the tray: once each. The autostart entries of the system (/etc/xdg/autostart) would start them a second time, and they are turned off in ~/.config/autostart
 totaljs-launch-once nm-applet nm-applet &
-totaljs-launch-once pasystray pasystray &
+# pasystray talks to the audio server (pipewire-pulse): if it starts before the server answers it shows an icon of "not connected" (a white disc) and does not recover,
+# so it waits for the server (up to a minute)
+if command -v pactl >/dev/null 2>&1; then
+  ( for _ in $(seq 1 60); do pactl info >/dev/null 2>&1 && break; sleep 1; done; totaljs-launch-once pasystray pasystray ) &
+else
+  totaljs-launch-once pasystray pasystray &
+fi
 # Openbox has no agent of Polkit of its own, and the tools of the desktop that need a password ask for it through one
 for agent in /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1; do
   if [ -x "$agent" ]; then totaljs-launch-once polkit-gnome-authentication-agent-1 "$agent" & break; fi
