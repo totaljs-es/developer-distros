@@ -25,6 +25,8 @@
 
 ## Install
 
+> **On a Mac with Apple Silicon, with UTM:** create the virtual machine with **Use Apple Virtualization** turned on (*Virtualize → Linux → advanced options*). With it the boot shows its animation, the restart works and the shortcuts with `Cmd` reach the desktop. The other engine of UTM (QEMU) installs and runs it too, but with known problems: see the [installation guide](docs/install.md).
+
 ### Arch Linux
 
 **[Arch preview — 27 October 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.10.27)**
