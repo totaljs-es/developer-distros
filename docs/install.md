@@ -54,7 +54,7 @@ Total.js. With the default engine of UTM (QEMU) the system installs and works th
 
 With the engine QEMU, three more things (they come from QEMU, not from the system, and Apple Virtualization does not have them):
 - **A restart can hang** when the machine has several processors; turning it off and on works, and with 1 processor the restart works too.
-- The boot is seen (with its animation) by choosing the display card `virtio-ramfb` in the settings of the machine.
+- **The animation of the boot is not seen**, not even with another display card (`virtio-ramfb` was tried and does not show it); with Apple Virtualization it is.
 - The keys of the Mac that close a window are caught by the window: `Cmd + W` closes the machine. Use `Alt + W` to change the wallpaper.
 The ISO of Intel (x86_64) in UTM can only run with QEMU, because Apple Virtualization does not emulate Intel.
 
