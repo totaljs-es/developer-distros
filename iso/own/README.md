@@ -1,4 +1,6 @@
-# Our own ISO
+# Experimental own live ISO
+
+**Status: experimental and outside the published installation path.** The workflow runs manually only; it is not a release check for the Arch ISOs or the Ubuntu ISO/seeds. This prototype has no installer and has not been cleared for public distribution.
 
 The ISO of Total.js Developer that is ours: a live image made from the packages of Ubuntu 26.04, with our identity and **no installer, logo or name of Canonical** in it. It is what
 `docs/legal.md` calls the way out of publishing the modified installer of Ubuntu: Ubuntu is the base (`ID_LIKE=ubuntu debian`), and what carries its marks is replaced.

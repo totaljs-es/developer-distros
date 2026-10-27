@@ -75,7 +75,7 @@ everything else comes from the archive of Ubuntu.
 packages/              the source of the packages
 tools/package-repo/    builds and signs the repository, and tests it in a clean Ubuntu
 iso/ubuntu/            the ISO and the seed images, and the tests that install and boot the system
-iso/own/               a live image of our own, from the packages of Ubuntu
+iso/own/               experimental live-image prototype (manual builds only)
 shared/                the artwork: wallpapers, boot splash and logos
 docs/                  the documentation
 tools/image-builder/   the images for TotalVM (macOS with Apple Silicon)

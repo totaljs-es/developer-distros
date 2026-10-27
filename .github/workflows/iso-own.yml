@@ -2,12 +2,9 @@ name: iso-own
 
 # The ISO of Total.js Developer that is ours: the packages of Ubuntu in a live image with our identity, with no installer and no marks of Canonical.
 # It is built in a clean Ubuntu 26.04 (a privileged container) and started in QEMU, with BIOS and with UEFI. See iso/own/README.md.
+# Experimental prototype, outside the published ISO pipeline. Run manually only.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'iso/own/**'
-      - '.github/workflows/iso-own.yml'
 
 jobs:
   live:
