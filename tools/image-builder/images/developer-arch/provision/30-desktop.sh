@@ -27,7 +27,7 @@ pac -S --noconfirm --needed \
     network-manager-applet polkit avahi nss-mdns \
     pipewire pipewire-pulse wireplumber alsa-utils pavucontrol pasystray \
     gsimplecal \
-    xdg-utils xdotool dunst libnotify scrot \
+    xdg-utils xdotool dunst libnotify scrot python-pyxdg spice-vdagent \
     xf86-input-libinput \
     mesa imagemagick python \
     gnome-themes-extra papirus-icon-theme

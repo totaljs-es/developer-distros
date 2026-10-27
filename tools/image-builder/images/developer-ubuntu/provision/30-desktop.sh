@@ -24,7 +24,7 @@ apt-get install -y --no-install-recommends \
     avahi-daemon libnss-mdns \
     pipewire pipewire-pulse wireplumber alsa-utils pavucontrol pasystray \
     gsimplecal \
-    dbus-x11 xdg-utils \
+    dbus-x11 xdg-utils python3-xdg spice-vdagent \
     x11-xserver-utils x11-utils xdotool dunst libnotify-bin scrot \
     mesa-utils libgl1-mesa-dri libglx-mesa0 \
     imagemagick

@@ -25,6 +25,8 @@ id earlyuser >/dev/null 2>&1 || useradd -m -s /bin/bash earlyuser
 pacman -S --noconfirm totaljs-developer-desktop
 
 echo "==> what the desktop promises"
+command -v spice-vdagent >/dev/null
+test -f /etc/xdg/autostart/spice-vdagent.desktop
 for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml /etc/skel/.config/tint2/tint2rc \
          /etc/skel/.config/gtk-3.0/settings.ini /usr/bin/totaljs-open /usr/bin/totaljs-wallpaper /etc/lightdm/lightdm.conf.d/50-totaljs.conf \
          /etc/lightdm/lightdm-gtk-greeter.conf.d/50-totaljs.conf /usr/share/applications/totaljs-center.desktop /usr/share/xsessions/openbox.desktop; do

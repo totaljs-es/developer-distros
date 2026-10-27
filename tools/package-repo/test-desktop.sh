@@ -44,6 +44,8 @@ for item in /home/earlyuser/.config /home/earlyuser/.config/openbox /home/earlyu
 done
 
 echo "==> what the desktop promises"
+command -v spice-vdagent >/dev/null
+test -f /etc/xdg/autostart/spice-vdagent.desktop
 for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/rc.xml /etc/skel/.config/tint2/tint2rc /etc/skel/.config/gtk-3.0/settings.ini \
          /usr/bin/totaljs-open /usr/bin/totaljs-wallpaper /etc/lightdm/lightdm.conf.d/50-totaljs.conf /etc/lightdm/lightdm-gtk-greeter.conf.d/50-totaljs.conf /usr/share/applications/totaljs-center.desktop; do
     test -e "${f}" || { echo "missing ${f}" >&2; exit 1; }

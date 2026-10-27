@@ -87,6 +87,7 @@ wireplumber             wireplumber
 alsa-utils              alsa-utils
 pavucontrol             pavucontrol
 pasystray               pasystray
+spice-vdagent           spice-vdagent
 dbus-x11                dbus
 xdg-utils               xdg-utils
 x11-xserver-utils       xorg-xrdb xorg-xmodmap xorg-xrandr xorg-xset
