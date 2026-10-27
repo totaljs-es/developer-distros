@@ -1,14 +1,1 @@
-# the wallpapers of the pack (the rotation of the desktop and the chooser): all of shared/wallpapers/4k except the mascot, which is only the background of the login screen
-shared/wallpapers/4k/aubergine.jpg usr/share/backgrounds/totaljs/aubergine.jpg
-shared/wallpapers/4k/blueprint.jpg usr/share/backgrounds/totaljs/blueprint.jpg
-shared/wallpapers/4k/contour.jpg usr/share/backgrounds/totaljs/contour.jpg
-shared/wallpapers/4k/daylight.jpg usr/share/backgrounds/totaljs/daylight.jpg
-shared/wallpapers/4k/ember.jpg usr/share/backgrounds/totaljs/ember.jpg
-shared/wallpapers/4k/horizon.jpg usr/share/backgrounds/totaljs/horizon.jpg
-shared/wallpapers/4k/lattice.jpg usr/share/backgrounds/totaljs/lattice.jpg
-shared/wallpapers/4k/prism.jpg usr/share/backgrounds/totaljs/prism.jpg
-shared/wallpapers/4k/signal.jpg usr/share/backgrounds/totaljs/signal.jpg
-shared/wallpapers/4k/sunrise.jpg usr/share/backgrounds/totaljs/sunrise.jpg
-shared/wallpapers/4k/syntax.jpg usr/share/backgrounds/totaljs/syntax.jpg
-# the login screen has its own folder, so that it is not one of the wallpapers that change
-shared/wallpapers/4k/mascot.jpg usr/share/backgrounds/totaljs-greeter/mascot.jpg
+shared/wallpapers/4k usr/share/backgrounds/totaljs
