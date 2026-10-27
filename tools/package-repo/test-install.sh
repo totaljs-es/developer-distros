@@ -172,7 +172,9 @@ case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'to
 
 echo "==> the wallpapers (a package of its own: only the desktop needs them)"
 apt-get install -y totaljs-wallpapers >/dev/null
-test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" = 12
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 13
+test -s /usr/share/backgrounds/totaljs/toto.jpg
+test -s /usr/share/doc/totaljs-wallpapers/TOTO-LICENSE.md
 apt-get remove -y totaljs-wallpapers >/dev/null
 test ! -e /usr/share/backgrounds/totaljs
 
