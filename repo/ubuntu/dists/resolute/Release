@@ -2,12 +2,12 @@ Origin: Total.js
 Label: Total.js Developer
 Suite: resolute
 Codename: resolute
-Date: Mon, 26 Oct 2026 09:39:16 UTC
+Date: Tue, 27 Oct 2026 09:18:41 UTC
 Architectures: arm64 amd64
 Components: main
 Description: Official Total.js Developer packages
 SHA256:
- 60e8ba856984f2761afe73d8547318b52af4604c55aece48a519fa434b66b8e8 16959 main/binary-arm64/Packages
- 436f15c7c572aa4cfb091b646f3b0fb174caf294df72514cbc31cb0ad1578661 5445 main/binary-arm64/Packages.gz
- 60e8ba856984f2761afe73d8547318b52af4604c55aece48a519fa434b66b8e8 16959 main/binary-amd64/Packages
- 436f15c7c572aa4cfb091b646f3b0fb174caf294df72514cbc31cb0ad1578661 5445 main/binary-amd64/Packages.gz
+ 0398f00b403a16a7e97bb37b2106d40e01364b5364fc31df4cff9a320ee144f8 17029 main/binary-arm64/Packages
+ eed4a4be44c50e18f2dff09ae869bcab374de6f923d27f2d4d2d8cec03121d65 5494 main/binary-arm64/Packages.gz
+ 0398f00b403a16a7e97bb37b2106d40e01364b5364fc31df4cff9a320ee144f8 17029 main/binary-amd64/Packages
+ eed4a4be44c50e18f2dff09ae869bcab374de6f923d27f2d4d2d8cec03121d65 5494 main/binary-amd64/Packages.gz
