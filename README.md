@@ -20,7 +20,7 @@
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
 - **Total.js Center**, the front door at `https://totaljs.developer`: the state of the services, your projects and how to connect to the database.
-- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Google Chrome, a terminal, a file manager, a widget on the wallpaper and twelve wallpapers.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Google Chrome, a terminal, a file manager, a widget on the wallpaper and thirteen wallpapers.
 
 ## Install
 
@@ -54,7 +54,7 @@ everything else comes from the archive of Ubuntu.
 
 - **Packages:** `totaljs-developer-server` and `totaljs-developer-desktop` are meta-packages; each piece (Node.js, the services, the DNS, Center, the desktop, the widget...) is a package of its own.
   The repository is built and signed from this repository and served at <https://totaljs-es.github.io/developer-distros/>.
-- **The installer:** the ISO is the official installer of Ubuntu Server with an autoinstall seed and a boot menu added. The packages of Ubuntu are downloaded from Ubuntu, and ours from the repository above.
+- **The installer:** the unmodified official Ubuntu Server ISO reads our separate autoinstall seed image. Ubuntu packages come from Ubuntu, and the Total.js layer comes from the repository above. The remastered installer is tested separately; see [its publication status](docs/legal.md).
 - **Tested:** each change installs the packages in a clean Ubuntu 26.04, starts the desktop session in a virtual screen, and the installer is run in QEMU and the installed system booted.
 - **Already have Ubuntu 26.04?** Add the repository and install the packages: the commands are on its [front page](https://totaljs-es.github.io/developer-distros/), and [`docs/layer.md`](docs/layer.md) explains them.
 
@@ -86,8 +86,9 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md). To report a vulnerability, follow [SECU
 
 ## License
 
-The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under [CC BY-SA 4.0](LICENSE-ARTWORK). The logo and the mascot of Total.js are
-not covered by either: they are marks. The software that the packages install (Node.js, Docker, PostgreSQL, Firefox, Chrome, Ubuntu...) keeps its own licenses.
+Toto, the European red fox mascot of [Spanish Total.js](https://totaljs.es/), accompanies the welcome screen and first steps. His official artwork is kept in [`shared/branding/toto`](shared/branding/toto/README.md).
+
+The code is under the [MIT License](LICENSE). The wallpapers and the images of the boot splash are under [CC BY-SA 4.0](LICENSE-ARTWORK). Toto and his appearance in wallpapers are covered by the [proprietary Toto license](shared/branding/toto/LICENSE.md). The Total.js logo and the legacy Tux artwork are not covered by either code or wallpaper license. The software that the packages install (Node.js, Docker, PostgreSQL, Firefox, Chrome, Ubuntu...) keeps its own licenses.
 
 ## Trademarks
 

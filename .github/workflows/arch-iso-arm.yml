@@ -49,7 +49,7 @@ jobs:
           # the runner has no KVM: QEMU emulates the processor and the start takes about ten minutes (in UTM, with Apple Virtualization, a few seconds). It is a success when
           # the banner of the medium appears or when systemd reaches the multi-user target with the getty of the first console (the banner needs a login on the serial port)
           # systemd writes colours to the console (escape codes inside the words): they are taken away before looking for a text
-          seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' boot.log | tr -d '\r' | grep -q "$1"; }
+          seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' boot.log | tr -d '\r' | grep -F "$1" >/dev/null; }
           for _ in $(seq 1 700); do
             if seen 'Total.js Developer, installation medium'; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
             if seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; then echo "booted: systemd reached the multi-user target with the getty of the first console"; tail -n 5 boot.log; kill "$QEMU" 2>/dev/null || true; exit 0; fi
@@ -60,3 +60,12 @@ jobs:
           echo "the medium did not reach the banner" >&2
           kill "$QEMU" 2>/dev/null || true
           exit 1
+
+      - name: Keep the boot diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: arch-iso-arm-boot-logs
+          path: |
+            boot.log
+            build/arch-iso-arm/mkinitcpio.log

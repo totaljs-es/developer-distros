@@ -39,6 +39,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@v7
+
       - uses: actions/download-artifact@v7
         with:
           name: totaljs-developer-arch-x86_64-iso
@@ -56,26 +58,18 @@ jobs:
           xorriso -indev "$ISO" -find / -maxdepth 3 2>/dev/null | grep -E 'vmlinuz|initramfs|airootfs' | head
 
       - name: Boot it in QEMU
-        run: |
-          ISO="$(ls iso/*.iso | head -n 1)"
-          LABEL="$(xorriso -indev "$ISO" -pvd_info 2>&1 | sed -n 's/^Volume Id *: *//p' | head -n 1)"
-          mkdir kernel
-          xorriso -osirrox on -indev "$ISO" -extract /arch/boot/x86_64 kernel >/dev/null 2>&1
-          ls kernel
-          ACCEL=tcg; [ -w /dev/kvm ] && ACCEL=kvm
-          # the kernel and the initramfs of the ISO, started directly, with the console on the serial port
-          timeout 600 qemu-system-x86_64 -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
-            -kernel kernel/vmlinuz-linux -initrd kernel/initramfs-linux.img \
-            -append "archisobasedir=arch archisolabel=$LABEL console=ttyS0,115200 totaljs.edition=server" \
-            -drive file="$ISO",media=cdrom,readonly=on > boot.log 2>&1 &
-          QEMU=$!
-          seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' boot.log | tr -d '\r' | grep -q "$1"; }
-          for _ in $(seq 1 300); do
-            if seen 'Total.js Developer, installation medium' || { seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; }; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
-            kill -0 "$QEMU" 2>/dev/null || break
-            sleep 2
-          done
-          tail -n 60 boot.log
-          echo "the medium did not reach the banner" >&2
-          kill "$QEMU" 2>/dev/null || true
-          exit 1
+        run: bash arch/iso/test-boot.sh "$(ls iso/*.iso | head -n 1)"
+
+      - name: Keep the boot diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: arch-iso-boot-logs
+          path: build/arch-iso/boot/*.txt
+
+      - name: Keep the serial console
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: arch-iso-boot-console
+          path: build/arch-iso/boot/*.log

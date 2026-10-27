@@ -2,9 +2,9 @@
 
 The Total.js layer that every distro has in common: the desktop and its configuration, wallpapers, the Plymouth boot theme, themes, scripts and branding. It is the only place where the experience is customized, so Ubuntu and Arch stay the same for the user.
 
-`branding/mascot.png` is the official mascot: Tux hugging the Total.js logo (1024 x 1024, transparent). It is the identity of the distros, of TotalVM, of the boot screen and of the documentation; use this file and not a copy.
+`shared/branding/toto/` contains official Toto artwork and its proprietary license. Toto is the European red fox mascot of Spanish Total.js and accompanies Center, first-run setup and optional wallpapers. Use these assets, with attribution, and keep the Total.js logo for system icons and the boot splash. `branding/mascot.png` is retained as legacy Tux artwork.
 
-`wallpapers/` has the six wallpapers of the desktop (4K, drawn with code, with the official logo): see its README.
+`wallpapers/` has the wallpapers of the desktop (4K, drawn with code, with the official logo): see its README.
 
 `plymouth/` has the boot splash, an animation of the logo coming together with a ring of light that follows the progress of the boot: see its README.
 

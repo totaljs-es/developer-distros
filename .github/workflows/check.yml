@@ -19,3 +19,6 @@ jobs:
       # The JSON files, the catalog, the recipes and the shell syntax
       - run: node scripts/check.js
 
+
+      - name: ISO plumbing regressions (no VM)
+        run: python3 scripts/test-iso.py

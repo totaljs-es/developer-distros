@@ -15,6 +15,8 @@ install -m 0755 "${WIZARD_SRC}/wizard.py" /usr/local/share/totaljs-wizard/wizard
 install -m 0700 -o root -g root "${WIZARD_SRC}/totaljs-apply-firstrun.py" /usr/local/sbin/totaljs-apply-firstrun.py
 install -m 0440 -o root -g root "${WIZARD_SRC}/90-totaljs-wizard" /etc/sudoers.d/90-totaljs-wizard
 visudo -cf /etc/sudoers.d/90-totaljs-wizard
+install -m 0644 "${WIZARD_SRC}/toto-welcome.png" /usr/local/share/totaljs-wizard/toto-welcome.png
+install -m 0644 "${WIZARD_SRC}/TOTO-LICENSE.md" /usr/local/share/totaljs-wizard/TOTO-LICENSE.md
 
 # Logo: take it straight from the shipped assets (don't depend on 35-branding,
 # which may take a different code path and not stage it).

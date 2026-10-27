@@ -30,4 +30,6 @@ How to install it: [docs/install-arch.md](../docs/install-arch.md).
 
 ## What is not done yet
 
-The desktop edition, the test of `install-arm.sh` in the CI (today it is tried in a virtual machine), the splash of plymouth (`totaljs-brand`) and Chromium/Firefox as packages of the meta-package of the desktop.
+The end-to-end test of installation to disk on both architectures. The desktop and Plymouth packages are already present; the ISO boot checks only establish that the live environment starts.
+
+The x86_64 workflow builds an ISO and `bash arch/iso/test-boot.sh image.iso` boots its kernel/initramfs against that ISO. This bypasses the firmware menus: BIOS/UEFI boot and installation to disk still need separate validation. Serial, extraction and volume-label logs are retained even when the test fails. The ARM workflow boots through UEFI and also retains its serial log.

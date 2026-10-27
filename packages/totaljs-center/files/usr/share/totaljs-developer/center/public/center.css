@@ -118,3 +118,12 @@ pre { margin: 0; padding: 14px 16px; overflow: auto; font-size: 13px; line-heigh
 footer { padding: 8px 0 40px; color: var(--muted); font-size: 13px; text-align: center; }
 @media (max-width: 560px) { .hero { padding: 22px; } .copy { position: static; margin-top: 8px; } }
 @media (prefers-reduced-motion: reduce) { .tile { transition: none; } .tile:hover { transform: none; } }
+
+/* Toto accompanies real welcome/help text and keeps its original proportions. */
+.hero > div { flex: 1 1 240px; min-width: 0; }
+.toto-welcome { flex: 0 0 auto; width: 144px; height: auto; object-fit: contain; }
+.toto-help { float: left; width: 80px; height: auto; margin: 0 18px 8px 0; object-fit: contain; }
+#projects::after { content: ''; display: block; clear: both; }
+@media (max-width: 600px) {
+    .toto-welcome { width: 96px; align-self: flex-start; }
+}

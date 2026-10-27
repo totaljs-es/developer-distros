@@ -1,2 +1,5 @@
 # the mark is kept in shared/branding, where the other pieces of the brand are
 shared/branding/logo-totaljs.svg usr/share/totaljs-developer/center/public/logo.svg
+shared/branding/toto/toto-welcome.webp usr/share/totaljs-developer/center/public/toto-welcome.webp
+shared/branding/toto/toto-thinking.webp usr/share/totaljs-developer/center/public/toto-thinking.webp
+shared/branding/toto/LICENSE.md usr/share/doc/totaljs-center/TOTO-LICENSE.md

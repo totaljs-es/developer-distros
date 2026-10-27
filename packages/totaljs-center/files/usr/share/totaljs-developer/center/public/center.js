@@ -47,6 +47,7 @@ function render(d) {
 			list.append(el('a', { href: p.url, target: '_blank', rel: 'noopener' }, [el('strong', { textContent: p.name }), el('br'), el('span', { className: 'mono note', textContent: p.url.replace('http://', '') })]));
 		projects.append(list);
 	} else {
+		projects.append(el('img', { className: 'toto-help', src: '/toto-thinking.webp', width: 80, height: 80, alt: '' }));
 		projects.append(el('p', { className: 'empty' }, [
 			'Your projects will appear here. Create one in Code and it gets its own address: ',
 			el('code', { textContent: 'my-project.' + d.domain }), '.'

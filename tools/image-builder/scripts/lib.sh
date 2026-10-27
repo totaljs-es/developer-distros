@@ -49,3 +49,11 @@ build_runner() {
         --entitlements "${BUILDER_DIR}/totalvm-builder.entitlements" \
         "${RUNNER_BIN}"
 }
+
+# The same official welcome artwork for both first-run wizards.
+stage_toto() {
+    local source="${BUILDER_DIR}/../../shared/branding/toto" destination="$1"
+    mkdir -p "${destination}/wizard"
+    cp "${source}/toto-welcome.png" "${destination}/wizard/toto-welcome.png"
+    cp "${source}/LICENSE.md" "${destination}/wizard/TOTO-LICENSE.md"
+}

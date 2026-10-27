@@ -155,16 +155,17 @@ case "${SLIM:-pool}" in
 esac
 
 if [ "${#REMOVE[@]}" -gt 0 ]; then
-    # The disk check of the installer reads md5sum.txt: it must not list what is no longer there
-    xorriso -osirrox on -indev "${WORK}/${ISO_NAME}" -extract /md5sum.txt "${WORK}/md5sum.txt" >/dev/null 2>&1 \
-        || die "could not read /md5sum.txt from the ISO"
-    chmod u+w "${WORK}/md5sum.txt"
-    PATTERN="$(printf '%s\n' "${REMOVE[@]}" | sed 's|^/||' | paste -sd'|' -)"
-    grep -v -E "  \./(${PATTERN})/" "${WORK}/md5sum.txt" > "${WORK}/md5sum.slim" || true
-    [ -s "${WORK}/md5sum.slim" ] || die "md5sum.txt has nothing left once ${REMOVE[*]} are out"
-    ARGS+=(-rm_r "${REMOVE[@]}" -- -map "${WORK}/md5sum.slim" /md5sum.txt)
+    ARGS+=(-rm_r "${REMOVE[@]}" --)
     log "slim: ${REMOVE[*]} taken out"
 fi
+
+# GRUB and the seed changed in every mode, including SLIM=0. Keeping their
+# old hashes makes the installer's media check report a damaged disk.
+xorriso -osirrox on -indev "${WORK}/${ISO_NAME}" -extract /md5sum.txt "${WORK}/md5sum.txt" >/dev/null 2>&1 \
+    || die "could not read /md5sum.txt from the ISO"
+python3 "$(dirname "$0")/update-md5.py" "${WORK}/md5sum.txt" "${WORK}/grub.cfg" \
+    "${WORK}/nocloud" "${WORK}/md5sum.updated" "${REMOVE[@]}"
+ARGS+=(-map "${WORK}/md5sum.updated" /md5sum.txt)
 
 ARGS+=(-map "${WORK}/grub.cfg" /boot/grub/grub.cfg -map "${WORK}/nocloud" /nocloud)
 xorriso "${ARGS[@]}" >"${WORK}/xorriso.log" 2>&1 || { tail -20 "${WORK}/xorriso.log" >&2; die "xorriso failed"; }

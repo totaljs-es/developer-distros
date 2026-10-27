@@ -139,6 +139,7 @@ STAGE_MENU_ICONS="$(jq -r 'if (.build | has("stage_menu_icons")) then .build.sta
 if [ "${STAGE_MENU_ICONS}" = "true" ]; then
     stage_menu_icons "${SEED_SRC}/assets"
 fi
+stage_toto "${SEED_SRC}/assets"
 hdiutil makehybrid -iso -joliet -default-volume-name CIDATA -o "${SEED_ISO}" "${SEED_SRC}" >/dev/null
 rm -rf "${SEED_SRC}"
 # hdiutil appends .iso if missing.

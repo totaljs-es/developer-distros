@@ -69,6 +69,7 @@ mkdir -p "${WORK_DIR}"
 ASSETS_STAGE="$(mktemp -d "${WORK_DIR}/assets.XXXXXX")"
 trap 'rm -f "${IMAGE_DIR}/provision/skip-zero"; rm -rf "${ASSETS_STAGE}"' EXIT
 cp -a "${SHARED_ASSETS}/." "${ASSETS_STAGE}/"
+stage_toto "${ASSETS_STAGE}"
 STAGE_MENU_ICONS="$(jq -r 'if (.build | has("stage_menu_icons")) then .build.stage_menu_icons else true end' "${CONFIG}")"
 if [ "${STAGE_MENU_ICONS}" = "true" ]; then
     stage_menu_icons "${ASSETS_STAGE}"

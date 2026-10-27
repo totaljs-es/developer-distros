@@ -465,10 +465,10 @@ class WizardWindow(Gtk.Window):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
         box.set_valign(Gtk.Align.CENTER)
 
-        logo_path = os.path.join(WIZARD_DIR, "logo.png")
+        logo_path = os.path.join(WIZARD_DIR, "toto-welcome.png")
         if HAVE_PIXBUF and os.path.exists(logo_path):
             try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 96, 110, True)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 144, 144, True)
                 image = Gtk.Image.new_from_pixbuf(pixbuf)
                 box.pack_start(image, False, False, 0)
             except Exception:
@@ -482,6 +482,10 @@ class WizardWindow(Gtk.Window):
         subtitle.get_style_context().add_class("wizard-subtitle")
         subtitle.set_justify(Gtk.Justification.CENTER)
         box.pack_start(subtitle, False, False, 0)
+
+        credit = Gtk.Label(label="Toto, mascot of Spanish Total.js")
+        credit.get_style_context().add_class("muted")
+        box.pack_start(credit, False, False, 0)
 
         next_btn = self._suggested_button("Get started")
         next_btn.connect("clicked", lambda *_: self.stack.set_visible_child_name("keyboard"))

@@ -96,8 +96,10 @@ if (python.status === 0) {
 	Fs.mkdirSync(folder, { recursive: true });
 	Fs.mkdirSync(Path.join(temp, 'shared', 'branding'), { recursive: true });
 	Fs.copyFileSync(Path.join(ROOT, 'shared/branding/mascot.png'), Path.join(temp, 'shared/branding/mascot.png'));
+	Fs.mkdirSync(Path.join(temp, 'shared/branding/toto'));
+	Fs.copyFileSync(Path.join(ROOT, 'shared/branding/toto/toto-coding.png'), Path.join(temp, 'shared/branding/toto/toto-coding.png'));
 
-	const made = spawnSync('python3', [Path.join(ROOT, 'shared/wallpapers/generate.py'), folder], { encoding: 'utf8', env: { ...process.env, MASCOT: Path.join(temp, 'shared/branding/mascot.png'), LOGO: Path.join(ROOT, 'shared/branding/logo-totaljs.svg') } });
+	const made = spawnSync('python3', [Path.join(ROOT, 'shared/wallpapers/generate.py'), folder], { encoding: 'utf8', env: { ...process.env, TOTO: Path.join(temp, 'shared/branding/toto/toto-coding.png'), MASCOT: Path.join(temp, 'shared/branding/mascot.png'), LOGO: Path.join(ROOT, 'shared/branding/logo-totaljs.svg') } });
 
 	if (made.status !== 0)
 		problems.push('shared/wallpapers/generate.py failed: ' + made.stderr.trim());
