@@ -52,6 +52,12 @@ Create a machine with these settings, in the program that you use (VirtualBox, V
 **UTM on a Mac with Apple Silicon:** when you create the machine (*Virtualize → Linux*), turn on **Use Apple Virtualization** in the advanced options. With it the boot shows the animation of
 Total.js. With the default engine of UTM (QEMU) the system installs and works the same, but the screen of the virtual machine stays off until the login appears, and the animation is not seen.
 
+With the engine QEMU, three more things (they come from QEMU, not from the system, and Apple Virtualization does not have them):
+- **A restart can hang** when the machine has several processors; turning it off and on works, and with 1 processor the restart works too.
+- The boot is seen (with its animation) by choosing the display card `virtio-ramfb` in the settings of the machine.
+- The keys of the Mac that close a window are caught by the window: `Cmd + W` closes the machine. Use `Alt + W` to change the wallpaper.
+The ISO of Intel (x86_64) in UTM can only run with QEMU, because Apple Virtualization does not emulate Intel.
+
 With QEMU it is:
 
 ```bash
