@@ -52,7 +52,7 @@ class ArchBootChecks(unittest.TestCase):
             xorriso.write_text('''#!/usr/bin/env python3
 import pathlib, sys
 if '-pvd_info' in sys.argv:
-    print("Volume Id    : 'TOTALJS_202610'")
+    print('Volume id    : TOTALJS_202610')
 else:
     dest = pathlib.Path(sys.argv[-1])
     dest.mkdir(exist_ok=True)
@@ -83,7 +83,10 @@ time.sleep(1)
             for executable in (xorriso, qemu):
                 executable.chmod(0o755)
             iso = root / 'medium.iso'
-            iso.touch()
+            descriptor = bytearray(2048)
+            descriptor[:7] = b'\x01CD001\x01'
+            descriptor[40:72] = b'TOTALJS_202610'.ljust(32, b' ')
+            iso.write_bytes(bytes(16 * 2048) + descriptor)
             env = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ['PATH'],
                        FAKE_BOOT_MODE=mode, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='2')
             result = subprocess.run(['bash', str(ROOT / 'arch/iso/test-boot.sh'), str(iso)],
@@ -104,6 +107,29 @@ time.sleep(1)
 
     def test_missing_live_medium_is_failure(self):
         self.assertNotEqual(self.run_boot('error').returncode, 0)
+
+
+class VolumeLabelChecks(unittest.TestCase):
+    def test_primary_descriptor_after_boot_descriptor(self):
+        spec = importlib.util.spec_from_file_location('iso_label', ROOT / 'arch/iso/read-label.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'image.iso'
+            boot = bytearray(2048)
+            boot[:7] = b'\x00CD001\x01'
+            primary = bytearray(2048)
+            primary[:7] = b'\x01CD001\x01'
+            primary[40:72] = b'TOTALJS_202610'.ljust(32, b' ')
+            path.write_bytes(bytes(16 * 2048) + boot + primary)
+            self.assertEqual(module.read_label(path), 'TOTALJS_202610')
+            primary[40:72] = b"'BAD LABEL'".ljust(32, b' ')
+            path.write_bytes(bytes(16 * 2048) + boot + primary)
+            with self.assertRaises(ValueError):
+                module.read_label(path)
+            path.write_bytes(b'not an ISO')
+            with self.assertRaises(ValueError):
+                module.read_label(path)
 
 
 if __name__ == '__main__':

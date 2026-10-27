@@ -12,17 +12,9 @@ done
 [ -f "${ISO}" ] || { echo "${ISO} does not exist" >&2; exit 1; }
 mkdir -p "${WORK}/kernel"
 xorriso -indev "${ISO}" -pvd_info > "${WORK}/pvd.txt" 2>&1
-# xorriso prints Volume Id : 'TOTALJS_...'. Those quotes are formatting,
-# not part of the label that archiso must find in /dev/disk/by-label.
-LABEL="$(python3 - "${WORK}/pvd.txt" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read()
-match = re.search(r"^Volume Id\s*:\s*'([A-Za-z0-9_-]+)'\s*$", text, re.M)
-if not match:
-    sys.exit('no supported ISO volume label in xorriso output')
-print(match[1])
-PY
-)"
+# Keep xorriso's report for diagnostics, but read the actual ISO metadata:
+# spelling, quotation and capitalization of its text output vary by version.
+LABEL="$(python3 "$(dirname "$0")/read-label.py" "${ISO}")"
 xorriso -osirrox on -indev "${ISO}" -extract /arch/boot/x86_64 "${WORK}/kernel" > "${WORK}/extract.log" 2>&1
 ACCEL=tcg
 [ ! -w /dev/kvm ] || ACCEL=kvm

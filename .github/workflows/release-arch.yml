@@ -1,0 +1,44 @@
+name: release-arch
+
+# Publish existing CI artifacts only. arch-* never triggers the Ubuntu v* release.
+on:
+  push:
+    tags:
+      - 'arch-*'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release-arch-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso qemu-system-x86
+      - name: Allow KVM for the x86 live boot check
+        run: |
+          if [ -e /dev/kvm ]; then sudo chmod a+rw /dev/kvm; fi
+      - name: Publish the latest validated Arch ISOs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-arch-isos.py "$GITHUB_REF_NAME"
+      - name: Keep publication diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: arch-release-diagnostics
+          path: |
+            build/release-arch/**/*.log
+            build/release-arch/**/*.txt
+            build/release-arch/notes.md
+            dist/arch-release/SOURCE.json
+            dist/arch-release/SHA256SUMS

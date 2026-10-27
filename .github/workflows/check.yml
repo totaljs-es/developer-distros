@@ -22,3 +22,6 @@ jobs:
 
       - name: ISO plumbing regressions (no VM)
         run: python3 scripts/test-iso.py
+
+      - name: Arch publication policy (no GitHub writes)
+        run: python3 scripts/test-arch-release.py

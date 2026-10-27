@@ -5,7 +5,15 @@ The Arch edition is built from the same packages as the Ubuntu one, for **x86_64
 - **Server:** the command line, with everything that Total.js needs: Node.js, Total.js, Docker, PostgreSQL, Code, Flow, Total.js Center and HTTPS for `totaljs.developer`.
 - **Desktop:** the server plus an Openbox desktop with the look of Total.js, Firefox and Chromium (the ones of the repositories of Arch).
 
-It uses the **official ISO of Arch Linux, unmodified**, and its own installer, `archinstall`, with a configuration of ours: nothing of Arch is remastered.
+## Total.js Developer installation ISOs
+
+Download the preview images from [GitHub Releases](https://github.com/totaljs-es/developer-distros/releases). Choose `aarch64` for ARM machines and Apple Silicon VMs, or `x86_64` for Intel/AMD. Only architectures that passed the publication checks are included in each release; the notes describe the exact validation.
+
+Check the download with the release's `SHA256SUMS` (`sha256sum -c SHA256SUMS --ignore-missing`). `SOURCE.json` records the source commit and original CI build. These checksums are not a signature.
+
+Boot the ISO with internet access, choose the desktop or server edition and follow `totaljs-install`. It asks for the disk (**the selected disk is erased**), keyboard, time zone and account. Use UEFI for ARM, at least 4 GB RAM and a 30 GB disk. Remove the ISO after installation and restart from the disk. The installer downloads the current signed Total.js packages, so the package repository must be available. The boot animation is still being investigated on VM graphics backends.
+
+The following sections describe the alternative route using upstream installation media. On x86_64 it uses the **official ISO of Arch Linux, unmodified**, and `archinstall` with our configuration.
 
 ## What you need
 
