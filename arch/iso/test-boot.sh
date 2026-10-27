@@ -39,8 +39,10 @@ QEMU=$!
 seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' "${WORK}/boot.log" | tr -d '\r' | grep -F "$1" >/dev/null; }
 START=$(date +%s)
 while true; do
-    if seen 'Total.js Developer, installation medium' || { seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; }; then
-        echo "booted: the live system reached its banner or multi-user target with getty"
+    # The medium of Arch has no autologin on the serial port, and the target multi-user waits for the keyring of pacman, which in an emulated machine (no KVM) has no
+    # entropy for minutes: the login prompt of the serial port is the proof that the live system is up.
+    if seen 'Total.js Developer, installation medium' || seen 'archiso login:' || { seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; }; then
+        echo "booted: the live system reached its login prompt, its banner or its multi-user target with getty"
         printf 'accel=%s boot_seconds=%s\n' "${ACCEL}" "$(( $(date +%s) - START ))" > "${WORK}/timings.txt"
         exit 0
     fi
@@ -49,5 +51,5 @@ while true; do
     sleep 2
 done
 tail -n 80 "${WORK}/boot.log"
-echo "the medium did not reach its banner or multi-user target with getty" >&2
+echo "the medium did not reach its login prompt, its banner or its multi-user target with getty" >&2
 exit 1
