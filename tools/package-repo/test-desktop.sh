@@ -8,10 +8,6 @@
 set -Eeuo pipefail
 trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
 
-# The official Docker image excludes /usr/share/doc. Keep this package's
-# license so the install test exercises the same notice as a normal system.
-printf 'path-include=/usr/share/doc/totaljs-wallpapers\npath-include=/usr/share/doc/totaljs-wallpapers/*\n' > /etc/dpkg/dpkg.cfg.d/zz-totaljs-wallpaper-test
-
 export DEBIAN_FRONTEND=noninteractive
 printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d
 chmod +x /usr/sbin/policy-rc.d
@@ -53,9 +49,7 @@ for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/r
     test -e "${f}" || { echo "missing ${f}" >&2; exit 1; }
 done
 for xml in /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml; do python3 -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' "${xml}"; done
-test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 13
-test -s /usr/share/backgrounds/totaljs/toto.jpg
-test -s /usr/share/doc/totaljs-wallpapers/TOTO-LICENSE.md
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 12
 command -v zenity >/dev/null
 grep -q 'totaljs-developer.crt' /etc/firefox/policies/policies.json
 grep -q '"URL": "https://totaljs.developer"' /etc/firefox/policies/policies.json

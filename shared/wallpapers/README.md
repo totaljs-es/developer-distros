@@ -1,6 +1,6 @@
 # Wallpapers
 
-Thirteen wallpapers for the desktop of the Total.js Developer Distros, drawn with code so that they are reproducible, small and can be made for any size. All of them use the official logo of Total.js (`../branding/logo-totaljs.svg`), the green of the logo and a graphite background, with a fine grain that keeps the dark gradients from showing bands.
+Twelve wallpapers for the desktop of the Total.js Developer Distros, drawn with code so that they are reproducible, small and can be made for any size. All of them use the official logo of Total.js (`../branding/logo-totaljs.svg`), the green of the logo and a graphite background, with a fine grain that keeps the dark gradients from showing bands.
 
 | | |
 |---|---|
@@ -9,7 +9,6 @@ Thirteen wallpapers for the desktop of the Total.js Developer Distros, drawn wit
 | `contour` | Contour lines, like a map of a hill, with the logo at the top |
 | `horizon` | Night, with the land in layers and the logo above the horizon |
 | `mascot` | The logo out of focus, and the mascot (`../branding/mascot.png`) in the corner |
-| `toto` | Optional wallpaper with Toto coding, the European red fox mascot of Spanish Total.js |
 | `daylight` | The light one |
 | `ember` | Warm ribbons of light on aubergine, with the logo at the start of them |
 | `aubergine` | Soft lights of aubergine, magenta and orange, with the logo calm in the middle |
@@ -18,7 +17,7 @@ Thirteen wallpapers for the desktop of the Total.js Developer Distros, drawn wit
 | `blueprint` | A technical drawing: a grid, marks and the construction lines of the logo |
 | `syntax` | The shape of code, in bars, like an editor out of focus, with a calm place for the logo |
 
-The six original Total.js compositions are the identity of Total.js (graphite and the green of the logo). The last six are for people who like the colors of the two distros that Total.js runs on: `ember`, `aubergine` and `sunrise` use an aubergine and orange palette (Ubuntu), `prism`, `blueprint` and `syntax` a blue one (Arch). They take the **colors only**: the logos and marks of Ubuntu and Arch are not used, and the desktop of the distros stays the same on both.
+The first six are the identity of Total.js (graphite and the green of the logo). The last six are for people who like the colors of the two distros that Total.js runs on: `ember`, `aubergine` and `sunrise` use an aubergine and orange palette (Ubuntu), `prism`, `blueprint` and `syntax` a blue one (Arch). They take the **colors only**: the logos and marks of Ubuntu and Arch are not used, and the desktop of the distros stays the same on both.
 
 ## Files
 
@@ -44,4 +43,4 @@ The compositions are for 16:9. A 16:10 screen or an ultra-wide one needs its own
 
 ## License
 
-The generated backgrounds are CC BY-SA 4.0. Toto and his appearance in `toto.jpg` remain subject to the [proprietary Toto license](../branding/toto/LICENSE.md); including him does not relicense the character. The Total.js logo and legacy Tux artwork retain their own rights.
+The generated backgrounds are covered by [CC BY-SA 4.0](../../LICENSE-ARTWORK). The Total.js logo and legacy Tux artwork retain their own rights.

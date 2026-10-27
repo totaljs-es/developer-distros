@@ -9,10 +9,6 @@ set -Eeuo pipefail
 trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
 # (no `| grep -q` in this file: grep -q quits at the first match, the command in front gets SIGPIPE and, with pipefail, the test dies with 141)
 
-# The official Docker image excludes /usr/share/doc. Keep this package's
-# license so the install test exercises the same notice as a normal system.
-printf 'path-include=/usr/share/doc/totaljs-wallpapers\npath-include=/usr/share/doc/totaljs-wallpapers/*\n' > /etc/dpkg/dpkg.cfg.d/zz-totaljs-wallpaper-test
-
 export DEBIAN_FRONTEND=noninteractive
 # a container has no services to start
 printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d
@@ -177,9 +173,7 @@ case "${POLICY}" in *'Candidate: 1.0.0-1'*) ;; *) echo "${POLICY}" >&2; echo 'to
 
 echo "==> the wallpapers (a package of its own: only the desktop needs them)"
 apt-get install -y totaljs-wallpapers >/dev/null
-test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 13
-test -s /usr/share/backgrounds/totaljs/toto.jpg
-test -s /usr/share/doc/totaljs-wallpapers/TOTO-LICENSE.md
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 12
 apt-get remove -y totaljs-wallpapers >/dev/null
 test ! -e /usr/share/backgrounds/totaljs
 

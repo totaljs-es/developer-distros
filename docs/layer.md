@@ -22,7 +22,7 @@ totaljs-developer-server      meta-package: the server edition
 totaljs-developer-desktop     meta-package: the server edition plus
   totaljs-openbox             Openbox with the theme of Total.js, Tint2, Rofi, Alacritty, PCManFM, LightDM, the menu and the shortcuts
   totaljs-conky               the widget on the wallpaper, with four profiles (system, services, compact and clock)
-  totaljs-wallpapers          the thirteen wallpapers
+  totaljs-wallpapers          the twelve wallpapers
   totaljs-mozilla-source      the repository of Mozilla, where Firefox comes from (Ubuntu offers only a snap)
   totaljs-chrome-source       the repository of Google, where Google Chrome comes from
 ```

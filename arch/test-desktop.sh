@@ -8,12 +8,6 @@ trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" 
 REPO="${1:?the folder of the repository (the one with totaljs-developer.db.tar.zst)}"
 test -f "${REPO}/totaljs-developer.db.tar.zst"
 
-# The official Docker image excludes documentation with NoExtract. Override
-# only our wallpaper notice, immediately after that exclusion, before install.
-if ! grep -F ' !usr/share/doc/totaljs-wallpapers/*' /etc/pacman.conf >/dev/null; then
-    sed -i '/^[[:space:]]*NoExtract[[:space:]]*=/s@usr/share/doc/\*@usr/share/doc/* !usr/share/doc/totaljs-wallpapers/*@' /etc/pacman.conf
-fi
-
 echo "==> the repository"
 if ! grep -q '^\[totaljs-developer\]' /etc/pacman.conf; then
     cat >> /etc/pacman.conf <<CONF
@@ -37,9 +31,7 @@ for f in /usr/share/themes/TotalJS/openbox-3/themerc /etc/skel/.config/openbox/r
     test -e "${f}" || { echo "missing ${f}" >&2; exit 1; }
 done
 for xml in /etc/skel/.config/openbox/rc.xml /etc/skel/.config/openbox/menu.xml; do python -c 'import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])' "${xml}"; done
-test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 13
-test -s /usr/share/backgrounds/totaljs/toto.jpg
-test -s /usr/share/doc/totaljs-wallpapers/TOTO-LICENSE.md
+test "$(ls /usr/share/backgrounds/totaljs/*.jpg | wc -l)" -eq 12
 test "$(ls /usr/share/totaljs-developer/icons/*.svg | wc -l)" -ge 10   # the icons of the menu: `include` too
 grep -q 'totaljs-wallpaper choose' /etc/skel/.config/openbox/menu.xml
 bash -n /usr/bin/totaljs-wallpaper

@@ -24,8 +24,6 @@ NAVY, DEEP_BLUE, BLUE, ICE = '#08131f', '#0d3a5c', '#1793d1', '#7cc4ec'
 HERE = os.path.dirname(os.path.abspath(__file__))
 BRANDING = os.path.join(HERE, '..', 'branding')
 MASCOT = os.environ.get('MASCOT', os.path.join(BRANDING, 'mascot.png'))
-TOTO = os.environ.get('TOTO', os.path.join(BRANDING, 'toto', 'toto-coding.png'))
-TOTO_HREF = TOTO
 MASCOT_HREF = MASCOT   # main() makes it relative to the folder of the SVGs, so that they do not carry the path of a computer
 LOGO_FILE = os.environ.get('LOGO', os.path.join(BRANDING, 'logo-totaljs.svg'))
 
@@ -200,9 +198,8 @@ def horizon():
     return svg(body, defs, with_logo=True)
 
 
-def mascot(artwork=None, credit=False):
+def mascot():
     """The mascot in the corner, and the logo out of focus behind it, like the login screen but quiet."""
-    artwork = artwork or MASCOT_HREF
     rnd = random.Random(21)
     bok = ''
     for i in range(22):
@@ -216,16 +213,9 @@ def mascot(artwork=None, credit=False):
     body = f"""<rect width="{W}" height="{H}" fill="url(#bg)"/>
 {bok}
 <ellipse cx="3290" cy="1860" rx="430" ry="60" fill="url(#floor)"/>
-<image x="3020" y="1330" width="540" height="540" xlink:href="{artwork}" href="{artwork}"/>
+<image x="3020" y="1330" width="540" height="540" xlink:href="{MASCOT_HREF}" href="{MASCOT_HREF}"/>
 """
-    if credit:
-        body += '<text x="3290" y="1960" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#93a399">Toto · Spanish Total.js · totaljs.es</text>\n'
     return svg(body, defs)
-
-
-def toto():
-    """An optional wallpaper with Toto coding; his original artwork is unmodified."""
-    return mascot(TOTO_HREF, credit=True)
 
 
 def daylight():
@@ -392,7 +382,6 @@ WALLPAPERS = {
     'contour': contour,
     'horizon': horizon,
     'mascot': mascot,
-    'toto': toto,
     'daylight': daylight,
     'ember': ember,
     'aubergine': aubergine,
@@ -406,7 +395,6 @@ if __name__ == '__main__':
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'svg')
     os.makedirs(out, exist_ok=True)
     MASCOT_HREF = os.path.relpath(os.path.abspath(MASCOT), os.path.abspath(out))
-    TOTO_HREF = os.path.relpath(os.path.abspath(TOTO), os.path.abspath(out))
     for name, fn in WALLPAPERS.items():
         path = os.path.join(out, name + '.svg')
         with open(path, 'w') as f:
