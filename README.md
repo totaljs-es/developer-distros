@@ -2,7 +2,7 @@
 
 <h1 align="center">Total.js Developer</h1>
 
-<p align="center"><b>A complete development environment for <a href="https://www.totaljs.com">Total.js</a>, installed in minutes.</b><br>Built on Ubuntu 26.04 LTS, for virtual machines and computers, with a desktop or only the command line.</p>
+<p align="center"><b>A complete development environment for <a href="https://www.totaljs.com">Total.js</a>, installed in minutes.</b><br>Available on Arch Linux and Ubuntu 26.04 LTS, for computers and virtual machines, with a desktop or only the command line.</p>
 
 <p align="center">
   <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml/badge.svg" alt="check"></a>
@@ -21,18 +21,34 @@
 - **PostgreSQL** with **pgAdmin**, and a reverse proxy: every project has its own address, `my-project.totaljs.developer`.
 - **Docker** with Compose, Git, SSH, `ufw` and `fail2ban`, and the usual tools of the command line.
 - **Total.js Center**, the front door at `https://totaljs.developer`: the state of the services, your projects and how to connect to the database.
-- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Google Chrome, a terminal, a file manager, a widget on the wallpaper and thirteen wallpapers.
+- In the **desktop edition**: an Openbox desktop with the look of Total.js, Firefox, Chrome on Ubuntu or Chromium on Arch, a terminal, a file manager, a widget on the wallpaper and thirteen wallpapers.
 
 ## Install
 
-Start a machine with the **official ISO of Ubuntu Server 26.04 LTS** and one **seed** (a small image, a few hundred kilobytes) next to it, answer the usual questions of the installer, and the rest
-installs by itself. It needs an internet connection, in a virtual machine and on a computer.
+### Arch Linux
 
-1. Download the [official ISO of Ubuntu Server](https://releases.ubuntu.com/26.04/) (amd64, Intel and AMD) or the [one for arm64](https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/) (ARM, such as UTM or Parallels on a Mac with Apple Silicon).
-2. Download a seed from the [releases](../../releases): `totaljs-developer-desktop-seed.iso` (with a desktop) or `totaljs-developer-server-seed.iso` (command line only).
-3. Attach both to a virtual machine (4 GB of memory, 30 GB of disk) as two drives, or write them to two USB sticks, start from the one of Ubuntu, choose **Try or Install Ubuntu Server** and type `yes` when it asks about the autoinstall.
+**[Arch preview — 27 October 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.10.27)**
 
-**[Installation guide](docs/install.md)**, with the settings of the virtual machine and the steps.
+| Your computer or virtual machine | Download |
+| --- | --- |
+| Intel or AMD (x86_64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-x86_64.iso) |
+| ARM64, including Apple Silicon Macs (aarch64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-aarch64.iso) |
+
+1. Start your computer or virtual machine from the ISO. Use at least **4 GB of memory**, a **30 GB disk** and an **internet connection**.
+2. Choose **Desktop** or **Server** and follow the installer. It asks for your disk, keyboard, time zone and account. **The selected disk will be erased.**
+3. When installation finishes, remove the ISO and restart from the disk.
+
+**[Arch installation guide](docs/install-arch.md)**, including UTM on a Mac with Apple Silicon.
+
+### Ubuntu
+
+Install with the **official Ubuntu Server 26.04 LTS ISO** and a small seed image that sets up Total.js Developer. An internet connection is required.
+
+1. Download the official Ubuntu Server ISO for [Intel/AMD](https://releases.ubuntu.com/26.04/) or [ARM64](https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/).
+2. Download the **Desktop** or **Server** seed from the [Ubuntu seeds release](https://github.com/totaljs-es/developer-distros/releases/tag/seeds-0.1.0).
+3. Start the machine with both images attached, boot from the Ubuntu ISO and follow the installer.
+
+**[Ubuntu installation guide](docs/install.md)**, with the virtual machine settings and steps.
 
 ## Your first minutes
 
@@ -50,20 +66,16 @@ The names are answered by the machine itself: there is nothing to configure. The
 
 ## How it is built
 
-Total.js Developer does not fork or patch Ubuntu. It is a **set of packages** in a signed APT repository, installed on top of Ubuntu Server 26.04 LTS, and
-everything else comes from the archive of Ubuntu.
+The Total.js layer is installed as packages on top of Arch Linux, Arch Linux ARM or Ubuntu. Packages can be updated through the system's package manager.
 
-- **Packages:** `totaljs-developer-server` and `totaljs-developer-desktop` are meta-packages; each piece (Node.js, the services, the DNS, Center, the desktop, the widget...) is a package of its own.
-  The repository is built and signed from this repository and served at <https://totaljs-es.github.io/developer-distros/>.
-- **The installer:** the unmodified official Ubuntu Server ISO reads our separate autoinstall seed image. Ubuntu packages come from Ubuntu, and the Total.js layer comes from the repository above. The remastered installer is tested separately; see [its publication status](docs/legal.md).
-- **Tested:** each change installs the packages in a clean Ubuntu 26.04, starts the desktop session in a virtual screen, and the installer is run in QEMU and the installed system booted.
-- **Already have Ubuntu 26.04?** Add the repository and install the packages: the commands are on its [front page](https://totaljs-es.github.io/developer-distros/), and [`docs/layer.md`](docs/layer.md) explains them.
+For package details and development instructions, see [the package guide](docs/layer.md) and [Contributing](CONTRIBUTING.md).
 
 ## Documentation
 
 | | |
 | --- | --- |
-| [Installation guide](docs/install.md) | Download, prepare a virtual machine or a computer, install |
+| [Arch installation](docs/install-arch.md) | Download an ISO and install Arch on a computer or virtual machine |
+| [Ubuntu installation](docs/install.md) | Install with the official Ubuntu ISO and a seed |
 | [How to use it](docs/using.md) | Addresses, projects, database, services, desktop shortcuts |
 | [The packages](docs/layer.md) | What each package does and the rules they follow |
 | [Legal notes](docs/legal.md) | Licenses, marks, and what is and is not distributed |
@@ -93,5 +105,5 @@ The code is under the [MIT License](LICENSE). The wallpapers and the images of t
 
 ## Trademarks
 
-Total.js Developer is based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
-Arch Linux and the Arch logo are trademarks of their owners.
+The Ubuntu edition of Total.js Developer is based on Ubuntu. It is not an official Ubuntu release and it is not endorsed by Canonical. Ubuntu is a trademark of Canonical Ltd.
+The Arch editions are based on Arch Linux or Arch Linux ARM and are not official releases of those projects. Arch Linux and the Arch logo are trademarks of their owners.
