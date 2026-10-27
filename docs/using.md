@@ -119,7 +119,7 @@ A folder with a `.node-version`, an `.nvmrc` or an `engines.node` in its `packag
 | `Super + E` | Files |
 | `Super + B` | Total.js Center in the browser |
 | `Super + C` | Code in the browser |
-| `Alt + W` or `Super + W` | Another wallpaper (on a Mac, with UTM, use `Alt + W`: `Cmd + W` closes the window of the virtual machine) |
+| `Super + W` | Another wallpaper (`Alt + W` does the same: with the engine QEMU of UTM, `Cmd + W` closes the machine) |
 | `Super + Space` | The menu of the desktop (also with the right button on the wallpaper) |
 | `Alt + Tab` | Change of window |
 | `Super + F` | Maximize or restore the window |
