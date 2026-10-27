@@ -8,6 +8,7 @@
   <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/check.yml/badge.svg" alt="check"></a>
   <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/package-repo.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/package-repo.yml/badge.svg" alt="package-repo"></a>
   <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/iso-ubuntu.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/iso-ubuntu.yml/badge.svg" alt="iso-ubuntu"></a>
+  <a href="https://github.com/totaljs-es/developer-distros/actions/workflows/arch-iso.yml"><img src="https://github.com/totaljs-es/developer-distros/actions/workflows/arch-iso.yml/badge.svg" alt="arch-iso"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
 </p>
 
