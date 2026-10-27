@@ -5,7 +5,12 @@
 #
 # The repository has to be built with BASE_URL=file:///repo and signed with a throwaway key. A container has no screen: the session
 # runs in Xvfb, and what the screen looks like is saved in /out as screenshots.
-set -euo pipefail
+set -Eeuo pipefail
+trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
+
+# The official Docker image excludes /usr/share/doc. Keep this package's
+# license so the install test exercises the same notice as a normal system.
+printf 'path-include=/usr/share/doc/totaljs-wallpapers\npath-include=/usr/share/doc/totaljs-wallpapers/*\n' > /etc/dpkg/dpkg.cfg.d/zz-totaljs-wallpaper-test
 
 export DEBIAN_FRONTEND=noninteractive
 printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d

@@ -5,8 +5,13 @@
 #
 # The repository has to be built with BASE_URL=file:///repo and signed with a throwaway key. It installs the server layer,
 # checks what it promises, removes it and checks that nothing of it stays.
-set -euo pipefail
+set -Eeuo pipefail
+trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
 # (no `| grep -q` in this file: grep -q quits at the first match, the command in front gets SIGPIPE and, with pipefail, the test dies with 141)
+
+# The official Docker image excludes /usr/share/doc. Keep this package's
+# license so the install test exercises the same notice as a normal system.
+printf 'path-include=/usr/share/doc/totaljs-wallpapers\npath-include=/usr/share/doc/totaljs-wallpapers/*\n' > /etc/dpkg/dpkg.cfg.d/zz-totaljs-wallpaper-test
 
 export DEBIAN_FRONTEND=noninteractive
 # a container has no services to start

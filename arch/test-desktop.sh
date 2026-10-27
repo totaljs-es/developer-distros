@@ -2,10 +2,17 @@
 # arch/test-desktop.sh - installs the desktop edition from the repository that arch/build.sh made, in a container of Arch, and looks at what it promises.
 #   arch/test-desktop.sh /path/to/the/folder/with/the/repository
 # (No `| grep -q` at the end of a pipe: with pipefail it dies with 141.)
-set -euo pipefail
+set -Eeuo pipefail
+trap 'status=$?; printf "FAILED %s:%s (exit %s): %s\n" "$0" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
 
 REPO="${1:?the folder of the repository (the one with totaljs-developer.db.tar.zst)}"
 test -f "${REPO}/totaljs-developer.db.tar.zst"
+
+# The official Docker image excludes documentation with NoExtract. Override
+# only our wallpaper notice, immediately after that exclusion, before install.
+if ! grep -F ' !usr/share/doc/totaljs-wallpapers/*' /etc/pacman.conf >/dev/null; then
+    sed -i '/^[[:space:]]*NoExtract[[:space:]]*=/s@usr/share/doc/\*@usr/share/doc/* !usr/share/doc/totaljs-wallpapers/*@' /etc/pacman.conf
+fi
 
 echo "==> the repository"
 if ! grep -q '^\[totaljs-developer\]' /etc/pacman.conf; then
