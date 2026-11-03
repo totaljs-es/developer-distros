@@ -26,6 +26,7 @@ for home in /home/*; do
     done
     [ -e "${home}/.local/share/applications/$(basename "${hidden}")" ] || install -o "${owner}" -g "${group}" -m 0644 "${hidden}" "${home}/.local/share/applications/"
   done
+  /usr/lib/totaljs-openbox/migrate-autostart "${home}/.config/openbox/autostart"
   [ ! -e "${home}/.config/openbox" ] || continue
   for dir in openbox tint2 rofi picom dunst alacritty gsimplecal libfm gtk-3.0 gtk-4.0 autostart; do
     [ ! -e "${home}/.config/${dir}" ] || continue

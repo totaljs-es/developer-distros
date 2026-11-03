@@ -4,7 +4,7 @@ xsetroot -cursor_name left_ptr &
 # terminal stays see-through under a GLX compositor, and xrender needs no 3D). It starts BEFORE the panel and the session waits for it:
 # the panel restarts itself when a compositor appears, and in that moment it could end (see tint2-exits.log)
 if ! pgrep -u "$(id -u)" -x picom >/dev/null; then
-  if systemd-detect-virt --quiet 2>/dev/null; then BACKEND="--backend xrender --no-vsync"; else BACKEND="--backend glx"; fi
+  if [ "$(totaljs-picom-backend)" = xrender ]; then BACKEND="--backend xrender --no-vsync"; else BACKEND="--backend glx"; fi
   picom --config "$HOME/.config/picom/picom.conf" $BACKEND --daemon
   for _ in 1 2 3 4 5 6; do pgrep -u "$(id -u)" -x picom >/dev/null && break; sleep 0.5; done
   pgrep -u "$(id -u)" -x picom >/dev/null || picom --config "$HOME/.config/picom/picom.conf" --backend xrender --no-vsync --daemon

@@ -211,3 +211,51 @@ The affected installer, ISO-plumbing, build-guard and publication-policy suites
 passed (36 test methods). Workflow YAML, repository checks and whitespace checks
 also passed. No ISO recipe contents or installed-target behavior changed in
 this follow-up, and no new complete target installation is claimed.
+
+
+## VirtualBox ARM desktop repaint freeze
+
+Reproduced the reported blank Firefox page, missing launcher/tray icons and
+apparently stuck terminal on a disposable copy of the locally installed Ubuntu
+ARM Desktop disk. VirtualBox 7.2.22, one CPU, 4 GiB RAM, VMSVGA, 3D disabled.
+The user's VM was not changed. The same disk worked under QEMU/HVF.
+
+Inside VirtualBox, `systemd-detect-virt` returned `none`, although the `vboxguest`
+module and PCI vendor `0x80ee` were present. Openbox therefore selected picom's
+GLX backend. Switching only picom to XRender restored window repainting,
+launcher/tray icons, the Center page and terminal input.
+
+The shared `totaljs-openbox` package is now 1.0.1-1. Its backend helper checks
+systemd detection, the VirtualBox guest module and the VirtualBox PCI vendor.
+Physical machines retain GLX. Its upgrade changes only the previous managed
+backend predicate, preserving other session settings and skipping symlinks.
+Arch's generated package includes the same helper and upgrade script.
+
+Seven fixture tests passed on Linux, including both VirtualBox detection paths,
+physical hardware and idempotent migration with mode/ownership preservation.
+The built Debian package was installed onto the disposable disk (adding the
+previously missing spice-vdagent dependency from Ubuntu), and a fresh VirtualBox
+boot selected XRender automatically despite systemd still returning `none`.
+The repository check and shell syntax checks passed. A new container desktop
+check types a command into Alacritty and verifies its result; the full container
+desktop suite has not been rerun in this follow-up.
+
+The signed APT repository was rebuilt locally and its InRelease signature
+verified with the committed public key. Publishing the prepared `pages` branch
+is required before online installers can download this update; rebuilding an
+ISO alone does not update that package source. No push or publication was made.
+The Arch source conversion was checked; a new native Arch package build and
+VirtualBox Arch session have not been exercised in this follow-up.
+
+After that boot, Firefox displayed the Center, the tray icons were visible and
+an actual command typed into Alacritty created the expected marker file.
+Screenshots are retained locally in `build/own/local/validation/virtualbox-desktop/`.
+The prepared package branch preserves the previously published signed Arch
+repository; its updated native Arch layer package still needs rebuilding/staging.
+
+For a running affected session, `Super+Enter` opens Alacritty; typing
+`pkill picom` and pressing Enter stops the frozen compositor even if the input
+has not repainted yet. Once the package repository is published, Ubuntu users
+can run `sudo apt update && sudo apt install --only-upgrade totaljs-openbox`
+and log out/in. A newly installed online target downloads the fixed package
+without needing a replacement live ISO.

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Replace only our previous backend predicate; preserve personal session setup.
+set -eu
+file="${1:?autostart path required}"
+[ -f "$file" ] && [ ! -L "$file" ] || exit 0
+old='if systemd-detect-virt --quiet 2>/dev/null; then BACKEND='
+grep -qF "$old" "$file" || exit 0
+sed -i 's@if systemd-detect-virt --quiet 2>/dev/null; then BACKEND=@if [ "$(totaljs-picom-backend)" = xrender ]; then BACKEND=@' "$file"

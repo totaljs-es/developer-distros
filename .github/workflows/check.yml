@@ -37,3 +37,6 @@ jobs:
 
       - name: Ubuntu bootloader compatibility (no disks)
         run: python3 scripts/test-calamares-bootloader.py
+
+      - name: Desktop compositor detection and upgrade
+        run: python3 scripts/test-openbox-compositor.py

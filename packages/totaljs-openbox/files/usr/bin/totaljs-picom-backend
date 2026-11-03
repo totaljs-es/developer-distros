@@ -1,0 +1,16 @@
+#!/bin/sh
+# VirtualBox ARM can report "none" to systemd-detect-virt. Its guest module
+# and PCI vendor still identify the VM, where GLX can freeze desktop repainting.
+set -eu
+sysfs="${1:-/sys}"
+if systemd-detect-virt --quiet 2>/dev/null || [ -d "$sysfs/module/vboxguest" ]; then
+  echo xrender
+  exit 0
+fi
+for vendor in "$sysfs"/bus/pci/devices/*/vendor; do
+  if [ -r "$vendor" ] && grep -qix '0x80ee' "$vendor"; then
+    echo xrender
+    exit 0
+  fi
+done
+echo glx

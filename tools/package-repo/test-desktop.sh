@@ -111,6 +111,13 @@ done
 # the launcher and the right-click menu
 alacritty -vv >/tmp/alacritty.log 2>&1 &
 sleep 12
+# A running process alone does not prove that a terminal accepts input.
+window="$(xdotool search --sync --onlyvisible --class Alacritty | head -1)"
+xdotool windowactivate --sync "$window"
+xdotool type --clearmodifiers 'printf ready > /tmp/totaljs-terminal-input-ready'
+xdotool key Return
+for _ in $(seq 1 20); do [ -s /tmp/totaljs-terminal-input-ready ] && break; sleep 1; done
+test "$(cat /tmp/totaljs-terminal-input-ready)" = ready
 import -window root /out/desktop-terminal.png
 # the same screen without the compositor: a window that is blank only with it is a problem of the compositor in a virtual screen
 pgrep -x picom >/dev/null && echo "picom is running" || echo "picom is NOT running"
