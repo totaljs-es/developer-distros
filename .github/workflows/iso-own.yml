@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p build/own
           docker run --rm --privileged -e ARCH -e CALAMARES -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 \
-            bash /src/iso/own/build.sh "/out/totaljs-developer-live-${ARCH}.iso"
+            bash /src/iso/own/build.sh "/out/totaljs-developer-ubuntu-${ARCH}.iso"
 
       - name: Tools of the test
         run: |
@@ -47,10 +47,10 @@ jobs:
 
       - name: Start it with the BIOS
         if: matrix.arch == 'amd64'
-        run: WORK_DIR=build/own/bios iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
+        run: WORK_DIR=build/own/bios iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
 
       - name: Start it with UEFI
-        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
+        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
 
       - name: The graphical installer loads its native modules
         if: inputs.installer
@@ -60,12 +60,12 @@ jobs:
           MARKER_PATTERN: TOTALJS-CALAMARES-READY
           BOOT_TIMEOUT: '900'
           WORK_DIR: build/own/calamares
-        run: iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
+        run: iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
 
       - name: Checksum the installation medium
         run: |
           cd build/own
-          sha256sum "totaljs-developer-live-${ARCH}.iso" > SHA256SUMS
+          sha256sum "totaljs-developer-ubuntu-${ARCH}.iso" > SHA256SUMS
 
       - name: What was measured
         if: always()
@@ -96,7 +96,7 @@ jobs:
       - name: Keep the experimental ISO for manual installation tests
         uses: actions/upload-artifact@v7
         with:
-          name: totaljs-calamares-live-${{ matrix.arch }}
+          name: totaljs-developer-ubuntu-${{ matrix.arch }}
           path: |
             build/own/*.iso
             build/own/SHA256SUMS
