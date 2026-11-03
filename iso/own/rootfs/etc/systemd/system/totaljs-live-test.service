@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c '. /etc/os-release; echo "TOTALJS-LIVE-OK ${PRETTY_NAME} $(uname -r)" > /dev/ttyS0'
+ExecStart=/bin/sh -c '. /etc/os-release; serial=/dev/ttyS0; [ ! -c /dev/ttyAMA0 ] || serial=/dev/ttyAMA0; echo "TOTALJS-LIVE-OK $${PRETTY_NAME} $$(uname -r)" > "$$serial"'
 
 [Install]
 WantedBy=multi-user.target

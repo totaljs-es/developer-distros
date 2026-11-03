@@ -25,3 +25,9 @@ jobs:
 
       - name: Arch publication policy (no GitHub writes)
         run: python3 scripts/test-arch-release.py
+
+      - name: Shared Calamares preview (no installation jobs)
+        run: python3 scripts/test-calamares.py
+
+      - name: Online installer contracts (command doubles, no disks)
+        run: python3 scripts/test-calamares-install.py

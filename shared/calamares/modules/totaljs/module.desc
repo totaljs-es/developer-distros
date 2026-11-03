@@ -1,0 +1,6 @@
+{
+  "type": "job",
+  "name": "totaljs",
+  "interface": "python",
+  "script": "main.py"
+}

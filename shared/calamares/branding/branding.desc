@@ -1,0 +1,38 @@
+{
+  "componentName": "totaljs",
+  "welcomeStyleCalamares": false,
+  "welcomeExpandingLogo": true,
+  "windowExpanding": "normal",
+  "windowSize": "900px,620px",
+  "windowPlacement": "center",
+  "sidebar": "widget",
+  "navigation": "widget",
+  "strings": {
+    "productName": "Total.js Developer UI Preview",
+    "shortProductName": "Total.js Developer",
+    "version": "Preview",
+    "shortVersion": "Preview",
+    "versionedName": "Total.js Developer UI Preview",
+    "shortVersionedName": "Total.js Developer Preview",
+    "bootloaderEntryName": "Total.js Developer",
+    "productUrl": "https://www.totaljs.com",
+    "supportUrl": "https://github.com/totaljs-es/developer-distros",
+    "knownIssuesUrl": "https://github.com/totaljs-es/developer-distros/issues",
+    "releaseNotesUrl": "",
+    "donateUrl": ""
+  },
+  "images": {
+    "productIcon": "logo-totaljs-qt.svg",
+    "productLogo": "logo-totaljs-qt.svg",
+    "productWelcome": "toto-welcome.png"
+  },
+  "style": {
+    "SidebarBackground": "#20252b",
+    "SidebarText": "#e5e9ee",
+    "SidebarTextCurrent": "#172019",
+    "SidebarBackgroundCurrent": "#6ac043"
+  },
+  "slideshow": "show.qml",
+  "slideshowAPI": 2,
+  "uploadServer": { "type": "none" }
+}

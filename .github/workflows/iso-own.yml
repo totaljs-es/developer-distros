@@ -1,34 +1,71 @@
 name: iso-own
 
-# The ISO of Total.js Developer that is ours: the packages of Ubuntu in a live image with our identity, with no installer and no marks of Canonical.
-# It is built in a clean Ubuntu 26.04 (a privileged container) and started in QEMU, with BIOS and with UEFI. See iso/own/README.md.
+# Experimental own live image, optionally with the shared Calamares online installer.
+# Native Ubuntu 26.04 builds: BIOS/UEFI on amd64 and UEFI on arm64. Startup checks do not prove a target installation.
 # Experimental prototype, outside the published ISO pipeline. Run manually only.
 on:
   workflow_dispatch:
+    inputs:
+      installer:
+        description: Include the experimental graphical Calamares installer
+        type: boolean
+        default: true
 
 jobs:
   live:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    env:
+      ARCH: ${{ matrix.arch }}
+      CALAMARES: ${{ inputs.installer && '1' || '0' }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Build the live image
         run: |
           mkdir -p build/own
-          docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 \
-            bash /src/iso/own/build.sh /out/totaljs-developer-live-amd64.iso
+          docker run --rm --privileged -e ARCH -e CALAMARES -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 \
+            bash /src/iso/own/build.sh "/out/totaljs-developer-live-${ARCH}.iso"
 
       - name: Tools of the test
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf
+          if [ "${ARCH}" = arm64 ]; then
+            sudo apt-get install -y qemu-system-arm qemu-utils qemu-efi-aarch64
+          else
+            sudo apt-get install -y qemu-system-x86 qemu-utils ovmf
+          fi
+          if [ -e /dev/kvm ]; then sudo chmod a+rw /dev/kvm; fi
 
       - name: Start it with the BIOS
-        run: WORK_DIR=build/own/bios iso/own/test-boot.sh build/own/totaljs-developer-live-amd64.iso
+        if: matrix.arch == 'amd64'
+        run: WORK_DIR=build/own/bios iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
 
       - name: Start it with UEFI
-        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh build/own/totaljs-developer-live-amd64.iso
+        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
+
+      - name: The graphical installer loads its native modules
+        if: inputs.installer
+        env:
+          UEFI: '1'
+          QEMU_MEMORY: '4096'
+          MARKER_PATTERN: TOTALJS-CALAMARES-READY
+          BOOT_TIMEOUT: '900'
+          WORK_DIR: build/own/calamares
+        run: iso/own/test-boot.sh "build/own/totaljs-developer-live-${ARCH}.iso"
+
+      - name: Checksum the installation medium
+        run: |
+          cd build/own
+          sha256sum "totaljs-developer-live-${ARCH}.iso" > SHA256SUMS
 
       - name: What was measured
         if: always()
@@ -36,17 +73,33 @@ jobs:
           {
             echo '### Live image of Total.js Developer'
             ls -l build/own/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
-            [ -f build/own/bios/timings.txt ] && echo "- BIOS: $(cat build/own/bios/timings.txt)"
-            [ -f build/own/uefi/timings.txt ] && echo "- UEFI: $(cat build/own/uefi/timings.txt)"
+            for mode in bios uefi calamares; do
+              if [ -f "build/own/${mode}/timings.txt" ]; then
+                echo "- ${mode}: $(cat "build/own/${mode}/timings.txt")"
+              fi
+            done
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Keep the logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: iso-own-logs
+          name: iso-own-logs-${{ matrix.arch }}
           path: |
             build/own/bios/boot.log
             build/own/uefi/boot.log
             build/own/bios/timings.txt
             build/own/uefi/timings.txt
+            build/own/calamares/boot.log
+            build/own/calamares/timings.txt
+
+      - name: Keep the experimental ISO for manual installation tests
+        uses: actions/upload-artifact@v7
+        with:
+          name: totaljs-calamares-live-${{ matrix.arch }}
+          path: |
+            build/own/*.iso
+            build/own/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

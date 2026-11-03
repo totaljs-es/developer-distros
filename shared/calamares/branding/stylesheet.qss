@@ -1,0 +1,19 @@
+/* Shared Total.js palette. Keep native Qt controls and focus indicators. */
+QWidget#sidebarApp {
+    background-color: #20252b;
+    color: #e5e9ee;
+}
+QPushButton {
+    min-height: 28px;
+    padding: 4px 16px;
+}
+QPushButton:default {
+    background-color: #6ac043;
+    color: #172019;
+    border: 1px solid #509b31;
+    border-radius: 4px;
+}
+QPushButton:default:disabled {
+    background-color: #d8ddd5;
+    color: #626b60;
+}

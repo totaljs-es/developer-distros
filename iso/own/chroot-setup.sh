@@ -16,6 +16,15 @@ apt-get update -qq
 # the kernel, what starts a system from a CD (live-boot) and the base of a system that boots and has a network
 apt-get install -y --no-install-recommends linux-image-generic initramfs-tools live-boot systemd-sysv udev dbus iproute2 systemd-resolved kmod >/dev/null
 
+if [ "${CALAMARES:-0}" = 1 ]; then
+    apt-get install -y --no-install-recommends calamares debootstrap python3 sudo locales \
+        xorg openbox lightdm lightdm-gtk-greeter xterm tint2 \
+        network-manager network-manager-gnome policykit-1-gnome dbus-x11 \
+        console-setup xdg-utils gnupg gpgv efibootmgr dosfstools e2fsprogs >/dev/null
+    command -v ckbcomp >/dev/null
+    TOTALJS_LIVE_BUILD=1 bash /tmp/totaljs-installer-source/shared/calamares/setup-live.sh ubuntu "${ARCH}"
+fi
+
 # the identity: the system is Total.js Developer. It is based on Ubuntu and says so (ID_LIKE), and has no mark of Ubuntu as its name.
 cat > /etc/os-release <<'EOF'
 PRETTY_NAME="Total.js Developer"
@@ -37,7 +46,12 @@ Name=en* eth*
 [Network]
 DHCP=yes
 EOF
-systemctl enable systemd-networkd systemd-resolved totaljs-live-test.service >/dev/null 2>&1 || true
+systemctl enable systemd-resolved totaljs-live-test.service >/dev/null 2>&1 || true
+if [ "${CALAMARES:-0}" = 0 ]; then
+    systemctl enable systemd-networkd >/dev/null
+else
+    rm -f /etc/systemd/network/20-wired.network
+fi
 
 # a free root account with no password for the live session
 passwd -d root >/dev/null
