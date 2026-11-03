@@ -45,12 +45,4 @@ Presentation {
             font.pixelSize: 21
         }
     }
-    Text {
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 12
-        text: qsTr("Toto, mascot of Spanish Total.js · totaljs.es")
-        color: "#626b60"
-        font.pixelSize: 12
-    }
 }

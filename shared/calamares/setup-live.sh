@@ -23,6 +23,11 @@ if profile.get('mode') != 'experimental-online-installer' or profile.get('base')
 PROFILE_CHECK
 getent passwd live >/dev/null || useradd --create-home --shell /bin/bash live
 passwd -l live >/dev/null
+if [ "${BASE}" = arch ]; then
+    # Arch's official lightdm-autologin PAM policy requires this live-only group.
+    getent group autologin >/dev/null || groupadd --system autologin
+    usermod --append --groups autologin live
+fi
 
 # Only this fixed, root-owned profile can be launched without a password.
 install -d -m 0755 /etc/sudoers.d

@@ -4,17 +4,26 @@ name: arch-iso-arm
 # and starts it in QEMU with UEFI to see that it reaches the shell with our banner. The ISO is kept as an artifact of the run: it is not published here.
 on:
   workflow_dispatch:
+    inputs:
+      installer:
+        description: Include the experimental shared Calamares installer
+        type: boolean
+        default: true
   push:
     paths:
       - 'arch/iso-arm/**'
       - 'arch/iso/overlay/**'
       - 'arch/install-arm.sh'
+      - 'arch/calamares/**'
+      - 'shared/calamares/**'
       - '.github/workflows/arch-iso-arm.yml'
 
 jobs:
   iso:
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 90
+    timeout-minutes: 120
+    env:
+      CALAMARES: ${{ inputs.installer && '1' || '0' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -25,7 +34,7 @@ jobs:
 
       - name: Build the ISO
         run: |
-          sudo env KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso-arm/build.sh
+          sudo env CALAMARES="$CALAMARES" KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso-arm/build.sh
 
       - name: The ISO, as an artifact
         uses: actions/upload-artifact@v7
@@ -61,6 +70,17 @@ jobs:
           kill "$QEMU" 2>/dev/null || true
           exit 1
 
+      - name: The graphical installer loads its modules
+        if: inputs.installer
+        env:
+          ARCH: arm64
+          UEFI: '1'
+          QEMU_MEMORY: '4096'
+          MARKER_PATTERN: TOTALJS-CALAMARES-READY
+          WORK_DIR: build/arch-iso-arm/calamares
+          BOOT_TIMEOUT: '1500'
+        run: bash iso/own/test-boot.sh "$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
+
       - name: Keep the boot diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -69,3 +89,4 @@ jobs:
           path: |
             boot.log
             build/arch-iso-arm/mkinitcpio.log
+            build/arch-iso-arm/calamares/*

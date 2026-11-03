@@ -119,7 +119,7 @@ def preflight(config, storage):
             command(['gpgv', '--homedir', str(folder), '--keyring', str(keyfile), str(metadata)])
         else:
             package_arch = 'aarch64' if arch == 'arm64' else 'x86_64'
-            url = repository + '/arch/' + package_arch + '/totaljs-developer.db.tar.gz'
+            url = repository + '/arch/' + package_arch + '/totaljs-developer.db'
             metadata = folder / 'repository.db'
             signature = folder / 'repository.sig'
             metadata.write_bytes(download(url))

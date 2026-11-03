@@ -15,11 +15,12 @@ Implemented in source: shared branding and preview, edition selection,
 online bootstrap/finalization jobs, and an opt-in own Ubuntu graphical live
 build on native amd64/arm64. The manual `iso-own` workflow builds both and
 checks live boot and graphical module loading; it does not automate a target
-installation. Ubuntu arm64 was built locally and its Server installation, disk-only boot, restart and HTTPS services were verified; see [the evidence](validation-2026-11-03.md).
+installation. Ubuntu arm64 was built locally and both Server and Desktop installations, disk-only boot, restart and HTTPS services were verified; see [the evidence](validation-2026-11-03.md).
 
-Pending: validate Ubuntu Desktop and amd64 installation, package/integrate
-Calamares in the Arch live recipes, then validate the same outcomes on Arch. The Arch online profile is generated but has no live
-ISO integration yet.
+Pending: validate Ubuntu amd64 installation and the same outcomes on Arch.
+Optional Calamares integration and pinned framework package recipes are now
+present for both Arch live builders; native ARM live startup was validated locally; x86 startup and target
+installation on both architectures remain pending. See [the Arch build instructions](../arch/calamares/README.md).
 The current Ubuntu seeds and Arch console installer remain the usable paths.
 
 ## Shared interaction

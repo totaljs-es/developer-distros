@@ -8,6 +8,6 @@ The Total.js layer that every distro has in common: the desktop and its configur
 
 `plymouth/` has the boot splash, an animation of the logo coming together with a ring of light that follows the progress of the boot: see its README.
 
-`calamares/` contains shared graphical-installer branding, a non-installing preview and experimental online installation jobs. The own Ubuntu live builder includes it optionally; arm64 live startup and Server installation have been validated locally. Other Ubuntu combinations remain pending. Arch live integration is still pending. See [the design](../docs/installer.md).
+`calamares/` contains shared graphical-installer branding, a non-installing preview and experimental online installation jobs. The own Ubuntu live builder includes it optionally; arm64 live startup and both Server and Desktop installations have been validated locally. Ubuntu amd64 remains pending. Both Arch live builders now offer optional integration; native Arch ARM live startup is validated; Arch target installation and x86 startup remain pending. See [the design](../docs/installer.md).
 
 The remaining common files are still inside the recipes (`tools/image-builder/images/developer-ubuntu/assets/`) and move here one piece at a time, each with a build that proves nothing changed.

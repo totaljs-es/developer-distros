@@ -2,9 +2,9 @@
 
 Shared branding, a non-installing UI preview and experimental online
 installation jobs. The own Ubuntu live-image builder can include the installer
-on native amd64 and arm64 builds. Ubuntu arm64 live startup, Server installation, disk-only boot, restart and
+on native amd64 and arm64 builds. Ubuntu arm64 live startup, Server and Desktop installation, disk-only boot, restart and
 HTTPS services were validated locally; see [the evidence](../../docs/validation-2026-11-03.md).
-Other Ubuntu combinations and Arch integration remain pending. Public release workflows are unchanged.
+Ubuntu amd64 and Arch validation remain pending. Public release workflows are unchanged.
 
 The installer is Total.js Developer on both Ubuntu and Arch, with the same
 pages, colors, official logo and unmodified Toto artwork. Installation will
@@ -61,7 +61,10 @@ The shared pages select Desktop or Server. The custom jobs verify signed
 repository metadata before partitioning, bootstrap a fresh target using the
 base's package manager, install the Total.js packages, and finalize services.
 Calamares handles partitioning, locale, keyboard, account creation and the
-standard bootloader path. NetworkManager provides the live and installed
+standard bootloader path. Ubuntu delegates through a small adapter to its
+installed native bootloader module: a missing `/dev/disk/by-id` skips only
+optional GRUB debconf device preseeding, just as an unmatched by-id alias does.
+GRUB installation and other errors still use the native implementation. NetworkManager provides the live and installed
 network connection in both editions (console tools only in Server). Arch ARM has a separate UEFI fallback loader job
 for its `Image` kernel and requires the ESP mounted at `/boot`.
 
@@ -78,10 +81,11 @@ Total.js key. It cannot disable signatures, change the trusted fingerprint,
 use credentials in a URL or use HTTP. The generated installer profile records
 `validatedInVM: false`; generating it is not proof of an installation.
 
-The Arch profile and bootstrap code are present. Its live ISO recipes still
-use their existing console installer: Calamares must first be packaged and
-integrated on both Arch architectures. Nothing here claims Arch live support
-has been built or tested.
+The Arch profile and bootstrap code are present. Both Arch live recipes now
+have optional Calamares integration and pinned package recipes; their console
+installer remains the default. Native ARM live startup was validated locally;
+Arch installation to disk and x86 live startup remain pending. See [Arch packaging](../../arch/calamares/README.md).
+Source integration does not establish successful Arch installation.
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-calamares.py
@@ -101,7 +105,9 @@ unsupported clip paths become equivalent SVG masks, and image references are
 inlined without changing their pixel data or the logo geometry. Calamares uses
 this compatible SVG for its sidebar and window icon. Qt support is documented
 in [the Qt SVG feature list](https://doc.qt.io/qt-6/svgextensions.html). Toto's license and attribution are
-included in each output. The artwork retains its existing licenses.
+included in each output. The artwork retains its existing licenses. The mascot
+image remains in the welcome/slideshow; the visible attribution footer is
+omitted so installation text focuses on the distribution.
 
 Calamares owns translations of its standard pages. Custom QML strings use
 `qsTr()` with English as the source language; translation catalogs must be

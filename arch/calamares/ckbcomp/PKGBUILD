@@ -1,0 +1,15 @@
+# ckbcomp is the console-setup utility used by Calamares keyboard configuration.
+pkgname=ckbcomp
+pkgver=1.240
+pkgrel=1
+pkgdesc='Compile an XKB keyboard description to a console keymap'
+arch=('any')
+url='https://salsa.debian.org/installer-team/console-setup'
+license=('GPL-2.0-or-later')
+depends=('perl' 'xkeyboard-config')
+source=("https://deb.debian.org/debian/pool/main/c/console-setup/console-setup_${pkgver}.tar.xz")
+sha256sums=('ce9e9a7bd59e7d54c00d20628fa08b879efa7bfc25fd39c406683a6d6c09e49c')
+package() {
+    install -Dm755 console-setup/Keyboard/ckbcomp "${pkgdir}/usr/bin/ckbcomp"
+    install -Dm644 console-setup/man/ckbcomp.1 "${pkgdir}/usr/share/man/man1/ckbcomp.1"
+}

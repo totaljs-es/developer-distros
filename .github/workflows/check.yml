@@ -31,3 +31,9 @@ jobs:
 
       - name: Online installer contracts (command doubles, no disks)
         run: python3 scripts/test-calamares-install.py
+
+      - name: Arch Calamares staging and build guards (no VM)
+        run: python3 scripts/test-arch-calamares.py
+
+      - name: Ubuntu bootloader compatibility (no disks)
+        run: python3 scripts/test-calamares-bootloader.py

@@ -1,6 +1,6 @@
 # Experimental own live ISO
 
-**Status: experimental and outside the published installation path.** The workflow runs manually only; it is not a release check for the Arch ISOs or the Ubuntu ISO/seeds. The optional Calamares installer has been built locally on arm64 and validated through Server installation, disk-only boot, restart and HTTPS services. Desktop and amd64 installation remain pending; see [the evidence](../../docs/validation-2026-11-03.md). Distribution status remains documented in `docs/legal.md`.
+**Status: experimental and outside the published installation path.** The workflow runs manually only; it is not a release check for the Arch ISOs or the Ubuntu ISO/seeds. The optional Calamares installer has been built locally on arm64 and validated through Server and Desktop installations, disk-only boot, restart and HTTPS services. Desktop password login was checked. amd64 installation remains pending; see [the evidence](../../docs/validation-2026-11-03.md). Distribution status remains documented in `docs/legal.md`.
 
 The graphical installer uses the [shared Calamares interface](../../shared/calamares/README.md)
 and [online installation design](../../docs/installer.md). Set `CALAMARES=1` to
@@ -30,7 +30,7 @@ The manually dispatched workflow `.github/workflows/iso-own.yml` has an installe
 | Where | State |
 | --- | --- |
 | `os-release`, `issue` | Ours (`ID=totaljs-developer`, `ID_LIKE="ubuntu debian"`). They are files of the package `base-files`: a later version of that package has to be rebuilt with our identity, so that an update does not put the old one back. |
-| The installer | Optional Calamares, with shared Total.js branding and online installation jobs. Ubuntu arm64 UI and Server installation validated locally; other combinations pending. |
+| The installer | Optional Calamares, with shared Total.js branding and online installation jobs. Ubuntu arm64 UI, Server and Desktop installation validated locally; amd64 pending. |
 | GRUB, the boot splash, the wallpapers | Ours (`grub.cfg`, `shared/plymouth`, `shared/wallpapers`). |
 | The packages of Ubuntu | Redistributed as they are, from the archive of Ubuntu. |
 
@@ -73,7 +73,9 @@ ARCH=arm64 UEFI=1 QEMU_MEMORY=4096 MARKER_PATTERN=TOTALJS-CALAMARES-READY WORK_D
 
 On Apple Silicon the boot test selects HVF automatically and finds the UEFI
 firmware installed by Homebrew. `QEMU_ACCEL=tcg` forces software emulation;
-`QEMU_FIRMWARE` selects a different firmware file. The boot check has no target
+`QEMU_FIRMWARE` selects a different firmware file. amd64 UEFI uses split
+OVMF flash and a fresh copy of its matching variable template; set
+`QEMU_FIRMWARE_VARS` when it cannot be inferred from the code filename. The boot check has no target
 disk and proves graphical startup only. The separate installation evidence is
 in [the local validation report](../../docs/validation-2026-11-03.md).
 

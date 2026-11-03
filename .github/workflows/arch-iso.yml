@@ -4,10 +4,17 @@ name: arch-iso
 # to the shell with our banner. The ISO is kept as an artifact of the run: it is not published here.
 on:
   workflow_dispatch:
+    inputs:
+      installer:
+        description: Include the experimental shared Calamares installer
+        type: boolean
+        default: true
   push:
     paths:
       - 'arch/iso/**'
       - 'arch/archinstall/**'
+      - 'arch/calamares/**'
+      - 'shared/calamares/**'
       - '.github/workflows/arch-iso.yml'
 
 jobs:
@@ -16,16 +23,27 @@ jobs:
     container:
       image: archlinux:latest
       options: --privileged
-    timeout-minutes: 60
+    timeout-minutes: 90
+    env:
+      CALAMARES: ${{ inputs.installer && '1' || '0' }}
     steps:
       - name: Tools
         run: pacman -Syu --noconfirm --needed archiso git python
 
       - uses: actions/checkout@v7
 
+      - name: Build the live installer dependencies
+        if: inputs.installer
+        run: |
+          pacman -S --noconfirm --needed base-devel cmake ninja extra-cmake-modules qt6-base qt6-declarative qt6-svg qt6-tools yaml-cpp kcoreaddons kconfig ki18n kservice kpmcore polkit-qt6 libpwquality icu parted
+          useradd --create-home --shell /bin/bash totaljs-calbuild
+          mkdir -p build/arch-calamares
+          chown totaljs-calbuild:totaljs-calbuild build/arch-calamares
+          runuser -u totaljs-calbuild -- bash arch/calamares/build-packages.sh "$GITHUB_WORKSPACE/build/arch-calamares"
+
       - name: Build the ISO
         run: |
-          KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso/build.sh
+          CALAMARES_PACKAGES="$GITHUB_WORKSPACE/build/arch-calamares" KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso/build.sh
 
       - name: The ISO, as an artifact
         uses: actions/upload-artifact@v7
@@ -60,6 +78,18 @@ jobs:
       - name: Boot it in QEMU
         run: bash arch/iso/test-boot.sh "$(ls iso/*.iso | head -n 1)"
 
+      - name: The graphical installer loads its modules
+        if: inputs.installer
+        env:
+          UEFI: '1'
+          QEMU_MEMORY: '4096'
+          MARKER_PATTERN: TOTALJS-CALAMARES-READY
+          WORK_DIR: build/arch-iso/calamares
+          BOOT_TIMEOUT: '900'
+        run: |
+          sudo apt-get install -y ovmf
+          bash iso/own/test-boot.sh "$(ls iso/*.iso | head -n 1)"
+
       - name: Keep the boot diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -72,4 +102,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: arch-iso-boot-console
-          path: build/arch-iso/boot/*.log
+          path: |
+            build/arch-iso/boot/*.log
+            build/arch-iso/calamares/*

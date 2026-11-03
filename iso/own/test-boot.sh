@@ -50,7 +50,24 @@ if [ "${UEFI:-0}" = 1 ] || [ "${ARCH}" = arm64 ]; then
         done
     fi
     [ -f "${CODE}" ] || die "UEFI firmware is missing; set QEMU_FIRMWARE to its path"
-    OPTIONS+=(-bios "${CODE}")
+    if [ "${ARCH}" = amd64 ]; then
+        # Split OVMF (including Ubuntu's 4M images) is flash, not a PC BIOS ROM.
+        # Give each run a private variable store; never write the system template.
+        VARS="${QEMU_FIRMWARE_VARS:-}"
+        if [ -z "${VARS}" ]; then
+            case "${CODE}" in
+                *_CODE*.fd) VARS="${CODE/_CODE/_VARS}" ;;
+                *edk2-x86_64-code.fd) VARS="$(dirname "${CODE}")/edk2-i386-vars.fd" ;;
+            esac
+        fi
+        [ -f "${VARS}" ] || die "Matching OVMF variables are missing; set QEMU_FIRMWARE_VARS"
+        cp "${VARS}" "${WORK}/uefi-vars.fd"
+        OPTIONS+=(-machine q35
+                  -drive "if=pflash,format=raw,unit=0,readonly=on,file=${CODE}"
+                  -drive "if=pflash,format=raw,unit=1,file=${WORK}/uefi-vars.fd")
+    else
+        OPTIONS+=(-bios "${CODE}")
+    fi
     log "UEFI: ${CODE}"
 fi
 

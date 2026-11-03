@@ -64,8 +64,8 @@ welcome/edition/summary/completion PNGs, first-boot SSH output, post-restart
 checks and `SHA256SUMS`. The ISO is
 `build/own/local/totaljs-developer-live-arm64-before-logo.iso` (retained installation-validation baseline).
 
-Still required: Ubuntu Desktop installation, amd64 installation/BIOS/UEFI,
-Arch live packaging/integration and installation on both architectures,
+Desktop validation is recorded below. Still required: amd64 installation/BIOS/UEFI,
+Arch x86 live startup and Arch installation on both architectures,
 physical hardware, and failure/retry cleanup. Encryption, LVM root and Secure
 Boot remain outside this experimental profile's supported scope.
 
@@ -90,3 +90,101 @@ page confirmed the corrected logo and unchanged Toto artwork. Screenshot:
 This follow-up checked live startup and appearance; the complete Server
 installation was not repeated for the branding-only rebuild. The installation
 and restart results above belong to the retained baseline ISO and its hash.
+
+
+## Successful ARM64 Desktop installation
+
+A fresh 50 GiB qcow2 disk was installed through the native Calamares UI using
+the logo-corrected ISO (`2ecb529664ba22e39b688d384028e62dd63fc6abe9bb364e2d645cfcaeecc437`).
+Only the temporary UI automation tool was added to the live session. The
+installer reached **All done**, and the installed disk booted with no ISO
+attached.
+
+- The account logged in through LightDM with the randomly generated password
+  entered in Calamares; Openbox, tint2 and Conky appeared correctly.
+- The default target is `graphical.target`. LightDM, NetworkManager, Docker
+  and Center were active, with no failed systemd units.
+- Installed packages include `totaljs-developer-desktop 1.0.0-1`, Firefox
+  `159.0~build1`, Chrome `156.0.8078.79-1`, and Node.js `v24.22.1`.
+- The installer and live autologin configuration are absent from the target.
+- Center, Code, Flow and pgAdmin returned HTTP 200 over HTTPS with normal
+  certificate verification. `docker exec postgres pg_isready` succeeded.
+- A normal `systemctl reboot`, authorized with the account's password via
+  sudo, changed the boot ID. LightDM and all the same services passed again.
+
+A temporary QA key and password file were added only after installation for
+verification, removed afterward, and deleted from the host. The VM was shut
+down. Screenshots and service results are retained locally under
+`build/own/local/validation/desktop-arm64/`. Ubuntu amd64 and Arch target
+installation remain separate pending checks.
+
+
+## Reported CI and VirtualBox bootloader failures
+
+The supplied CI log identifies amd64 UEFI, despite the initial ARM label.
+The 4 MiB split OVMF code image was passed as a PC `-bios` ROM. This exact
+failure was reproduced with Homebrew QEMU and its 3.5 MiB code component.
+With `q35` and separate pflash code/variables drives, QEMU remained running
+and displayed TianoCore. Each test gets a private copy of the variable store;
+the firmware template stays read-only. Full amd64 ISO boot is a separate check.
+
+The VirtualBox screenshot shows Ubuntu's native Calamares bootloader raising
+inside `get_disk_id()` while listing `/dev/disk/by-id`. The exact installed
+Ubuntu module was extracted and the missing-directory exception reproduced.
+The shared Ubuntu adapter delegates to that module and treats only that
+specific `FileNotFoundError` like its existing no-alias result. Both BIOS
+and EFI debconf paths were exercised with the real module; unrelated errors
+remain fatal. A fresh complete VirtualBox installation is still required.
+
+The user's visual correction keeps Toto's image and removes only its visible
+slideshow attribution text. A fresh ARM64 ISO was built with these changes and its native module-loading
+marker passed. Previous ISO validation results continue to identify their own hashes.
+
+
+## Arch ARM graphical live build
+
+The optional Arch ARM build completed natively in a case-sensitive Linux
+container root. The local ISO is
+`build/arch-iso-arm/out/totaljs-developer-arch-2026.11.03-aarch64.iso`, SHA-256
+`8e0713eade33151738e107c67035d84596f85e9005621013a5e0201c402e36b7`.
+It booted with QEMU/HVF and displayed the shared Calamares welcome page;
+LightDM and NetworkManager were active and `TOTALJS-CALAMARES-READY` was
+observed. The live user belongs to `autologin`; the upstream `alarm` account
+and SSH were removed during the build. Evidence is retained under
+`build/arch-iso-arm/validation/`.
+
+This establishes native framework packaging and graphical live startup,
+not installation to disk. This artifact preceded the request to remove the
+visible attribution footer; subsequent builds use the updated shared QML.
+The local x86_64 framework and Ubuntu amd64 builds were interrupted when
+Colima stopped. Their unfinished containers were retained for diagnosis;
+no local amd64 ISO or installation result is claimed.
+
+
+## End-to-end regression: Ubuntu without by-id aliases
+
+The rebuilt ISO `build/own/local/totaljs-developer-live-arm64-fixed.iso` has
+SHA-256 `7c2eb1576afcb0e0f05412cc10c33a20d62d5ad29269e6582f4fd42723cc1c66`.
+A fresh 40 GiB disk was installed with the Server edition. QMP keyboard/mouse
+events drove the unmodified UI; no automation package was installed in the
+live environment. The slideshow retained the mascot image and omitted its
+attribution text, as requested.
+
+For this regression only, a live-session watcher removed by-id symlinks that
+udev recreated during partitioning. `/dev/disk/by-id` remained absent through
+completion. This QA instrumentation is not part of the distro or target.
+Calamares reached **All done**; its log confirms execution of the shared
+bootloader adapter, native `grub-install --target=arm64-efi` and
+`grub-mkconfig`. The installed disk then booted without the ISO.
+
+SSH password authentication with the password created in Calamares succeeded;
+no QA key or password file was added to the target. NetworkManager, Docker
+and Center were active, no systemd failures were reported, and all four
+HTTPS endpoints returned 200 once first-boot containers were ready. PostgreSQL
+accepted connections. The password/askpass files were removed from the host
+and the VM was shut down. Local evidence is in
+`build/own/local/validation/boot-fixes/`.
+
+This covers the reported missing-directory condition in QEMU. It does not
+claim a new complete VirtualBox run or a full amd64 ISO boot. Those remain
+explicit follow-up checks after uploading the source commit.

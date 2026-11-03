@@ -10,9 +10,12 @@
 #   KEY_FILE=public-key.gpg arch/iso-arm/build.sh        # the ISO in build/arch-iso-arm/out
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd -P)"
 KEY_FILE="${KEY_FILE:?KEY_FILE is the public key of the repository}"
-BUILD="${ROOT}/build/arch-iso-arm"
+CALAMARES="${CALAMARES:-0}"
+case "${CALAMARES}" in 0|1) ;; *) echo 'CALAMARES must be 0 or 1' >&2; exit 1 ;; esac
+BUILD="$(realpath -m "${ARCH_ARM_BUILD_DIR:-${ROOT}/build/arch-iso-arm}")"
+case "${BUILD}" in /|/tmp|/var|/var/tmp|"${ROOT}") echo 'Unsafe ARM build directory' >&2; exit 1 ;; esac
 RFS="${BUILD}/rootfs"
 ISO="${BUILD}/iso"
 OUT="${BUILD}/out"
@@ -36,6 +39,10 @@ trap cleanup EXIT
 in_rfs() { chroot "${RFS}" /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin "$@"; }
 
 mkdir -p "${BUILD}"
+if mountpoint -q "${RFS}"; then
+    echo 'A previous ARM build still has mounts; unmount it before rebuilding' >&2
+    exit 1
+fi
 rm -rf "${RFS}" "${ISO}" "${OUT}"
 mkdir -p "${RFS}" "${ISO}/arch/boot/aarch64" "${ISO}/arch/aarch64" "${ISO}/EFI/BOOT" "${OUT}"
 
@@ -47,7 +54,11 @@ fi
 bsdtar -xpf "${BUILD}/rootfs.tar.gz" -C "${RFS}"
 # pacman checks the free space of the mount point of its cache: the folder of the system has to be one (arch-chroot does the same)
 mount --bind "${RFS}" "${RFS}"
-mount -t proc proc "${RFS}/proc"; mount --rbind /sys "${RFS}/sys"; mount --rbind /dev "${RFS}/dev"
+mount -t proc proc "${RFS}/proc"
+mount --rbind /sys "${RFS}/sys"
+mount --make-rslave "${RFS}/sys"
+mount --rbind /dev "${RFS}/dev"
+mount --make-rslave "${RFS}/dev"
 rm -f "${RFS}/etc/resolv.conf"; cp -L /etc/resolv.conf "${RFS}/etc/resolv.conf"
 
 echo "==> the live system"
@@ -87,6 +98,30 @@ install -Dm755 "${ROOT}/arch/install-arm.sh" "${RFS}/usr/local/bin/totaljs-insta
 chmod 755 "${RFS}/usr/local/bin/totaljs-install"
 sed -i 's/Based on Arch Linux\./Based on Arch Linux ARM./' "${RFS}/etc/motd"
 
+# The upstream tarball contains a shared-password alarm account and enabled SSH.
+# Neither belongs on a redistributable installer medium.
+if in_rfs id alarm >/dev/null 2>&1; then in_rfs userdel --remove alarm; fi
+in_rfs systemctl disable sshd.service
+
+if [ "${CALAMARES}" = 1 ]; then
+    # Build upstream sources natively as an unprivileged user in this disposable root.
+    pacman_retry -S --needed base-devel cmake ninja extra-cmake-modules qt6-base qt6-declarative qt6-svg qt6-tools \
+        yaml-cpp kcoreaddons kconfig ki18n kservice kpmcore polkit-qt6 python libpwquality icu parted
+    mkdir -p "${RFS}/tmp/totaljs-calamares-build"
+    cp -R "${ROOT}/arch/calamares/." "${RFS}/tmp/totaljs-calamares-build/"
+    in_rfs useradd --create-home --shell /bin/bash totaljs-calbuild
+    in_rfs chown -R totaljs-calbuild:totaljs-calbuild /tmp/totaljs-calamares-build
+    in_rfs runuser -u totaljs-calbuild -- bash /tmp/totaljs-calamares-build/build-packages.sh /tmp/totaljs-calamares-build/out
+    # Install runtime dependencies first, then the local framework package. Its
+    # post-transaction hook configures only this disposable live root.
+    mapfile -t LIVE_PACKAGES < <(grep -v -E '^(calamares|ckbcomp)$' "${ROOT}/arch/calamares/live-packages")
+    pacman_retry -S --needed "${LIVE_PACKAGES[@]}"
+    bash "${ROOT}/arch/calamares/stage-live.sh" "${RFS}" arm64
+    in_rfs bash -c 'pacman -U --noconfirm /tmp/totaljs-calamares-build/out/*.pkg.tar.*'
+    in_rfs userdel --remove totaljs-calbuild
+    rm -rf "${RFS}/tmp/totaljs-calamares-build"
+fi
+
 # root logs in by itself on the first console and on the serial one; on the first one the installer starts
 mkdir -p "${RFS}/etc/systemd/system/getty@tty1.service.d" "${RFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d"
 cat > "${RFS}/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'AUTOLOGIN'
@@ -99,13 +134,18 @@ cat > "${RFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d/autologin.conf" 
 ExecStart=
 ExecStart=-/sbin/agetty -o '-p -f -- \\u' --keep-baud 115200,57600,38400,9600 --autologin root %I $TERM
 AUTOLOGIN
-in_rfs systemctl enable getty@tty1.service serial-getty@ttyAMA0.service systemd-networkd.service systemd-resolved.service iwd.service
+in_rfs systemctl enable getty@tty1.service serial-getty@ttyAMA0.service systemd-resolved.service
+if [ "${CALAMARES}" = 0 ]; then
+    in_rfs systemctl enable systemd-networkd.service iwd.service
+fi
 in_rfs passwd -d root >/dev/null
+if [ "${CALAMARES}" = 0 ]; then
 cat > "${RFS}/root/.bash_profile" <<'PROFILE'
 [ -f ~/.bashrc ] && . ~/.bashrc
 # Total.js Developer: the installer, on the first console
 if [ "$(tty)" = /dev/tty1 ]; then /usr/local/bin/totaljs-install --ask || true; fi
 PROFILE
+fi
 echo totaljs-installer > "${RFS}/etc/hostname"
 # nothing of the keys of the machine that builds the medium
 rm -f "${RFS}"/etc/ssh/ssh_host_*

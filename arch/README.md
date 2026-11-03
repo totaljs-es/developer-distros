@@ -13,6 +13,7 @@ The same packages as the Ubuntu edition, built for Arch from the same source: `p
 | `test-install.sh` | Installs the server edition from that repository in a container of Arch and looks at what it promises. |
 | `stage-repo.sh` | Signs the repository that the CI built, with the key of Total.js, and puts it where `publish-pages.sh` publishes it. |
 | `install-arm.sh` | The installer for ARM (Arch Linux ARM has no ISO): it runs from the Archboot AArch64 ISO and installs the system and the server edition on an empty disk. |
+| `calamares/` | Pinned live-only framework/keyboard packages and shared graphical-installer integration; optional in both ISO builders. |
 | `archinstall/` | The configuration for `archinstall`, the installer of Arch: the seed of the Arch edition. |
 
 ## How it is published
@@ -33,3 +34,5 @@ How to install it: [docs/install-arch.md](../docs/install-arch.md).
 The end-to-end test of installation to disk on both architectures. The desktop and Plymouth packages are already present; the ISO boot checks only establish that the live environment starts.
 
 The x86_64 workflow builds an ISO and `bash arch/iso/test-boot.sh image.iso` boots its kernel/initramfs against that ISO. This bypasses the firmware menus: BIOS/UEFI boot and installation to disk still need separate validation. Serial, extraction and volume-label logs are retained even when the test fails. The ARM workflow boots through UEFI and also retains its serial log.
+
+Both ISO workflows offer an experimental graphical installer checkbox for manual runs. See [Calamares packaging and build instructions](calamares/README.md). The shared profile does not replace the separate requirement to validate installation to disk.

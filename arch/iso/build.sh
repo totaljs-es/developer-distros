@@ -9,10 +9,19 @@
 # what is ours: the name, the menu of the boot, the key of our repository, the configuration of archinstall and the program totaljs-install.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd -P)"
 KEY_FILE="${KEY_FILE:?KEY_FILE is the public key of the repository}"
 BUILD="${ROOT}/build/arch-iso"
 PROFILE="${BUILD}/profile"
+CALAMARES="${CALAMARES:-0}"
+case "${CALAMARES}" in 0|1) ;; *) echo 'CALAMARES must be 0 or 1' >&2; exit 1 ;; esac
+if [ "${CALAMARES}" = 1 ]; then
+    CALAMARES_PACKAGES="$(realpath "${CALAMARES_PACKAGES:?Provide a directory of locally built Calamares and ckbcomp packages}")"
+    case "${CALAMARES_PACKAGES}/" in "${BUILD}/"*) echo 'Packages must be outside the disposable ISO build tree' >&2; exit 1 ;; esac
+    for package in calamares ckbcomp; do
+        compgen -G "${CALAMARES_PACKAGES}/${package}-[0-9]*.pkg.tar.*" >/dev/null || { echo "Missing ${package} package" >&2; exit 1; }
+    done
+fi
 
 [ "$(id -u)" = 0 ] || { echo "run this as root: mkarchiso needs to mount" >&2; exit 1; }
 [ -d /usr/share/archiso/configs/releng ] || { echo "the package archiso is not installed" >&2; exit 1; }
@@ -27,11 +36,13 @@ install -Dm644 "${KEY_FILE}" "${PROFILE}/airootfs/usr/share/totaljs-developer/re
 install -Dm644 "${ROOT}/arch/archinstall/server.json" "${PROFILE}/airootfs/usr/share/totaljs-developer/archinstall/server.json"
 [ ! -f "${ROOT}/arch/archinstall/desktop.json" ] || install -Dm644 "${ROOT}/arch/archinstall/desktop.json" "${PROFILE}/airootfs/usr/share/totaljs-developer/archinstall/desktop.json"
 # the installer starts on the first console (the serial one and the others stay as a plain shell)
+if [ "${CALAMARES}" = 0 ]; then
 cat >> "${PROFILE}/airootfs/root/.zlogin" <<'ZLOGIN'
 
 # Total.js Developer: the installer, on the first console
 if [ "$(tty)" = /dev/tty1 ]; then /usr/local/bin/totaljs-install --ask || true; fi
 ZLOGIN
+fi
 
 # --- the name, and the permissions of what we add
 python3 - "${PROFILE}/profiledef.sh" <<'PY'
@@ -50,6 +61,22 @@ PY
 grep -rl 'Arch Linux' "${PROFILE}/syslinux" "${PROFILE}/grub" "${PROFILE}/efiboot" 2>/dev/null | while read -r f; do
     sed -i "s/Arch Linux install medium/Total.js Developer installer/g; s/Arch Linux/Total.js Developer/g" "${f}"
 done
+
+if [ "${CALAMARES}" = 1 ]; then
+    # Only the disposable build repository allows unsigned local build outputs.
+    # Installed targets continue using the signed official and Total.js repos.
+    repo-add "${CALAMARES_PACKAGES}/totaljs-live.db.tar.gz" "${CALAMARES_PACKAGES}/"*.pkg.tar.*
+    cat >> "${PROFILE}/pacman.conf" <<REPOSITORY
+
+[totaljs-live]
+SigLevel = Optional TrustAll
+Server = file://${CALAMARES_PACKAGES}
+REPOSITORY
+    cat "${ROOT}/arch/calamares/live-packages" >> "${PROFILE}/packages.x86_64"
+    bash "${ROOT}/arch/calamares/stage-live.sh" "${PROFILE}/airootfs" amd64
+    # archiso drops source executable modes unless listed explicitly.
+    sed -i '/file_permissions=(/a\  ["/usr/lib/totaljs-live/configure-installer"]="0:0:755"' "${PROFILE}/profiledef.sh"
+fi
 
 mkarchiso -v -w "${BUILD}/work" -o "${BUILD}/out" "${PROFILE}"
 ls -la "${BUILD}/out"

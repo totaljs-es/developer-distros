@@ -165,6 +165,9 @@ def install_profile(source, output, base, architecture, edition, repository):
     modules = output / 'modules'
     shutil.copytree(source / 'modules/totaljs', modules / 'totaljs',
                     ignore=shutil.ignore_patterns('__pycache__'))
+    if base == 'ubuntu':
+        shutil.copytree(source / 'modules/bootloader', modules / 'bootloader',
+                        ignore=shutil.ignore_patterns('__pycache__'))
     settings = json.loads((output / 'settings.conf').read_text())
     settings['modules-search'] = [str(modules), 'local']
     settings['prompt-install'] = True

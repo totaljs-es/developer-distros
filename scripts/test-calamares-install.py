@@ -60,6 +60,7 @@ class InstallerTests(unittest.TestCase):
                     self.assertFalse(users['doAutologin'])
                     self.assertFalse(users['setRootPassword'])
                     self.assertFalse((output / 'preview.json').exists())
+                    self.assertEqual((output / 'modules/bootloader/main.py').is_file(), base == 'ubuntu')
             self.assertTrue(all(sequence == sequences[0] for sequence in sequences))
 
     def test_insecure_repository_is_rejected_before_output_exists(self):
@@ -207,6 +208,22 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(run.call_count, 1)
         self.assertEqual(run.call_args.args[0][0], 'gpgv')
 
+    def test_arch_preflight_uses_the_published_canonical_database_and_signature(self):
+        storage = SimpleNamespace(value={'packagechooser_packagechooser': 'server'}.get)
+        with patch.object(jobs.platform, 'machine', return_value='x86_64'), \
+             patch.object(jobs.os, 'geteuid', return_value=0), \
+             patch.object(jobs.shutil, 'which', return_value='/usr/bin/tool'), \
+             patch.object(jobs, 'repository_key', return_value=b'test-key'), \
+             patch.object(jobs, 'download', return_value=b'signed-metadata') as download, \
+             patch.object(jobs, 'command') as run:
+            jobs.preflight(config(base='arch'), storage)
+        self.assertEqual([call.args[0] for call in download.call_args_list], [
+            jobs.REPOSITORY + '/arch/x86_64/totaljs-developer.db',
+            jobs.REPOSITORY + '/arch/x86_64/totaljs-developer.db.sig',
+        ])
+        self.assertEqual(run.call_count, 1)
+        self.assertEqual(run.call_args.args[0][0], 'gpgv')
+
     def test_bootstrap_rejects_actual_unsupported_filesystem_before_writing(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -219,7 +236,7 @@ class InstallerTests(unittest.TestCase):
 
 
 class LiveBootPlumbingTests(unittest.TestCase):
-    def boot(self, arch, marker):
+    def boot(self, arch, marker, autodetect_vars=False, missing_vars=False):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             binaries = root / 'bin'
@@ -237,17 +254,28 @@ time.sleep(5)
                 path.write_text(helper)
                 path.chmod(0o755)
             image = root / 'live.iso'
-            firmware = root / 'firmware.fd'
+            firmware = root / ('OVMF_CODE_4M.fd' if autodetect_vars else 'firmware.fd')
             image.write_bytes(b'test double')
             firmware.write_bytes(b'test double')
+            variables = root / ('OVMF_VARS_4M.fd' if autodetect_vars else 'firmware-vars.fd')
+            variables.write_bytes(b'pristine variables')
             env = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ['PATH'],
                        ARCH=arch, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='3',
-                       QEMU_MEMORY='4096', QEMU_FIRMWARE=str(firmware),
+                       QEMU_MEMORY='4096', QEMU_FIRMWARE=str(firmware), QEMU_FIRMWARE_VARS=str(variables),
                        UEFI='1', MARKER_PATTERN='TOTALJS-CALAMARES-READY',
                        FAKE_MARKER=marker, FAKE_ARGS=str(root / 'arguments.json'))
+            if autodetect_vars:
+                env.pop('QEMU_FIRMWARE_VARS', None)
+            if missing_vars:
+                variables.unlink()
             result = subprocess.run(['bash', str(ROOT / 'iso/own/test-boot.sh'), str(image)],
                                     env=env, capture_output=True, text=True, timeout=10)
-            return result, json.loads((root / 'arguments.json').read_text())
+            if not missing_vars:
+                self.assertEqual(variables.read_bytes(), b'pristine variables')
+            if arch == 'amd64' and result.returncode == 0:
+                self.assertEqual((root / 'work/uefi-vars.fd').read_bytes(), b'pristine variables')
+            arguments = root / 'arguments.json'
+            return result, json.loads(arguments.read_text()) if arguments.exists() else None
 
     def test_both_architectures_boot_and_use_graphical_readiness_marker(self):
         for arch in ['amd64', 'arm64']:
@@ -255,8 +283,25 @@ time.sleep(5)
                 result, args = self.boot(arch, 'TOTALJS-CALAMARES-READY\n')
                 self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
                 self.assertEqual(args[args.index('-m') + 1], '4096')
-                self.assertEqual('-machine' in args, arch == 'arm64')
+                self.assertEqual(args[args.index('-machine') + 1], 'virt' if arch == 'arm64' else 'q35')
+                self.assertEqual('-bios' in args, arch == 'arm64')
+                if arch == 'amd64':
+                    self.assertTrue(any('if=pflash' in arg and 'readonly=on' in arg for arg in args))
+                    self.assertTrue(any('unit=1' in arg and 'uefi-vars.fd' in arg for arg in args))
                 self.assertEqual('virtio-gpu-pci' in args, arch == 'arm64')
+
+    def test_ovmf_4m_finds_matching_variables_and_uses_flash(self):
+        result, args = self.boot('amd64', 'TOTALJS-CALAMARES-READY\n', autodetect_vars=True)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertNotIn('-bios', args)
+        self.assertTrue(any('OVMF_CODE_4M.fd' in arg and 'readonly=on' in arg for arg in args))
+        self.assertTrue(any('uefi-vars.fd' in arg and 'unit=1' in arg for arg in args))
+
+    def test_missing_ovmf_variables_fail_before_starting_qemu(self):
+        result, args = self.boot('amd64', 'TOTALJS-CALAMARES-READY\n', missing_vars=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('Matching OVMF variables', result.stderr)
+        self.assertIsNone(args)
 
     def test_linux_boot_alone_does_not_count_as_installer_ready(self):
         result, _ = self.boot('amd64', 'TOTALJS-LIVE-OK Total.js Developer\n')
