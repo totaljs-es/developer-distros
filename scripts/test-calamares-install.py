@@ -236,7 +236,7 @@ class InstallerTests(unittest.TestCase):
 
 
 class LiveBootPlumbingTests(unittest.TestCase):
-    def boot(self, arch, marker, autodetect_vars=False, missing_vars=False):
+    def boot(self, arch, marker, autodetect_vars=False, missing_vars=False, acceleration="tcg"):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             binaries = root / 'bin'
@@ -260,7 +260,7 @@ time.sleep(5)
             variables = root / ('OVMF_VARS_4M.fd' if autodetect_vars else 'firmware-vars.fd')
             variables.write_bytes(b'pristine variables')
             env = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ['PATH'],
-                       ARCH=arch, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='3',
+                       ARCH=arch, QEMU_ACCEL=acceleration, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='3',
                        QEMU_MEMORY='4096', QEMU_FIRMWARE=str(firmware), QEMU_FIRMWARE_VARS=str(variables),
                        UEFI='1', MARKER_PATTERN='TOTALJS-CALAMARES-READY',
                        FAKE_MARKER=marker, FAKE_ARGS=str(root / 'arguments.json'))
@@ -289,6 +289,14 @@ time.sleep(5)
                     self.assertTrue(any('if=pflash' in arg and 'readonly=on' in arg for arg in args))
                     self.assertTrue(any('unit=1' in arg and 'uefi-vars.fd' in arg for arg in args))
                 self.assertEqual('virtio-gpu-pci' in args, arch == 'arm64')
+
+    def test_kvm_selects_the_host_cpu_on_both_architectures(self):
+        for architecture in ['amd64', 'arm64']:
+            with self.subTest(architecture=architecture):
+                result, args = self.boot(architecture, 'TOTALJS-CALAMARES-READY\n', acceleration='kvm')
+                self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+                self.assertEqual(args[args.index('-accel') + 1], 'kvm')
+                self.assertEqual(args[args.index('-cpu') + 1], 'host')
 
     def test_ovmf_4m_finds_matching_variables_and_uses_flash(self):
         result, args = self.boot('amd64', 'TOTALJS-CALAMARES-READY\n', autodetect_vars=True)

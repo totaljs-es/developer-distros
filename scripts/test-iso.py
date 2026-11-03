@@ -43,7 +43,7 @@ class MediaChecks(unittest.TestCase):
 
 
 class ArchBootChecks(unittest.TestCase):
-    def run_boot(self, mode):
+    def run_boot(self, mode, acceleration="tcg"):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             binaries = root / 'bin'
@@ -66,6 +66,8 @@ args = sys.argv[1:]
 cmdline = args[args.index('-append') + 1]
 assert 'archisolabel=TOTALJS_202610 ' in cmdline, cmdline
 assert "'" not in cmdline, cmdline
+assert args[args.index('-accel') + 1] == os.environ['QEMU_ACCEL']
+assert args[args.index('-cpu') + 1] == ('host' if os.environ['QEMU_ACCEL'] == 'kvm' else 'max')
 mode = os.environ['FAKE_BOOT_MODE']
 if mode == 'banner':
     print('Total.js Developer, installation medium', flush=True)
@@ -88,7 +90,7 @@ time.sleep(1)
             descriptor[40:72] = b'TOTALJS_202610'.ljust(32, b' ')
             iso.write_bytes(bytes(16 * 2048) + descriptor)
             env = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ['PATH'],
-                       FAKE_BOOT_MODE=mode, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='2')
+                       QEMU_ACCEL=acceleration, FAKE_BOOT_MODE=mode, WORK_DIR=str(root / 'work'), BOOT_TIMEOUT='2')
             result = subprocess.run(['bash', str(ROOT / 'arch/iso/test-boot.sh'), str(iso)],
                                     env=env, text=True, capture_output=True, timeout=15)
             self.assertTrue((root / 'work/boot.log').is_file())
@@ -96,6 +98,10 @@ time.sleep(1)
 
     def test_unquoted_label_and_long_banner_log(self):
         result = self.run_boot('banner')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_kvm_uses_the_host_cpu_model(self):
+        result = self.run_boot('banner', acceleration='kvm')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_coloured_systemd_and_getty(self):

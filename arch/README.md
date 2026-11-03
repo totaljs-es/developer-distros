@@ -36,3 +36,7 @@ The end-to-end test of installation to disk on both architectures. The desktop a
 The x86_64 workflow builds an ISO and `bash arch/iso/test-boot.sh image.iso` boots its kernel/initramfs against that ISO. This bypasses the firmware menus: BIOS/UEFI boot and installation to disk still need separate validation. Serial, extraction and volume-label logs are retained even when the test fails. The ARM workflow boots through UEFI and also retains its serial log.
 
 Both ISO workflows offer an experimental graphical installer checkbox for manual runs. See [Calamares packaging and build instructions](calamares/README.md). The shared profile does not replace the separate requirement to validate installation to disk.
+
+The x86_64 boot check selects the host CPU model with KVM and `max` with TCG.
+`QEMU_ACCEL=kvm` or `QEMU_ACCEL=tcg` can select the accelerator explicitly.
+The ARM workflow uses the common live-boot helper in `iso/own/test-boot.sh`.

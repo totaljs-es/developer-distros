@@ -35,7 +35,6 @@ cleanup() {
     sleep 1
     umount -R -l "${RFS}" 2>/dev/null || true
 }
-trap cleanup EXIT
 in_rfs() { chroot "${RFS}" /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin "$@"; }
 
 mkdir -p "${BUILD}"
@@ -43,6 +42,7 @@ if mountpoint -q "${RFS}"; then
     echo 'A previous ARM build still has mounts; unmount it before rebuilding' >&2
     exit 1
 fi
+trap cleanup EXIT
 rm -rf "${RFS}" "${ISO}" "${OUT}"
 mkdir -p "${RFS}" "${ISO}/arch/boot/aarch64" "${ISO}/arch/aarch64" "${ISO}/EFI/BOOT" "${OUT}"
 

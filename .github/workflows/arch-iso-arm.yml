@@ -47,28 +47,14 @@ jobs:
         run: xorriso -indev "$(ls build/arch-iso-arm/out/*.iso | head -n 1)" -report_el_torito plain 2>&1 | head -30
 
       - name: Boot it in QEMU (UEFI)
-        run: |
-          ISO="$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
-          cp /usr/share/AAVMF/AAVMF_VARS.fd vars.fd 2>/dev/null || truncate -s 64M vars.fd
-          ACCEL=tcg; [ -w /dev/kvm ] && ACCEL=kvm
-          timeout 1500 qemu-system-aarch64 -M virt -accel "$ACCEL" -cpu max -m 3072 -nographic -no-reboot \
-            -drive if=pflash,format=raw,readonly=on,file=/usr/share/AAVMF/AAVMF_CODE.fd -drive if=pflash,format=raw,file=vars.fd \
-            -drive if=none,id=cd,file="$ISO",media=cdrom,readonly=on -device virtio-scsi-pci -device scsi-cd,drive=cd > boot.log 2>&1 &
-          QEMU=$!
-          # the runner has no KVM: QEMU emulates the processor and the start takes about ten minutes (in UTM, with Apple Virtualization, a few seconds). It is a success when
-          # the banner of the medium appears or when systemd reaches the multi-user target with the getty of the first console (the banner needs a login on the serial port)
-          # systemd writes colours to the console (escape codes inside the words): they are taken away before looking for a text
-          seen() { sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' boot.log | tr -d '\r' | grep -F "$1" >/dev/null; }
-          for _ in $(seq 1 700); do
-            if seen 'Total.js Developer, installation medium'; then echo "booted: the banner of the medium is there"; kill "$QEMU" 2>/dev/null || true; exit 0; fi
-            if seen 'Reached target Multi-User System' && seen 'Started Getty on tty1'; then echo "booted: systemd reached the multi-user target with the getty of the first console"; tail -n 5 boot.log; kill "$QEMU" 2>/dev/null || true; exit 0; fi
-            kill -0 "$QEMU" 2>/dev/null || break
-            sleep 2
-          done
-          tail -n 80 boot.log
-          echo "the medium did not reach the banner" >&2
-          kill "$QEMU" 2>/dev/null || true
-          exit 1
+        env:
+          ARCH: arm64
+          UEFI: '1'
+          QEMU_MEMORY: '3072'
+          MARKER_PATTERN: 'Total\.js Developer, installation medium'
+          WORK_DIR: build/arch-iso-arm/boot
+          BOOT_TIMEOUT: '1500'
+        run: bash iso/own/test-boot.sh "$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
 
       - name: The graphical installer loads its modules
         if: inputs.installer
@@ -87,6 +73,6 @@ jobs:
         with:
           name: arch-iso-arm-boot-logs
           path: |
-            boot.log
+            build/arch-iso-arm/boot/*
             build/arch-iso-arm/mkinitcpio.log
             build/arch-iso-arm/calamares/*

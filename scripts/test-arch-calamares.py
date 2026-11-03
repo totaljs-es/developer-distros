@@ -85,6 +85,41 @@ class ArchCalamaresTests(unittest.TestCase):
                 self.assertIn('CALAMARES must be', result.stderr)
                 self.assertEqual(marker.read_text(), 'preserve')
 
+    def test_mounted_previous_arm_build_is_not_cleaned_by_refused_run(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            script = root / 'arch/iso-arm/build.sh'
+            script.parent.mkdir(parents=True)
+            shutil.copyfile(ROOT / 'arch/iso-arm/build.sh', script)
+            build = root / 'build/arch-iso-arm'
+            marker = build / 'rootfs/keep'
+            marker.parent.mkdir(parents=True)
+            marker.write_text('previous build')
+            trace = root / 'cleanup-called'
+            binaries = root / 'bin'
+            binaries.mkdir()
+            commands = {
+                'id': '#!/bin/sh\necho 0\n',
+                'uname': '#!/bin/sh\necho aarch64\n',
+                'mountpoint': '#!/bin/sh\nexit 0\n',
+                'realpath': '#!/usr/bin/env python3\nfrom pathlib import Path\nimport sys\nprint(Path(sys.argv[-1]).resolve())\n',
+                'sleep': '#!/bin/sh\necho sleep >> "$FAKE_CLEANUP_TRACE"\n',
+                'umount': '#!/bin/sh\necho umount >> "$FAKE_CLEANUP_TRACE"\n',
+            }
+            for name, contents in commands.items():
+                path = binaries / name
+                path.write_text(contents)
+                path.chmod(0o755)
+            result = subprocess.run(['bash', str(script)],
+                                    env=dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ['PATH'],
+                                             KEY_FILE='unused', CALAMARES='0', ARCH_ARM_BUILD_DIR=str(build),
+                                             FAKE_CLEANUP_TRACE=str(trace)),
+                                    capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('previous ARM build still has mounts', result.stderr)
+            self.assertEqual(marker.read_text(), 'previous build')
+            self.assertFalse(trace.exists(), 'Refusing a new build must not run cleanup against an older one')
+
     def test_package_input_inside_disposable_build_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

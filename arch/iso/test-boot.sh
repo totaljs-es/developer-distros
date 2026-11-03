@@ -16,8 +16,16 @@ xorriso -indev "${ISO}" -pvd_info > "${WORK}/pvd.txt" 2>&1
 # spelling, quotation and capitalization of its text output vary by version.
 LABEL="$(python3 "$(dirname "$0")/read-label.py" "${ISO}")"
 xorriso -osirrox on -indev "${ISO}" -extract /arch/boot/x86_64 "${WORK}/kernel" > "${WORK}/extract.log" 2>&1
-ACCEL=tcg
-[ ! -w /dev/kvm ] || ACCEL=kvm
+ACCEL="${QEMU_ACCEL:-}"
+if [ -z "${ACCEL}" ]; then
+    ACCEL=tcg
+    [ ! -w /dev/kvm ] || ACCEL=kvm
+fi
+case "${ACCEL}" in
+    kvm) CPU=host ;;
+    tcg) CPU=max ;;
+    *) echo "Unsupported acceleration: ${ACCEL}" >&2; exit 1 ;;
+esac
 QEMU=""
 cleanup() {
     if [ -n "${QEMU}" ]; then
@@ -29,7 +37,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 echo "==> booting label=${LABEL} accel=${ACCEL} (up to ${BOOT_TIMEOUT} s)"
-qemu-system-x86_64 -accel "${ACCEL}" -cpu max -m 3072 -nographic -no-reboot \
+qemu-system-x86_64 -accel "${ACCEL}" -cpu "${CPU}" -m 3072 -nographic -no-reboot \
     -kernel "${WORK}/kernel/vmlinuz-linux" -initrd "${WORK}/kernel/initramfs-linux.img" \
     -append "archisobasedir=arch archisolabel=${LABEL} console=ttyS0,115200 totaljs.edition=server" \
     -drive "file=${ISO},format=raw,media=cdrom,readonly=on" > "${WORK}/boot.log" 2>&1 &

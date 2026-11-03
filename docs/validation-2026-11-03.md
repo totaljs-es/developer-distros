@@ -188,3 +188,26 @@ and the VM was shut down. Local evidence is in
 This covers the reported missing-directory condition in QEMU. It does not
 claim a new complete VirtualBox run or a full amd64 ISO boot. Those remain
 explicit follow-up checks after uploading the source commit.
+
+
+## Follow-up review: Arch build and boot checks
+
+The x86_64 kernel boot check selected KVM when available but always passed
+`-cpu max`. It now uses `host` for KVM and `max` for TCG, with an optional
+`QEMU_ACCEL` override. The ARM workflow now calls the shared boot helper,
+which already makes this distinction, retains diagnostics and cleans up QEMU.
+Its banner check was exercised against the existing Arch ARM ISO on macOS/HVF:
+the live medium reached its banner in 21 seconds. Logs and timing are in
+`build/arch-iso-arm/review-boot/`. KVM CPU arguments were checked with command
+doubles; this review does not claim execution on a native KVM host.
+
+The ARM builder registered its exit cleanup before refusing an existing mounted
+build. A refused second invocation could therefore unmount the earlier build.
+Cleanup is now registered only after that refusal guard. A temporary-tree
+regression confirms that no cleanup command runs against the previous tree;
+the same regression fails against the previous source.
+
+The affected installer, ISO-plumbing, build-guard and publication-policy suites
+passed (36 test methods). Workflow YAML, repository checks and whitespace checks
+also passed. No ISO recipe contents or installed-target behavior changed in
+this follow-up, and no new complete target installation is claimed.
