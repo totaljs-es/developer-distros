@@ -37,15 +37,15 @@ The manually dispatched workflow `.github/workflows/iso-own.yml` has an installe
 ## Build it
 
 ```bash
-docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-developer-ubuntu-amd64.iso
-iso/own/test-boot.sh build/own/totaljs-developer-ubuntu-amd64.iso
+docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-ubuntu-amd64.iso
+iso/own/test-boot.sh build/own/totaljs-ubuntu-amd64.iso
 ```
 
 For the graphical installer, on a native Linux machine with Docker:
 
 ```bash
-docker run --rm --privileged -e CALAMARES=1 -v "$PWD:/src:ro" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-developer-ubuntu-amd64.iso
-UEFI=1 QEMU_MEMORY=4096 MARKER_PATTERN=TOTALJS-CALAMARES-READY iso/own/test-boot.sh build/own/totaljs-developer-ubuntu-amd64.iso
+docker run --rm --privileged -e CALAMARES=1 -v "$PWD:/src:ro" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-ubuntu-amd64.iso
+UEFI=1 QEMU_MEMORY=4096 MARKER_PATTERN=TOTALJS-CALAMARES-READY iso/own/test-boot.sh build/own/totaljs-ubuntu-amd64.iso
 ```
 
 Use an arm64 host/container and an `arm64` output name for ARM, and set
@@ -67,8 +67,8 @@ Colima context. The default Docker context is left unchanged:
 brew install docker colima qemu
 colima start distros --vm-type vz --cpu 4 --memory 6 --disk 50 --mount "$PWD:w" --activate=false --ssh-config=false
 mkdir -p build/own/local
-docker --context colima-distros run --rm --privileged -e ARCH=arm64 -e CALAMARES=1 -v "$PWD:/src:ro" -v "$PWD/build/own/local:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-developer-ubuntu-arm64.iso
-ARCH=arm64 UEFI=1 QEMU_MEMORY=4096 MARKER_PATTERN=TOTALJS-CALAMARES-READY WORK_DIR=build/own/local/boot-arm64 iso/own/test-boot.sh build/own/local/totaljs-developer-ubuntu-arm64.iso
+docker --context colima-distros run --rm --privileged -e ARCH=arm64 -e CALAMARES=1 -v "$PWD:/src:ro" -v "$PWD/build/own/local:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-ubuntu-arm64.iso
+ARCH=arm64 UEFI=1 QEMU_MEMORY=4096 MARKER_PATTERN=TOTALJS-CALAMARES-READY WORK_DIR=build/own/local/boot-arm64 iso/own/test-boot.sh build/own/local/totaljs-ubuntu-arm64.iso
 ```
 
 On Apple Silicon the boot test selects HVF automatically and finds the UEFI
@@ -88,6 +88,6 @@ checked, and start the run. Pushing alone runs source checks; ISO generation
 requires this manual dispatch.
 
 The two native jobs build amd64 and arm64. When they pass, download the
-`totaljs-developer-ubuntu-amd64` and `totaljs-developer-ubuntu-arm64` artifacts;
+`totaljs-ubuntu-amd64` and `totaljs-ubuntu-arm64` artifacts;
 each contains its ISO and SHA-256 checksum file. Artifacts expire after seven
 days. Boot logs are retained separately. These builds do not create a release.

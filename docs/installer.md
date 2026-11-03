@@ -23,6 +23,32 @@ present for both Arch live builders; native ARM live startup was validated local
 installation on both architectures remain pending. See [the Arch build instructions](../arch/calamares/README.md).
 The current Ubuntu seeds and Arch console installer remain the usable paths.
 
+## Media filenames
+
+The product remains Total.js Developer. Download filenames use the shorter
+`totaljs` prefix, with base and public architecture names as follows:
+
+| Audience | Base | Architecture | Filename |
+| --- | --- | --- | --- |
+| Public | Ubuntu | amd64 | `totaljs-ubuntu-amd64.iso` |
+| Public | Ubuntu | arm64 | `totaljs-ubuntu-arm64.iso` |
+| Public | Arch | amd64 | `totaljs-arch-amd64.iso` |
+| Public | Arch | arm64 | `totaljs-arch-arm64.iso` |
+| TotalVM, reserved | Ubuntu | arm64 | `totalvm-ubuntu-arm64.iso` |
+| TotalVM, reserved | Arch | arm64 | `totalvm-arch-arm64.iso` |
+
+Arch builders still use their native `x86_64`/`aarch64` identifiers internally;
+only public filenames and artifact labels use `amd64`/`arm64`. Version and
+build provenance belong in release tags and checksum/source metadata.
+Existing release assets and their historical download links are unchanged.
+
+The TotalVM names are reserved for the later private variant. These files
+must use access-controlled delivery, outside public release assets and public
+CI artifacts. This filename change does not generate the TotalVM variants,
+create private hosting or implement TotalVM authentication/integration.
+Public workflow uploads name their expected ISO explicitly, and the Arch
+publisher rejects private or unexpected filenames.
+
 ## Shared interaction
 
 1. Welcome and language; check connectivity, memory, power and disk space.

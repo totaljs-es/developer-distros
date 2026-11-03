@@ -39,12 +39,12 @@ jobs:
       - name: The ISO, as an artifact
         uses: actions/upload-artifact@v7
         with:
-          name: totaljs-developer-arch-aarch64-iso
-          path: build/arch-iso-arm/out/*.iso
+          name: totaljs-arch-arm64
+          path: build/arch-iso-arm/out/totaljs-arch-arm64.iso
           retention-days: 7
 
       - name: The boot catalog of the ISO
-        run: xorriso -indev "$(ls build/arch-iso-arm/out/*.iso | head -n 1)" -report_el_torito plain 2>&1 | head -30
+        run: xorriso -indev "build/arch-iso-arm/out/totaljs-arch-arm64.iso" -report_el_torito plain 2>&1 | head -30
 
       - name: Boot it in QEMU (UEFI)
         env:
@@ -54,7 +54,7 @@ jobs:
           MARKER_PATTERN: 'Total\.js Developer, installation medium'
           WORK_DIR: build/arch-iso-arm/boot
           BOOT_TIMEOUT: '1500'
-        run: bash iso/own/test-boot.sh "$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
+        run: bash iso/own/test-boot.sh "build/arch-iso-arm/out/totaljs-arch-arm64.iso"
 
       - name: The graphical installer loads its modules
         if: inputs.installer
@@ -65,7 +65,7 @@ jobs:
           MARKER_PATTERN: TOTALJS-CALAMARES-READY
           WORK_DIR: build/arch-iso-arm/calamares
           BOOT_TIMEOUT: '1500'
-        run: bash iso/own/test-boot.sh "$(ls build/arch-iso-arm/out/*.iso | head -n 1)"
+        run: bash iso/own/test-boot.sh "build/arch-iso-arm/out/totaljs-arch-arm64.iso"
 
       - name: Keep the boot diagnostics
         if: always()

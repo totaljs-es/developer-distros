@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p build/own
           docker run --rm --privileged -e ARCH -e CALAMARES -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 \
-            bash /src/iso/own/build.sh "/out/totaljs-developer-ubuntu-${ARCH}.iso"
+            bash /src/iso/own/build.sh "/out/totaljs-ubuntu-${ARCH}.iso"
 
       - name: Tools of the test
         run: |
@@ -47,10 +47,10 @@ jobs:
 
       - name: Start it with the BIOS
         if: matrix.arch == 'amd64'
-        run: WORK_DIR=build/own/bios iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
+        run: WORK_DIR=build/own/bios iso/own/test-boot.sh "build/own/totaljs-ubuntu-${ARCH}.iso"
 
       - name: Start it with UEFI
-        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
+        run: UEFI=1 WORK_DIR=build/own/uefi iso/own/test-boot.sh "build/own/totaljs-ubuntu-${ARCH}.iso"
 
       - name: The graphical installer loads its native modules
         if: inputs.installer
@@ -60,19 +60,19 @@ jobs:
           MARKER_PATTERN: TOTALJS-CALAMARES-READY
           BOOT_TIMEOUT: '900'
           WORK_DIR: build/own/calamares
-        run: iso/own/test-boot.sh "build/own/totaljs-developer-ubuntu-${ARCH}.iso"
+        run: iso/own/test-boot.sh "build/own/totaljs-ubuntu-${ARCH}.iso"
 
       - name: Checksum the installation medium
         run: |
           cd build/own
-          sha256sum "totaljs-developer-ubuntu-${ARCH}.iso" > SHA256SUMS
+          sha256sum "totaljs-ubuntu-${ARCH}.iso" > SHA256SUMS
 
       - name: What was measured
         if: always()
         run: |
           {
             echo '### Live image of Total.js Developer'
-            ls -l build/own/*.iso 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
+            ls -l "build/own/totaljs-ubuntu-${ARCH}.iso" 2>/dev/null | awk '{ printf "- %s: %.0f MiB\n", $NF, $5/1048576 }'
             for mode in bios uefi calamares; do
               if [ -f "build/own/${mode}/timings.txt" ]; then
                 echo "- ${mode}: $(cat "build/own/${mode}/timings.txt")"
@@ -96,9 +96,9 @@ jobs:
       - name: Keep the experimental ISO for manual installation tests
         uses: actions/upload-artifact@v7
         with:
-          name: totaljs-developer-ubuntu-${{ matrix.arch }}
+          name: totaljs-ubuntu-${{ matrix.arch }}
           path: |
-            build/own/*.iso
+            build/own/totaljs-ubuntu-${{ matrix.arch }}.iso
             build/own/SHA256SUMS
           if-no-files-found: error
           retention-days: 7

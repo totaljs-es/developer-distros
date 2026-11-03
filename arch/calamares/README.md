@@ -69,3 +69,7 @@ services must still be checked separately in disposable VMs.
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/test-arch-calamares.py
 ```
+
+Public artifacts and their contained ISO use `totaljs-arch-amd64` and
+`totaljs-arch-arm64` (with `.iso` for the image). The private TotalVM names are
+reserved separately in [the media contract](../../docs/installer.md#media-filenames).

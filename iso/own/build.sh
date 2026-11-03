@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # build.sh - builds the live image of Total.js Developer from the packages of Ubuntu, with no installer of Canonical and no marks of Ubuntu.
 #
-#   docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-developer-ubuntu-amd64.iso
+#   docker run --rm --privileged -v "$PWD:/src" -v "$PWD/build/own:/out" ubuntu:26.04 bash /src/iso/own/build.sh /out/totaljs-ubuntu-amd64.iso
 #
 # It runs in a clean Ubuntu 26.04 (a privileged container: it needs to mount and to chroot). It makes a minimal system with debootstrap, adds a kernel and
 # live-boot (which starts a system from a CD), packs it in a squashfs and writes a hybrid ISO (BIOS and UEFI) with grub-mkrescue.

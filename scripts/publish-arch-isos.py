@@ -14,9 +14,11 @@ import subprocess
 import sys
 
 TARGETS = {
-    'aarch64': ('arch-iso-arm.yml', 'totaljs-developer-arch-aarch64-iso'),
-    'x86_64': ('arch-iso.yml', 'totaljs-developer-arch-x86_64-iso'),
+    'aarch64': ('arch-iso-arm.yml', 'totaljs-arch-arm64'),
+    'x86_64': ('arch-iso.yml', 'totaljs-arch-amd64'),
 }
+
+ISO_NAMES = {'aarch64': 'totaljs-arch-arm64.iso', 'x86_64': 'totaljs-arch-amd64.iso'}
 
 
 def api(repository, endpoint):
@@ -66,7 +68,7 @@ def prepare(repository, architecture, run, artifact, workspace, destination):
     if len(images) != 1:
         raise ValueError(f'{architecture}: expected exactly one ISO, found {len(images)}')
     image = images[0]
-    if image.is_symlink() or not image.name.startswith('totaljs-developer-arch-') or not image.name.endswith(f'-{architecture}.iso'):
+    if image.is_symlink() or image.name != ISO_NAMES[architecture]:
         raise ValueError('unexpected ISO filename: ' + image.name)
     # Read the volume metadata and filesystem from the downloaded image itself.
     label = subprocess.check_output(['python3', 'arch/iso/read-label.py', str(image)], text=True).strip()
@@ -117,8 +119,7 @@ def publish(tag, repository, revision):
             print(f'::warning::{architecture} was not published: {error}', flush=True)
             # Remove an unvalidated image if a later verification failed.
             if destination.exists():
-                for path in destination.glob(f'*-{architecture}.iso'):
-                    path.unlink()
+                (destination / ISO_NAMES[architecture]).unlink(missing_ok=True)
             excluded.append(f'{architecture}: validation failed; see the publishing workflow logs')
     if not results:
         raise ValueError('no ISO passed publication checks')

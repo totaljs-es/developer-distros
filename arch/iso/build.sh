@@ -49,7 +49,7 @@ python3 - "${PROFILE}/profiledef.sh" <<'PY'
 import re, sys
 path = sys.argv[1]
 s = open(path).read()
-s = re.sub(r'^iso_name=.*$', 'iso_name="totaljs-developer-arch"', s, flags=re.M)
+s = re.sub(r'^iso_name=.*$', 'iso_name="totaljs-arch"', s, flags=re.M)
 s = re.sub(r'^iso_label=.*$', 'iso_label="TOTALJS_$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y%m)"', s, flags=re.M)
 s = re.sub(r'^iso_publisher=.*$', 'iso_publisher="Total.js <https://www.totaljs.com>"', s, flags=re.M)
 s = re.sub(r'^iso_application=.*$', 'iso_application="Total.js Developer installation medium"', s, flags=re.M)
@@ -79,4 +79,7 @@ REPOSITORY
 fi
 
 mkarchiso -v -w "${BUILD}/work" -o "${BUILD}/out" "${PROFILE}"
+IMAGES=("${BUILD}/out/"*.iso)
+[ "${#IMAGES[@]}" = 1 ] && [ -f "${IMAGES[0]}" ] || { echo 'Expected one generated Arch ISO' >&2; exit 1; }
+mv -- "${IMAGES[0]}" "${BUILD}/out/totaljs-arch-amd64.iso"
 ls -la "${BUILD}/out"

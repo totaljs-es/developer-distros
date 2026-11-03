@@ -48,8 +48,8 @@ jobs:
       - name: The ISO, as an artifact
         uses: actions/upload-artifact@v7
         with:
-          name: totaljs-developer-arch-x86_64-iso
-          path: build/arch-iso/out/*.iso
+          name: totaljs-arch-amd64
+          path: build/arch-iso/out/totaljs-arch-amd64.iso
           retention-days: 7
 
   boot:
@@ -61,7 +61,7 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: totaljs-developer-arch-x86_64-iso
+          name: totaljs-arch-amd64
           path: iso
 
       - name: Tools
@@ -71,12 +71,12 @@ jobs:
 
       - name: What the ISO has
         run: |
-          ISO="$(ls iso/*.iso | head -n 1)"
+          ISO="iso/totaljs-arch-amd64.iso"
           xorriso -indev "$ISO" -pvd_info 2>/dev/null | grep -E 'Volume Id|Publisher'
           xorriso -indev "$ISO" -find / -maxdepth 3 2>/dev/null | grep -E 'vmlinuz|initramfs|airootfs' | head
 
       - name: Boot it in QEMU
-        run: bash arch/iso/test-boot.sh "$(ls iso/*.iso | head -n 1)"
+        run: bash arch/iso/test-boot.sh "iso/totaljs-arch-amd64.iso"
 
       - name: The graphical installer loads its modules
         if: inputs.installer
@@ -88,7 +88,7 @@ jobs:
           BOOT_TIMEOUT: '900'
         run: |
           sudo apt-get install -y ovmf
-          bash iso/own/test-boot.sh "$(ls iso/*.iso | head -n 1)"
+          bash iso/own/test-boot.sh "iso/totaljs-arch-amd64.iso"
 
       - name: Keep the boot diagnostics
         if: always()

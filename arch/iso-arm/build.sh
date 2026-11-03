@@ -21,7 +21,6 @@ ISO="${BUILD}/iso"
 OUT="${BUILD}/out"
 ROOTFS_URL="${ROOTFS_URL:-http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz}"
 LABEL="TOTALJS_ARM_$(date +%Y%m)"
-VERSION="$(date +%Y.%m.%d)"
 
 [ "$(id -u)" = 0 ] || { echo "run this as root" >&2; exit 1; }
 [ "$(uname -m)" = aarch64 ] || { echo "this builds on an ARM machine (aarch64)" >&2; exit 1; }
@@ -225,7 +224,7 @@ xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -joliet -joliet-long -r
     -volid "${LABEL}" -appid "Total.js Developer installation medium" -publisher "Total.js <https://www.totaljs.com>" \
     -append_partition 2 0xef "${EFIIMG}" -appended_part_as_gpt \
     --efi-boot EFI/efiboot.img \
-    -output "${OUT}/totaljs-developer-arch-${VERSION}-aarch64.iso" "${ISO}"
+    -output "${OUT}/totaljs-arch-arm64.iso" "${ISO}"
 # the boot catalog: the firmware needs an entry for EFI (platform 0xEF); if it were only a BIOS one, the firmware would not find a file system in the CD
-xorriso -indev "${OUT}/totaljs-developer-arch-${VERSION}-aarch64.iso" -report_el_torito plain 2>&1 | sed -n "1,25p"
+xorriso -indev "${OUT}/totaljs-arch-arm64.iso" -report_el_torito plain 2>&1 | sed -n "1,25p"
 ls -la "${OUT}"
