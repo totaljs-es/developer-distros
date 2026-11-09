@@ -25,7 +25,8 @@ jobs:
       options: --privileged
     timeout-minutes: 90
     env:
-      CALAMARES: ${{ inputs.installer && '1' || '0' }}
+      # a push builds what is published (with the graphical installer); by hand, the box decides
+      CALAMARES: ${{ (github.event_name != 'workflow_dispatch' || inputs.installer) && '1' || '0' }}
     steps:
       - name: Tools
         run: pacman -Syu --noconfirm --needed archiso git python
@@ -33,7 +34,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build the live installer dependencies
-        if: inputs.installer
+        if: env.CALAMARES == '1'
         run: |
           pacman -S --noconfirm --needed base-devel cmake ninja extra-cmake-modules qt6-base qt6-declarative qt6-svg qt6-tools yaml-cpp kcoreaddons kconfig ki18n kservice kpmcore polkit-qt6 libpwquality icu parted
           useradd --create-home --shell /bin/bash totaljs-calbuild
@@ -79,7 +80,7 @@ jobs:
         run: bash arch/iso/test-boot.sh "iso/totaljs-arch-amd64.iso"
 
       - name: The graphical installer loads its modules
-        if: inputs.installer
+        if: env.CALAMARES == '1'
         env:
           UEFI: '1'
           QEMU_MEMORY: '4096'

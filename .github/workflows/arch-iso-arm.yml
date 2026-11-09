@@ -23,7 +23,8 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 120
     env:
-      CALAMARES: ${{ inputs.installer && '1' || '0' }}
+      # a push builds what is published (with the graphical installer); by hand, the box decides
+      CALAMARES: ${{ (github.event_name != 'workflow_dispatch' || inputs.installer) && '1' || '0' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -56,7 +57,7 @@ jobs:
       # The console banner belongs to the image without the graphical installer. The image with it has no login on the serial port: its proof of life is
       # the next step (TOTALJS-CALAMARES-READY), which also needs the full system to be up.
       - name: Boot it in QEMU (UEFI)
-        if: ${{ !inputs.installer }}
+        if: env.CALAMARES != '1'
         env:
           ARCH: arm64
           UEFI: '1'
@@ -67,7 +68,7 @@ jobs:
         run: bash iso/own/test-boot.sh "build/arch-iso-arm/out/totaljs-arch-arm64.iso"
 
       - name: The graphical installer loads its modules
-        if: inputs.installer
+        if: env.CALAMARES == '1'
         env:
           ARCH: arm64
           UEFI: '1'
