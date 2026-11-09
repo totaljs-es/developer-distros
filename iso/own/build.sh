@@ -65,7 +65,7 @@ if [ "${CALAMARES}" = 1 ]; then
     mkdir -p "${WORK}/rootfs/tmp/totaljs-installer-source/shared"
     cp -R "${ROOT}/shared/calamares" "${ROOT}/shared/branding" "${WORK}/rootfs/tmp/totaljs-installer-source/shared/"
     mkdir -p "${WORK}/rootfs/tmp/totaljs-installer-source/docs/images"
-    cp "${ROOT}/docs/images/desktop.jpg" "${ROOT}/docs/images/terminal.jpg" "${WORK}/rootfs/tmp/totaljs-installer-source/docs/images/"
+    cp "${ROOT}/docs/images/desktop.jpg" "${ROOT}/docs/images/server.jpg" "${WORK}/rootfs/tmp/totaljs-installer-source/docs/images/"
 fi
 printf 'nameserver 9.9.9.9\n' > "${WORK}/rootfs/etc/resolv.conf"
 

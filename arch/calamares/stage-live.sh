@@ -11,7 +11,7 @@ SOURCE="${RFS}/usr/share/totaljs-live/source"
 [ ! -e "${SOURCE}" ] || { echo 'Live sources already staged' >&2; exit 1; }
 mkdir -p "${SOURCE}/shared" "${SOURCE}/docs/images" "${RFS}/etc/pacman.d/hooks" "${RFS}/usr/lib/totaljs-live"
 cp -R "${ROOT}/shared/calamares" "${ROOT}/shared/branding" "${SOURCE}/shared/"
-cp "${ROOT}/docs/images/desktop.jpg" "${ROOT}/docs/images/terminal.jpg" "${SOURCE}/docs/images/"
+cp "${ROOT}/docs/images/desktop.jpg" "${ROOT}/docs/images/server.jpg" "${SOURCE}/docs/images/"
 cat > "${RFS}/usr/lib/totaljs-live/configure-installer" <<CONFIGURE
 #!/usr/bin/env bash
 set -euo pipefail
