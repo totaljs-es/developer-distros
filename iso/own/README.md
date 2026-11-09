@@ -29,7 +29,7 @@ The manually dispatched workflow `.github/workflows/iso-own.yml` has an installe
 
 | Where | State |
 | --- | --- |
-| `os-release`, `issue` | Ours (`ID=totaljs-developer`, `ID_LIKE="ubuntu debian"`). They are files of the package `base-files`: a later version of that package has to be rebuilt with our identity, so that an update does not put the old one back. |
+| `os-release`, `issue` | Ours (`ID=totaljs-developer`, `ID_LIKE="ubuntu debian"`). Only in the live image, which is rebuilt from scratch on every build (it is never updated, so nothing puts the old identity back); `VERSION_CODENAME` and `UBUNTU_CODENAME` stay, because tools such as the Docker source read them. The installed system is bootstrapped from the packages of Ubuntu as they are, and keeps the `os-release` of Ubuntu (it is Ubuntu with the Total.js layer). |
 | The installer | Optional Calamares, with shared Total.js branding and online installation jobs. Ubuntu arm64 UI, Server and Desktop installation validated locally; amd64 pending. |
 | GRUB, the boot splash, the wallpapers | Ours (`grub.cfg`, `shared/plymouth`, `shared/wallpapers`). |
 | The packages of Ubuntu | Redistributed as they are, from the archive of Ubuntu. |

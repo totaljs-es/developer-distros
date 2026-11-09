@@ -33,6 +33,8 @@ VERSION_ID="0.1"
 VERSION="0.1"
 ID=totaljs-developer
 ID_LIKE="ubuntu debian"
+VERSION_CODENAME=resolute
+UBUNTU_CODENAME=resolute
 HOME_URL="https://www.totaljs.com"
 EOF
 echo 'Total.js Developer \n \l' > /etc/issue
