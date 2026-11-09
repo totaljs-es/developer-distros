@@ -1,0 +1,39 @@
+name: release-ubuntu
+
+# Publish existing iso-own CI artifacts only (the own live image with Calamares). ubuntu-* never triggers the legacy v* release.
+on:
+  push:
+    tags:
+      - 'ubuntu-*'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release-ubuntu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso
+      - name: Publish the latest validated Ubuntu ISOs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-ubuntu-isos.py "$GITHUB_REF_NAME"
+      - name: Keep publication diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ubuntu-release-diagnostics
+          path: |
+            build/release-ubuntu/notes.md
+            dist/ubuntu-release/SOURCE.json
+            dist/ubuntu-release/SHA256SUMS

@@ -24,6 +24,8 @@ read it again before each release.
 
 **2026-10-25:** the form was answered with an automatic reply ("we have received your query and will respond in due course"; urgent matters: legal@canonical.com). There is no decision yet. **The ISO is not published until Canonical answers** (the installation guide and the README explain the seeds with the official ISO; the text for the ISO of Total.js Developer is in the commit `3e04618`, to restore when it is approved): do not push a tag `v*` (the workflow `release-iso` publishes it); the seeds and the repository do not need the answer.
 
+**2026-11-09, decision (Gera): the own Ubuntu live image (`iso/own`, Calamares installer, own identity, no installer or marks of Canonical) is published** as a preview, with the tag `ubuntu-YYYY.MM.DD` (workflow `release-ubuntu`, script `scripts/publish-ubuntu-isos.py`, files `totaljs-ubuntu-amd64.iso` and `totaljs-ubuntu-arm64.iso`). It redistributes unmodified packages from the archive of Ubuntu; the release notes say that it is not official and not endorsed by Canonical. Still open on our side: rebuild `base-files` with our identity (an update of that package restores the Ubuntu `os-release`). The legacy remastered ISO of the official installer (`release-iso`, tag `v*`) stays unpublished until Canonical answers; do not push `v*` tags.
+
 If Canonical does not approve it, the ways out are the seeds with the official ISO (already published), or our own image without its marks (`iso/own`).
 
 ## How the installation works without modifying the ISO
