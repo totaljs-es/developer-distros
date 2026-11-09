@@ -53,7 +53,10 @@ jobs:
       - name: The boot catalog of the ISO
         run: xorriso -indev "build/arch-iso-arm/out/totaljs-arch-arm64.iso" -report_el_torito plain 2>&1 | head -30
 
+      # The console banner belongs to the image without the graphical installer. The image with it has no login on the serial port: its proof of life is
+      # the next step (TOTALJS-CALAMARES-READY), which also needs the full system to be up.
       - name: Boot it in QEMU (UEFI)
+        if: ${{ !inputs.installer }}
         env:
           ARCH: arm64
           UEFI: '1'
