@@ -44,13 +44,20 @@
 
 ### Ubuntu
 
-Install with the **official Ubuntu Server 26.04 LTS ISO** and a small seed image that sets up Total.js Developer. An internet connection is required.
+**[Ubuntu preview — 9 November 2026](https://github.com/totaljs-es/developer-distros/releases/tag/ubuntu-2026.11.09)**
 
-1. Download the official Ubuntu Server ISO for [Intel/AMD](https://releases.ubuntu.com/26.04/) or [ARM64](https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/).
-2. Download the **Desktop** or **Server** seed from the [Ubuntu seeds release](https://github.com/totaljs-es/developer-distros/releases/tag/seeds-0.1.0).
-3. Start the machine with both images attached, boot from the Ubuntu ISO and follow the installer.
+| Your computer or virtual machine | Download |
+| --- | --- |
+| Intel or AMD (amd64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.09/totaljs-ubuntu-amd64.iso) |
+| ARM64, including Apple Silicon Macs (arm64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.09/totaljs-ubuntu-arm64.iso) |
 
-**[Ubuntu installation guide](docs/install.md)**, with the virtual machine settings and steps.
+1. Start your computer or virtual machine from the ISO. Use at least **4 GB of memory**, a **30 GB disk** and an **internet connection**.
+2. Follow the installer and choose **Desktop** or **Server**. It asks for your disk, keyboard, time zone and account. **The selected disk will be erased.**
+3. When installation finishes, remove the ISO and restart from the disk.
+
+The image is built on Ubuntu 26.04 LTS packages, with its own identity and installer.
+
+**[Ubuntu installation guide](docs/install.md)**, with the virtual machine settings. The guide also explains another way: the official Ubuntu Server ISO with a small seed image.
 
 ## Your first minutes
 
@@ -64,7 +71,7 @@ Install with the **official Ubuntu Server 26.04 LTS ISO** and a small seed image
 The names are answered by the machine itself: there is nothing to configure. The first time, the services download their images, and Total.js Center shows when each one is ready.
 **[How to use it](docs/using.md)**.
 
-<p align="center"><img src="docs/images/terminal.jpg" alt="A terminal with the summary of Total.js Developer" width="420"> <img src="docs/images/desktop.jpg" alt="The widget on the wallpaper" width="420"></p>
+<p align="center"><img src="docs/images/server.jpg" alt="The console of the server edition with the summary of Total.js Developer" width="420"> <img src="docs/images/desktop.jpg" alt="The widget on the wallpaper" width="420"></p>
 
 ## How it is built
 
@@ -77,7 +84,7 @@ For package details and development instructions, see [the package guide](docs/l
 | | |
 | --- | --- |
 | [Arch installation](docs/install-arch.md) | Download an ISO and install Arch on a computer or virtual machine |
-| [Ubuntu installation](docs/install.md) | Install with the official Ubuntu ISO and a seed |
+| [Ubuntu installation](docs/install.md) | Install from the ISO, or with the official Ubuntu ISO and a seed |
 | [How to use it](docs/using.md) | Addresses, projects, database, services, desktop shortcuts |
 | [The packages](docs/layer.md) | What each package does and the rules they follow |
 | [Legal notes](docs/legal.md) | Licenses, marks, and what is and is not distributed |
@@ -89,7 +96,7 @@ For package details and development instructions, see [the package guide](docs/l
 packages/              the source of the packages
 tools/package-repo/    builds and signs the repository, and tests it in a clean Ubuntu
 iso/ubuntu/            the ISO and the seed images, and the tests that install and boot the system
-iso/own/               experimental live-image prototype (manual builds only)
+iso/own/               the live ISO of the Ubuntu edition, with the Calamares installer
 shared/                the artwork: wallpapers, boot splash and logos
 docs/                  the documentation
 tools/image-builder/   the images for TotalVM (macOS with Apple Silicon)
