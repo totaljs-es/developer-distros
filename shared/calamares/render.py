@@ -85,9 +85,8 @@ def render(repo, output, base, architecture, edition, calamares_data='/usr/share
         raise ValueError('Output must be outside the Calamares source directory')
     assets = {
         'logo-totaljs.svg': repo / 'shared/branding/logo-totaljs.svg',
-        'toto-welcome.png': repo / 'shared/branding/toto/toto-welcome.png',
-        'TOTO-LICENSE.md': repo / 'shared/branding/toto/LICENSE.md',
-        'TOTO-README.md': repo / 'shared/branding/toto/README.md',
+        'totalvm.png': repo / 'shared/branding/totalvm/totalvm.png',
+        'TOTALVM-README.md': repo / 'shared/branding/totalvm/README.md',
     }
     if mode == 'installer':
         assets.update({

@@ -23,8 +23,8 @@ class ArchCalamaresTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 source = target / 'usr/share/totaljs-live/source'
                 for relative in ['shared/calamares/render.py', 'shared/calamares/setup-live.sh',
-                                 'shared/branding/logo-totaljs.svg', 'shared/branding/toto/LICENSE.md',
-                                 'shared/branding/toto/toto-welcome.png']:
+                                 'shared/branding/logo-totaljs.svg', 'shared/branding/totalvm/README.md',
+                                 'shared/branding/totalvm/totalvm.png']:
                     self.assertEqual((source / relative).read_bytes(), (ROOT / relative).read_bytes())
                 wrapper = target / 'usr/lib/totaljs-live/configure-installer'
                 self.assertTrue(os.access(wrapper, os.X_OK))

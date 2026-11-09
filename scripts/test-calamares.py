@@ -49,9 +49,8 @@ class PreviewTests(unittest.TestCase):
                     self.assertTrue((brand / metadata['slideshow']).is_file())
                     for name, source in {
                         'logo-totaljs.svg': 'logo-totaljs.svg',
-                        'toto-welcome.png': 'toto/toto-welcome.png',
-                        'TOTO-LICENSE.md': 'toto/LICENSE.md',
-                        'TOTO-README.md': 'toto/README.md',
+                        'totalvm.png': 'totalvm/totalvm.png',
+                        'TOTALVM-README.md': 'totalvm/README.md',
                     }.items():
                         self.assertEqual((brand / name).read_bytes(), (ROOT / 'shared/branding' / source).read_bytes())
 

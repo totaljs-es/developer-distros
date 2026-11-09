@@ -17,3 +17,16 @@ QPushButton:default:disabled {
     background-color: #d8ddd5;
     color: #626b60;
 }
+
+/* Progress of the installation: the green of the brand. */
+QProgressBar {
+    border: 1px solid #b9c4b4;
+    border-radius: 4px;
+    background: #ffffff;
+    text-align: center;
+    min-height: 22px;
+}
+QProgressBar::chunk {
+    background-color: #6ac043;
+    border-radius: 3px;
+}

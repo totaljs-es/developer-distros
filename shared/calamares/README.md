@@ -7,7 +7,7 @@ HTTPS services were validated locally; see [the evidence](../../docs/validation-
 Ubuntu amd64 and Arch validation remain pending. Public release workflows are unchanged.
 
 The installer is Total.js Developer on both Ubuntu and Arch, with the same
-pages, colors, official logo and unmodified Toto artwork. Installation will
+pages, colors, official logo and the TotalVM image (Tux hugging the Total.js logo). Installation will
 require internet and download packages, rather than copy the live desktop
 into the target. See [the installation design](../../docs/installer.md).
 
@@ -98,16 +98,15 @@ run a package manager, Calamares or a VM.
 
 ## Artwork and translations
 
-Logo and Toto files are copied from `shared/branding` during generation, not
+Logo and image files are copied from `shared/branding` during generation, not
 redrawn or duplicated in the source tree. The official logo SVG is kept byte
 for byte. For Qt 6.7+, the renderer also emits `logo-totaljs-qt.svg`: its
 unsupported clip paths become equivalent SVG masks, and image references are
 inlined without changing their pixel data or the logo geometry. Calamares uses
 this compatible SVG for its sidebar and window icon. Qt support is documented
-in [the Qt SVG feature list](https://doc.qt.io/qt-6/svgextensions.html). Toto's license and attribution are
-included in each output. The artwork retains its existing licenses. The mascot
-image remains in the welcome/slideshow; the visible attribution footer is
-omitted so installation text focuses on the distribution.
+in [the Qt SVG feature list](https://doc.qt.io/qt-6/svgextensions.html). The credit of the image is
+included in each output (`TOTALVM-README.md`). The artwork retains its existing licenses. The image is in the
+welcome page and in the slideshow.
 
 Calamares owns translations of its standard pages. Custom QML strings use
 `qsTr()` with English as the source language; translation catalogs must be

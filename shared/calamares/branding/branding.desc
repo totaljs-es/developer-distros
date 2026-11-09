@@ -3,7 +3,7 @@
   "welcomeStyleCalamares": false,
   "welcomeExpandingLogo": true,
   "windowExpanding": "normal",
-  "windowSize": "900px,620px",
+  "windowSize": "960px,640px",
   "windowPlacement": "center",
   "sidebar": "widget",
   "navigation": "widget",
@@ -24,7 +24,7 @@
   "images": {
     "productIcon": "logo-totaljs-qt.svg",
     "productLogo": "logo-totaljs-qt.svg",
-    "productWelcome": "toto-welcome.png"
+    "productWelcome": "totalvm.png"
   },
   "style": {
     "SidebarBackground": "#20252b",
