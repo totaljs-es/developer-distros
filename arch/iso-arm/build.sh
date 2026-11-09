@@ -32,7 +32,15 @@ cleanup() {
         case "$(readlink "${pid}/root" 2>/dev/null)" in "${RFS}"|"${RFS}"/*) kill "${pid#/proc/}" 2>/dev/null || true ;; esac
     done
     sleep 1
-    umount -R -l "${RFS}" 2>/dev/null || true
+    # the processes may need a moment to leave, and a lazy umount can race with them: retry until nothing of the system is mounted
+    local attempt
+    for attempt in 1 2 3 4 5; do
+        umount -R -l "${RFS}" 2>/dev/null || true
+        grep -q " ${RFS}[/ ]" /proc/self/mountinfo 2>/dev/null || return 0
+        sleep 2
+    done
+    echo "mounts that stay under ${RFS}:" >&2
+    grep " ${RFS}[/ ]" /proc/self/mountinfo >&2 || true
 }
 in_rfs() { chroot "${RFS}" /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin "$@"; }
 
