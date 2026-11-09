@@ -91,7 +91,7 @@ def render(repo, output, base, architecture, edition, calamares_data='/usr/share
     if mode == 'installer':
         assets.update({
             'desktop.jpg': repo / 'docs/images/desktop.jpg',
-            'server.jpg': repo / 'docs/images/terminal.jpg',
+            'server.jpg': repo / 'docs/images/server.jpg',
         })
     # Validate before creating anything. Never merge into system configuration.
     if output.exists():
