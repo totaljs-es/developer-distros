@@ -36,6 +36,13 @@ jobs:
         run: |
           sudo env CALAMARES="$CALAMARES" KEY_FILE="$GITHUB_WORKSPACE/tools/image-builder/images/developer-ubuntu/assets/totaljs-repository.gpg" bash arch/iso-arm/build.sh
 
+      # the build runs as root: the folder of the output, the ISO and the log go back to the runner user, so the later steps can write next to them
+      # (only these: the root file system inside the folder is large and nobody else needs it)
+      - name: Give the output to the runner user
+        run: |
+          sudo chown "$(id -u):$(id -g)" build/arch-iso-arm build/arch-iso-arm/out
+          sudo chown "$(id -u):$(id -g)" build/arch-iso-arm/out/*.iso build/arch-iso-arm/mkinitcpio.log 2>/dev/null || true
+
       - name: The ISO, as an artifact
         uses: actions/upload-artifact@v7
         with:
