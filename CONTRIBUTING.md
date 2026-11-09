@@ -19,7 +19,7 @@ node scripts/check.js
 ```
 
 It validates the JSON files, the syntax of every shell script and that the documentation names files that exist. It needs Node.js 20 or newer. The rest is tested in GitHub Actions
-(`package-repo` installs the packages in a clean Ubuntu 26.04 and starts the desktop; `iso-ubuntu` installs the system in QEMU), so a change to a package is only done when those pass.
+(`package-repo` installs the packages in a clean Ubuntu 26.04 and starts the desktop; `iso-own` boots the live image and its installer in QEMU), so a change to a package is only done when those pass.
 
 ## Style
 

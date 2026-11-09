@@ -3,9 +3,8 @@ name: release-seed
 # Publishes what people download to install Total.js Developer: the two seed images (desktop and server), a few hundred kilobytes each, with their
 # checksums and a signed attestation of where they came from. The ISO of Ubuntu is NOT published here: the release says where to get the
 # official one, with its checksum (docs/legal.md explains why).
-# The release of a version (the tag `v*`) is published by release-iso.yml, with the ISO of Total.js Developer and these same seeds: while Canonical has not answered
-# about the ISO (docs/legal.md), do not push a tag `v*`. This workflow builds only the seeds, by hand (Run workflow), and keeps them as an artifact of the run.
-# With a `release_tag` it also publishes them as a release of their own, with a tag that does NOT start with `v` (for instance `seeds-0.1.0`), so that it does not start release-iso.yml.
+# The ISO of Total.js Developer is published by release-ubuntu.yml (tag `ubuntu-*`). This workflow builds only the seeds, by hand (Run workflow), and keeps them as an artifact of the run.
+# With a `release_tag` it also publishes them as a release of their own, with a tag that does NOT start with `v` (for instance `seeds-0.1.0`), so that it starts no other release.
 #
 # The seeds install the packages of Total.js from the address of the repository of packages, so that address has to answer BEFORE the release:
 # the workflow checks it and stops if it does not.
@@ -85,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          case "${RELEASE_TAG}" in v*) echo "::error::a tag that starts with v starts release-iso.yml, which publishes the ISO: use another one (seeds-0.1.0)"; exit 1 ;; esac
+          case "${RELEASE_TAG}" in v*) echo "::error::a tag that starts with v is reserved for the legacy remastered ISO: use another one (seeds-0.1.0)"; exit 1 ;; esac
           cat > notes.md <<NOTES
           ## Total.js Developer: seeds for the official ISO of Ubuntu Server
 

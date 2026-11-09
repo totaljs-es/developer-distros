@@ -41,8 +41,7 @@ from the files of the ISO with `autoinstall`, while a person confirms the autoin
 
 The seeds of the tests are `seed-ci/` (stock server, random password) and `seed-ci-layer/` (also installs the Total.js layer, from a repository with a throwaway key that the
 workflow serves on the computer of the runner, `10.0.2.2` for the guest of QEMU). The installed system must boot, have Node.js 24 and its first person in the group `totaljs-developer`.
-`seed/` is the seed of the remastered ISO that builds by hand. The workflow `.github/workflows/iso-ubuntu.yml` runs all this and keeps the logs of the installer and of the first boot;
-`.github/workflows/release-iso.yml` builds the remastered ISO by hand and keeps it as an artifact of the run, to try it.
+`seed/` is the seed of the remastered ISO that builds by hand. The workflows `iso-ubuntu`, `iso-arm64` and `release-iso` that ran and published this remastered ISO were removed on 2026-11-09 (the published Ubuntu image is the own live ISO of `iso/own`); they are in the git history, before the commit that removes them, to restore if Canonical approves the remastered ISO (`docs/legal.md`).
 
 ## The size of the remastered ISO
 
