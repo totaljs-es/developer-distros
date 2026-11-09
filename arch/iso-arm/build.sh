@@ -32,10 +32,13 @@ cleanup() {
         case "$(readlink "${pid}/root" 2>/dev/null)" in "${RFS}"|"${RFS}"/*) kill "${pid#/proc/}" 2>/dev/null || true ;; esac
     done
     sleep 1
-    # the processes may need a moment to leave, and a lazy umount can race with them: retry until nothing of the system is mounted
-    local attempt
+    # the processes may need a moment to leave: retry until nothing of the system is mounted. The mounts are taken one by one, the deepest first,
+    # by their path: `umount -R` on the folder does nothing once the folder itself is no longer a mount point, and /sys and /dev stay
+    local attempt mnt
     for attempt in 1 2 3 4 5; do
-        umount -R -l "${RFS}" 2>/dev/null || true
+        while IFS= read -r mnt; do
+            umount -l "${mnt}" 2>/dev/null || true
+        done < <(awk -v root="${RFS}" '$5 == root || index($5, root "/") == 1 { print length($5) "\t" $5 }' /proc/self/mountinfo | sort -rn | cut -f2-)
         grep -q " ${RFS}[/ ]" /proc/self/mountinfo 2>/dev/null || return 0
         sleep 2
     done
