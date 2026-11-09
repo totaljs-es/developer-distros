@@ -1,32 +1,113 @@
-/* Shared Total.js palette. Keep native Qt controls and focus indicators. */
+/* Shared Total.js palette. Keep native Qt controls and focus indicators.
+   Dark #20252b, green #6ac043 (deep #509b31), ink #172019, soft page #f6f8f4. */
 QWidget#sidebarApp {
     background-color: #20252b;
     color: #e5e9ee;
 }
+QWidget#mainApp {
+    background-color: #f6f8f4;
+}
 QPushButton {
-    min-height: 28px;
-    padding: 4px 16px;
+    min-height: 30px;
+    padding: 4px 18px;
+    border: 1px solid #b9c4b4;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #20252b;
+}
+QPushButton:hover {
+    background-color: #eaf3e4;
+    border-color: #6ac043;
+}
+QPushButton:pressed {
+    background-color: #dcebd2;
+}
+QPushButton:focus {
+    border: 2px solid #509b31;
+}
+QPushButton:disabled {
+    background-color: #eef0ec;
+    color: #8c958a;
+    border-color: #d5dbd2;
 }
 QPushButton:default {
     background-color: #6ac043;
     color: #172019;
     border: 1px solid #509b31;
-    border-radius: 4px;
+}
+QPushButton:default:hover {
+    background-color: #7acd54;
 }
 QPushButton:default:disabled {
     background-color: #d8ddd5;
     color: #626b60;
 }
 
+/* Text fields: the same radius as the buttons, the green when they have focus. */
+QLineEdit {
+    min-height: 26px;
+    padding: 2px 8px;
+    border: 1px solid #b9c4b4;
+    border-radius: 5px;
+    background-color: #ffffff;
+    selection-background-color: #6ac043;
+    selection-color: #172019;
+}
+QLineEdit:focus {
+    border: 2px solid #6ac043;
+}
+
+/* Edition and other lists. */
+QWidget#mainApp QListView, QWidget#mainApp QListWidget {
+    border: 1px solid #cfd8c9;
+    border-radius: 6px;
+    background-color: #ffffff;
+    outline: 0;
+}
+QWidget#mainApp QListView::item, QWidget#mainApp QListWidget::item {
+    padding: 12px 14px;
+}
+QWidget#mainApp QListView::item:hover, QWidget#mainApp QListWidget::item:hover {
+    background-color: #eaf3e4;
+}
+QWidget#mainApp QListView::item:selected, QWidget#mainApp QListWidget::item:selected {
+    background-color: #6ac043;
+    color: #172019;
+}
+
 /* Progress of the installation: the green of the brand. */
 QProgressBar {
     border: 1px solid #b9c4b4;
-    border-radius: 4px;
+    border-radius: 5px;
     background: #ffffff;
     text-align: center;
     min-height: 22px;
 }
 QProgressBar::chunk {
     background-color: #6ac043;
-    border-radius: 3px;
+    border-radius: 4px;
+}
+
+/* The sidebar keeps its own look: no boxes, light text. */
+QWidget#sidebarApp QListView {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+QWidget#sidebarApp QListView::item {
+    padding: 0;
+}
+QWidget#sidebarApp QListView::item:hover {
+    background: transparent;
+}
+QWidget#sidebarApp QPushButton {
+    min-height: 0;
+    padding: 4px 8px;
+    border: 0;
+    background: transparent;
+    color: #aab3bd;
+}
+QWidget#sidebarApp QPushButton:hover {
+    background: transparent;
+    color: #ffffff;
 }
