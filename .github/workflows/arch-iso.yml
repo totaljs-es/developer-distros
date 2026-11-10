@@ -17,6 +17,11 @@ on:
       - 'shared/calamares/**'
       - '.github/workflows/arch-iso.yml'
 
+# a push builds what is published (with the graphical installer); by hand, the box decides.
+# At the top, so that the jobs build and boot agree.
+env:
+  CALAMARES: ${{ (github.event_name != 'workflow_dispatch' || inputs.installer) && '1' || '0' }}
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -24,9 +29,6 @@ jobs:
       image: archlinux:latest
       options: --privileged
     timeout-minutes: 90
-    env:
-      # a push builds what is published (with the graphical installer); by hand, the box decides
-      CALAMARES: ${{ (github.event_name != 'workflow_dispatch' || inputs.installer) && '1' || '0' }}
     steps:
       - name: Tools
         run: pacman -Syu --noconfirm --needed archiso git python
