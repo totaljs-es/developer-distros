@@ -76,7 +76,10 @@ jobs:
           xorriso -indev "$ISO" -pvd_info 2>/dev/null | grep -E 'Volume Id|Publisher'
           xorriso -indev "$ISO" -find / -maxdepth 3 2>/dev/null | grep -E 'vmlinuz|initramfs|airootfs' | head
 
+      # The console check belongs to the image without the graphical installer: the one with it has no login on the serial port,
+      # and is proven by the next step.
       - name: Boot it in QEMU
+        if: env.CALAMARES != '1'
         run: bash arch/iso/test-boot.sh "iso/totaljs-arch-amd64.iso"
 
       - name: The graphical installer loads its modules
