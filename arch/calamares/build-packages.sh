@@ -20,5 +20,13 @@ for component in ckbcomp calamares; do
     # Ask makepkg for its outputs rather than assuming a compression format.
     (cd "${WORK}/${component}" && makepkg --packagelist) > "${WORK}/packages.list"
     [ -s "${WORK}/packages.list" ] || { echo 'makepkg reported no outputs' >&2; exit 1; }
-    while IFS= read -r package; do cp "${package}" "${OUT}/"; done < "${WORK}/packages.list"
+    # packagelist also names the debug package when makepkg has the option "debug", but architecture-independent packages (ckbcomp) never get one:
+    # only a missing debug package is skipped, any other missing output stops the build
+    while IFS= read -r package; do
+        if [ ! -f "${package}" ]; then
+            case "${package##*/}" in *-debug-*) continue ;; esac
+            echo "makepkg did not produce ${package}" >&2; exit 1
+        fi
+        cp "${package}" "${OUT}/"
+    done < "${WORK}/packages.list"
 done
