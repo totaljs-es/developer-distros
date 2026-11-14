@@ -16,11 +16,17 @@ apt-get update -qq
 # the kernel, what starts a system from a CD (live-boot) and the base of a system that boots and has a network
 apt-get install -y --no-install-recommends linux-image-generic initramfs-tools live-boot systemd-sysv udev dbus iproute2 systemd-resolved kmod >/dev/null
 
+# real hardware: firmware (wifi, GPUs), and in a virtual machine the guest agents (clipboard, resize, shutdown)
+apt-get install -y --no-install-recommends linux-firmware open-vm-tools qemu-guest-agent >/dev/null
+if [ "${ARCH}" = amd64 ]; then
+    apt-get install -y --no-install-recommends intel-microcode amd64-microcode >/dev/null
+fi
+
 if [ "${CALAMARES:-0}" = 1 ]; then
     apt-get install -y --no-install-recommends calamares debootstrap python3 sudo locales \
         xorg openbox lightdm lightdm-gtk-greeter xterm tint2 \
         network-manager network-manager-gnome policykit-1-gnome dbus-x11 \
-        console-setup xdg-utils gnupg gpgv efibootmgr dosfstools e2fsprogs >/dev/null
+        spice-vdagent console-setup xdg-utils gnupg gpgv efibootmgr dosfstools e2fsprogs >/dev/null
     command -v ckbcomp >/dev/null
     TOTALJS_LIVE_BUILD=1 bash /tmp/totaljs-installer-source/shared/calamares/setup-live.sh ubuntu "${ARCH}"
 fi
