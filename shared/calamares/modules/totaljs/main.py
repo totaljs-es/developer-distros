@@ -197,12 +197,14 @@ def bootstrap(config, root, edition, firmware, run_command=command):
         inside('apt-get', 'install', '-y', *sources)
         inside('apt-get', 'update', '--error-on=any')
         grub = 'grub-efi-' + arch + '-bin' if firmware == 'efi' else 'grub-pc-bin'
-        inside('apt-get', 'install', '-y', 'linux-image-generic', 'linux-firmware', 'initramfs-tools',
+        microcode = ['intel-microcode', 'amd64-microcode'] if arch == 'amd64' else []
+        inside('apt-get', 'install', '-y', 'linux-image-generic', 'linux-firmware', *microcode, 'initramfs-tools',
                'grub2-common', grub, 'efibootmgr', 'netplan.io', 'network-manager', 'systemd-resolved', 'systemd-timesyncd',
                'kbd', 'console-setup', 'tzdata', 'totaljs-developer-' + edition)
     else:
         kernel = 'linux-aarch64' if arch == 'arm64' else 'linux'
-        run_command(['pacstrap', '-K', str(root), 'base', kernel, 'linux-firmware',
+        microcode = ['intel-ucode', 'amd-ucode'] if arch == 'amd64' else []
+        run_command(['pacstrap', '-K', str(root), 'base', kernel, 'linux-firmware', *microcode,
                      'grub', 'efibootmgr', 'sudo', 'networkmanager', 'openssh', 'python'])
         mount_runtime(root, run_command)
         target_file(root, 'etc/resolv.conf', Path('/etc/resolv.conf').read_text())

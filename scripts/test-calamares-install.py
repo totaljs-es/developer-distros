@@ -108,6 +108,8 @@ class InstallerTests(unittest.TestCase):
             self.assertLess(bootstrap, runtime)
             self.assertLess(runtime, source_install)
             self.assertIn('grub-efi-amd64-bin', calls[target_install])
+            for package in ('linux-firmware', 'intel-microcode', 'amd64-microcode'):
+                self.assertIn(package, calls[target_install])
             include = next(arg for arg in calls[bootstrap] if arg.startswith('--include='))
             self.assertIn('gpgv', include.split('=', 1)[1].split(','))
             self.assertIn('/etc/ssl/certs/ca-certificates.crt', (root / 'etc/apt/apt.conf.d/90-totaljs-ca').read_text())
@@ -137,6 +139,8 @@ class InstallerTests(unittest.TestCase):
             pacstrap = next(call for call in calls if call[0] == 'pacstrap')
             self.assertIn('linux-aarch64', pacstrap)
             self.assertIn('-K', pacstrap)
+            self.assertIn('linux-firmware', pacstrap)
+            self.assertNotIn('intel-ucode', pacstrap)
             self.assertTrue(any('archlinuxarm' in call for call in calls))
             transaction = next(call for call in calls if 'totaljs-developer-server' in call)
             self.assertIn('-Syu', transaction)

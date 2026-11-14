@@ -79,6 +79,8 @@ qemu-system-x86_64 -enable-kvm -m 4096 -smp 2 -nic user,model=virtio-net-pci \
 
 The computer has to be one on which Ubuntu Server 26.04 runs: if Ubuntu does not see your disk, your network card or your keyboard, Total.js Developer will not either.
 
+Secure Boot is not supported yet: turn it off in the firmware settings before starting the stick. The system you install includes the firmware and CPU microcode updates, so wifi and graphics work after the installation.
+
 ## 3. Install
 
 1. Start the machine from the ISO of Ubuntu and choose **Try or Install Ubuntu Server**.
