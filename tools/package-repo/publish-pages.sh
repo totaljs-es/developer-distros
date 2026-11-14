@@ -32,6 +32,7 @@ touch "${PAGES}/.nojekyll"
 # The front page: what this is, how to add it, and the packages with their descriptions (GitHub Pages lists no folders, so the page is the list).
 cp "${ROOT}/shared/branding/logo-totaljs.svg" "${PAGES}/logo.svg"
 cp "${ROOT}/docs/images/social.png" "${PAGES}/social.png"
+cp "${ROOT}/docs/images/favicon/"* "${PAGES}/"
 printf 'User-agent: *\nAllow: /\n\nSitemap: https://totaljs-es.github.io/developer-distros/sitemap.xml\n' > "${PAGES}/robots.txt"
 printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://totaljs-es.github.io/developer-distros/</loc></url>\n</urlset>\n' > "${PAGES}/sitemap.xml"
 FINGERPRINT="$(gpg --show-keys --with-colons "${SITE}/totaljs-developer.gpg" 2>/dev/null | awk -F: '$1 == "fpr" { print $10; exit }')"
@@ -77,6 +78,9 @@ page = """<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://totaljs-es.github.io/developer-distros/social.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Total.js Developer","applicationCategory":"DeveloperApplication","operatingSystem":"Linux (Ubuntu LTS, Arch), amd64 and arm64","description":"A Linux development environment for Total.js on Ubuntu LTS and Arch, with the same desktop on both.","url":"https://totaljs-es.github.io/developer-distros/","downloadUrl":"https://github.com/totaljs-es/developer-distros/releases","codeRepository":"https://github.com/totaljs-es/developer-distros","license":"https://opensource.org/license/mit","image":"https://totaljs-es.github.io/developer-distros/social.png","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"author":{"@type":"Organization","name":"Spanish Total.js","url":"https://totaljs.es"}}</script>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="favicon-48.png" type="image/png" sizes="48x48">
+<link rel="icon" href="favicon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <style>
 :root { color-scheme: dark light; --bg:#0b0f0d; --card:#131a16; --line:#25322a; --text:#e8efe9; --muted:#93a399; --green:#9ad959; }
