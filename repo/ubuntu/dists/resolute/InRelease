@@ -5,20 +5,20 @@ Origin: Total.js
 Label: Total.js Developer
 Suite: resolute
 Codename: resolute
-Date: Tue, 03 Nov 2026 16:27:04 UTC
+Date: Sat, 14 Nov 2026 19:56:27 UTC
 Architectures: arm64 amd64
 Components: main
 Description: Official Total.js Developer packages
 SHA256:
- f35a83e3498e0b49fc0de22897a556d3542beef30abcd8a15b320e13a1ac96d2 16976 main/binary-arm64/Packages
- 1c155c2b7737abfe6a30c60096a24aad59d4bd620518adc95b6deb2bf05bf08f 5484 main/binary-arm64/Packages.gz
- f35a83e3498e0b49fc0de22897a556d3542beef30abcd8a15b320e13a1ac96d2 16976 main/binary-amd64/Packages
- 1c155c2b7737abfe6a30c60096a24aad59d4bd620518adc95b6deb2bf05bf08f 5484 main/binary-amd64/Packages.gz
+ d2268e8ab517555a64a497ae3f8bf25eef910fe78421c6795a798fa238cb2486 16976 main/binary-arm64/Packages
+ b95578e22a6fafc7dbe2a43333722afa7ef1c8e54d99b64674e2557391bd0391 5479 main/binary-arm64/Packages.gz
+ d2268e8ab517555a64a497ae3f8bf25eef910fe78421c6795a798fa238cb2486 16976 main/binary-amd64/Packages
+ b95578e22a6fafc7dbe2a43333722afa7ef1c8e54d99b64674e2557391bd0391 5479 main/binary-amd64/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iJEEARYKADkWIQSVRUaUUjuNGKN299XXIro1yEJ7QAUCauoLWBsUgAAAAAAEAA5t
-YW51MiwyLjUrMS4xMiwwLDMACgkQ1yK6NchCe0Bu7AD+I8/cdW7iJEAZ4ODA/J/V
-3/VjYV1i5aFDoUrYOmAnoQ8A/02sH4YrK92FLAnnqBQI1Dc2QRqs8jGS8zd417eP
-PNEB
-=nIDW
+iJEEARYKADkWIQSVRUaUUjuNGKN299XXIro1yEJ7QAUCavi86xsUgAAAAAAEAA5t
+YW51MiwyLjUrMS4xMiwwLDMACgkQ1yK6NchCe0BAgwEA4yn+rVtTFzanYpA6Tcs7
+Iu2lrYUgExE7/TT0uEyeEogA/A4BfhfufR+l1JeTOA/rWMTPYs/sEItwu+hQM23K
+EscM
+=RteK
 -----END PGP SIGNATURE-----
