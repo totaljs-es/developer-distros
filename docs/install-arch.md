@@ -4,12 +4,12 @@ Choose **Desktop** for the graphical environment, or **Server** for the command 
 
 ## Download
 
-[Arch preview — 27 October 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.10.27)
+[Arch preview — 14 November 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.11.14)
 
 | Computer or virtual machine | ISO |
 | --- | --- |
-| Intel or AMD | [x86_64](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-x86_64.iso) |
-| ARM64, including Apple Silicon Macs | [aarch64](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-aarch64.iso) |
+| Intel or AMD | [x86_64](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.11.14/totaljs-arch-amd64.iso) |
+| ARM64, including Apple Silicon Macs | [aarch64](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.11.14/totaljs-arch-arm64.iso) |
 
 You need **4 GB RAM**, a **30 GB disk** and an **internet connection** throughout installation.
 

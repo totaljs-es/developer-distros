@@ -29,12 +29,12 @@
 
 ### Arch Linux
 
-**[Arch preview — 27 October 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.10.27)**
+**[Arch preview — 14 November 2026](https://github.com/totaljs-es/developer-distros/releases/tag/arch-2026.11.14)**
 
 | Your computer or virtual machine | Download |
 | --- | --- |
-| Intel or AMD (x86_64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-x86_64.iso) |
-| ARM64, including Apple Silicon Macs (aarch64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.10.27/totaljs-developer-arch-2026.10.27-aarch64.iso) |
+| Intel or AMD (x86_64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.11.14/totaljs-arch-amd64.iso) |
+| ARM64, including Apple Silicon Macs (aarch64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/arch-2026.11.14/totaljs-arch-arm64.iso) |
 
 1. Start your computer or virtual machine from the ISO. Use at least **4 GB of memory**, a **30 GB disk** and an **internet connection**.
 2. Choose **Desktop** or **Server** and follow the installer. It asks for your disk, keyboard, time zone and account. **The selected disk will be erased.**
@@ -44,12 +44,12 @@
 
 ### Ubuntu
 
-**[Ubuntu preview — 9 November 2026](https://github.com/totaljs-es/developer-distros/releases/tag/ubuntu-2026.11.09)**
+**[Ubuntu preview — 14 November 2026](https://github.com/totaljs-es/developer-distros/releases/tag/ubuntu-2026.11.14)**
 
 | Your computer or virtual machine | Download |
 | --- | --- |
-| Intel or AMD (amd64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.09/totaljs-ubuntu-amd64.iso) |
-| ARM64, including Apple Silicon Macs (arm64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.09/totaljs-ubuntu-arm64.iso) |
+| Intel or AMD (amd64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.14/totaljs-ubuntu-amd64.iso) |
+| ARM64, including Apple Silicon Macs (arm64) | [Download ISO](https://github.com/totaljs-es/developer-distros/releases/download/ubuntu-2026.11.14/totaljs-ubuntu-arm64.iso) |
 
 1. Start your computer or virtual machine from the ISO. Use at least **4 GB of memory**, a **30 GB disk** and an **internet connection**.
 2. Follow the installer and choose **Desktop** or **Server**. It asks for your disk, keyboard, time zone and account. **The selected disk will be erased.**
