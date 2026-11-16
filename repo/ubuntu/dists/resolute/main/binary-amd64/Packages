@@ -348,3 +348,33 @@ Filename: pool/main/t/totaljs-wallpapers/totaljs-wallpapers_1.0.0-3_all.deb
 Size: 16669194
 SHA256: e35b59f769929775e30e3fc1391f89befc1a3141bae8f03e52c99e33f557105e
 
+Package: total-js-code
+Version: 1.0.1
+Architecture: amd64
+Installed-Size: 10258
+Maintainer: Spanish Total.js Platform
+Section: devel
+Priority: optional
+Homepage: https://totaldesktop.totaljs.es/totalcode/
+Depends: libwebkit2gtk-4.1-0, libgtk-3-0
+Description: Your Total.js Code instances in an app of their own
+ Total.js Code opens your Total.js Code instances in windows of their own and keeps a local copy of their files in the folders you choose.
+Filename: pool/main/t/total-js-code/total-js-code_1.0.1_amd64.deb
+Size: 4421594
+SHA256: 298968bbc822da738dfc097de75a2155ec329f0f59de5f1ced8476eeecb2e0ef
+
+Package: total-mail
+Version: 1.0.0
+Architecture: amd64
+Installed-Size: 11123
+Maintainer: Spanish Total.js Platform
+Section: mail
+Priority: optional
+Homepage: https://totalmail.totaljs.es
+Depends: libwebkit2gtk-4.1-0, libgtk-3-0
+Description: Your TotalMail webmail in an app of its own
+ TotalMail shows the webmail of your own TotalMail server in a window of its own, with system notifications. Links and sign-in with Google or Microsoft open in your browser.
+Filename: pool/main/t/total-mail/total-mail_1.0.0_amd64.deb
+Size: 4976728
+SHA256: 0c84c43ba60c26ec277958fb30aa290b5b2229716c33b6d9c7035adc73cdff55
+

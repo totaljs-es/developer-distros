@@ -348,3 +348,18 @@ Filename: pool/main/t/totaljs-wallpapers/totaljs-wallpapers_1.0.0-3_all.deb
 Size: 16669194
 SHA256: e35b59f769929775e30e3fc1391f89befc1a3141bae8f03e52c99e33f557105e
 
+Package: total-js-code
+Version: 1.0.1
+Architecture: arm64
+Installed-Size: 8939
+Maintainer: Spanish Total.js Platform
+Section: devel
+Priority: optional
+Homepage: https://totaldesktop.totaljs.es/totalcode/
+Depends: libwebkit2gtk-4.1-0, libgtk-3-0
+Description: Your Total.js Code instances in an app of their own
+ Total.js Code opens your Total.js Code instances in windows of their own and keeps a local copy of their files in the folders you choose.
+Filename: pool/main/t/total-js-code/total-js-code_1.0.1_arm64.deb
+Size: 4239774
+SHA256: f4ead49076a1499f1d17135e639d3f25d7c38e85e3c436561cd3c394eddedd7f
+
