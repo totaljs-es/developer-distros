@@ -43,11 +43,15 @@ BASE_URL=https://packages.example.org/repo tools/package-repo/build.sh
 | `BASE_URL` | `https://totaljs-es.github.io/developer-distros/repo` | The address inside the packages: where every installed system will look for updates. Set the final one before a release. |
 | `REPO_OUT` | `build/site/repo` | Where the repository is written. `WEBSITE_ROOT` writes into `public/repo` of a website, as before. |
 | `SUITES` | `resolute` | The Ubuntu series (26.04 is the one of this repository; the images of TotalVM, on 24.04, keep their own repository at totalvm.totaljs.es). The package writes the source of APT with the series of the system it is installed on. |
-| `DEB_ARCHES` | `arm64 amd64` | The architectures of the APT indexes. The packages are `Architecture: all`, so they are the same files. |
+| `DEB_ARCHES` | `arm64 amd64` | The architectures of the APT indexes. Each index includes the shared packages and the desktop apps built for that architecture. |
 | `ARCH_DIRS` | `aarch64 x86_64` | The directories of Pacman (`$arch` of pacman). Same files, same database and signatures. |
 | `TOTALJS_REPO_GNUPGHOME`, `TOTALJS_REPO_KEY` | the key of Total.js on this computer | What signs the repository. |
 
 The key of Total.js is never in GitHub. The workflow `package-repo` builds the repository with a throwaway key and uses it with the real APT of the runner: `apt-get update`, the install (the package writes its own source), the removal, and the series `resolute`.
+
+## Optional desktop apps
+
+After adding the APT repository, install Code with `sudo apt install total-js-code` on amd64 or arm64. Install TotalMail with `sudo apt install total-mail` on amd64. Both are distributed as upstream release binaries.
 
 ## Publish it with GitHub Pages
 

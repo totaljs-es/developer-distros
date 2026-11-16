@@ -16,7 +16,7 @@ BASE_URL="${BASE_URL:-https://totaljs-es.github.io/developer-distros/repo}"
 # Where the repository is written: a folder of this repository (build/ is not committed). WEBSITE_ROOT keeps the old way
 # of writing into the public folder of a website.
 if [ -n "${WEBSITE_ROOT:-}" ]; then OUT="${WEBSITE_ROOT}/public/repo"; else OUT="${REPO_OUT:-${ROOT}/build/site/repo}"; fi
-# The Ubuntu series and the architectures of the repository. Packages are Architecture: all, so the same files serve every one
+# The Ubuntu series and the architectures of the repository.
 SUITES="${SUITES:-resolute}"
 DEB_ARCHES="${DEB_ARCHES:-arm64 amd64}"
 ARCH_DIRS="${ARCH_DIRS:-aarch64 x86_64}"
@@ -309,12 +309,21 @@ EOF
 
 cat "${WORK}/Packages.extra" >> "${WORK}/Packages.stanzas"
 
-# One index for every series and architecture: the packages are Architecture: all, so the files are the same
+# Start each index with the shared packages and add the native apps for that architecture.
+APT_INDEXES=()
+for SUITE in ${SUITES}; do
+  for DEB_ARCH in ${DEB_ARCHES}; do
+    INDEX="${OUT}/ubuntu/dists/${SUITE}/main/binary-${DEB_ARCH}/Packages"
+    mkdir -p "$(dirname "${INDEX}")"
+    cp "${WORK}/Packages.stanzas" "${INDEX}"
+    APT_INDEXES+=("${INDEX}")
+  done
+done
+python3 "${ROOT}/tools/package-repo/add-desktop-apps.py" "${OUT}/ubuntu" "${APT_INDEXES[@]}"
+
 for SUITE in ${SUITES}; do
   RELEASE_DIR="${OUT}/ubuntu/dists/${SUITE}"
   for DEB_ARCH in ${DEB_ARCHES}; do
-    mkdir -p "${RELEASE_DIR}/main/binary-${DEB_ARCH}"
-    cp "${WORK}/Packages.stanzas" "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages"
     gzip -9nc "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages" > "${RELEASE_DIR}/main/binary-${DEB_ARCH}/Packages.gz"
   done
 
