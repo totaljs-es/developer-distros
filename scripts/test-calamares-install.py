@@ -138,6 +138,7 @@ class InstallerTests(unittest.TestCase):
             jobs.bootstrap(config('arch', 'arm64'), root, 'server', 'efi', recorder)
             pacstrap = next(call for call in calls if call[0] == 'pacstrap')
             self.assertIn('linux-aarch64', pacstrap)
+            self.assertIn('archlinuxarm-keyring', pacstrap)
             self.assertIn('-K', pacstrap)
             self.assertIn('linux-firmware', pacstrap)
             self.assertNotIn('intel-ucode', pacstrap)

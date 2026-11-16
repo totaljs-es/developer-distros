@@ -203,8 +203,8 @@ def bootstrap(config, root, edition, firmware, run_command=command):
                'kbd', 'console-setup', 'tzdata', 'totaljs-developer-' + edition)
     else:
         kernel = 'linux-aarch64' if arch == 'arm64' else 'linux'
-        microcode = ['intel-ucode', 'amd-ucode'] if arch == 'amd64' else []
-        run_command(['pacstrap', '-K', str(root), 'base', kernel, 'linux-firmware', *microcode,
+        platform_packages = ['archlinuxarm-keyring'] if arch == 'arm64' else ['intel-ucode', 'amd-ucode']
+        run_command(['pacstrap', '-K', str(root), 'base', kernel, 'linux-firmware', *platform_packages,
                      'grub', 'efibootmgr', 'sudo', 'networkmanager', 'openssh', 'python'])
         mount_runtime(root, run_command)
         target_file(root, 'etc/resolv.conf', Path('/etc/resolv.conf').read_text())
