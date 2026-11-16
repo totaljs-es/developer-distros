@@ -24,6 +24,16 @@ for release in "${SITE}"/ubuntu/dists/*/InRelease; do
 done
 [ "${FOUND}" -gt 0 ] || { echo "No signed series (InRelease) in ${SITE}/ubuntu/dists" >&2; exit 1; }
 
+# build.sh alone creates the small TotalVM index. Pages also serves the ISO installer.
+for arch in x86_64 aarch64; do
+  db="${SITE}/arch/${arch}/totaljs-developer.db"
+  entries="$(bsdtar -tf "${db}")" || { echo "Cannot read ${db}: stage the full Arch repository with arch/stage-repo.sh" >&2; exit 1; }
+  for edition in server desktop; do
+    grep -Eq "^totaljs-developer-${edition}-[0-9][^/]*/desc$" <<< "${entries}" \
+      || { echo "Missing totaljs-developer-${edition} in ${db}: stage the full Arch repository with arch/stage-repo.sh" >&2; exit 1; }
+  done
+done
+
 rm -rf "${PAGES}"
 mkdir -p "${PAGES}/repo"
 cp -R "${SITE}/." "${PAGES}/repo/"

@@ -53,11 +53,12 @@ The key of Total.js is never in GitHub. The workflow `package-repo` builds the r
 
 ```sh
 tools/package-repo/build.sh
+arch/stage-repo.sh ~/Downloads/arch-repo-x86_64.zip
 PAGES_CNAME=packages.example.org tools/package-repo/publish-pages.sh          # prepares build/pages
 PAGES_CNAME=packages.example.org tools/package-repo/publish-pages.sh --push   # and publishes it
 ```
 
-Each publication is a **complete** repository, built from everything that is in `packages/`: to add or update a package, change it (and its `Version` in `control`), run `build.sh` and `publish-pages.sh`, and publish the branch. Nothing is added by hand to the branch `pages`, and the versions that are no longer built are no longer in it. `publish-pages.sh` leaves the prepared branch in `build/pages` and also as the branch `pages` of this repository (replaced by what is prepared), so it can be published with the tool that publishes `main` when the terminal has no credentials. **Do the work in `main`**: while the branch `pages` is checked out the folder has only the files of the repository of packages.
+Each publication is a **complete** repository, built from everything that is in `packages/`: to add or update a package, change it (and its `Version` in `control`), build the packages, stage the `arch-repo` workflow artifact and publish the branch. The Pages script requires the Server and Desktop packages in both Arch indexes. Nothing is added by hand to the branch `pages`, and the versions that are no longer built are no longer in it. `publish-pages.sh` leaves the prepared branch in `build/pages` and also as the branch `pages` of this repository (replaced by what is prepared), so it can be published with the tool that publishes `main` when the terminal has no credentials. **Do the work in `main`**: while the branch `pages` is checked out the folder has only the files of the repository of packages.
 
 Each publication is a new commit on top of the published branch, so it moves forward and any tool can publish it, GitHub Desktop included, with no forced push. The branch keeps its history and grows with each publication: `publish-pages.sh --fresh --push` starts it again as a single commit (a forced push, which needs credentials in the terminal), because the old versions of binary files would only make the repository grow. In the settings of the repository, *Pages* serves the branch `pages` from `/`. `PAGES_CNAME` is only for a custom domain, which also needs a `CNAME` record in its DNS.
 
